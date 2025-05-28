@@ -1,0 +1,282 @@
+{# ========= INCLUDES/VOTING_BUTTONS ========= #}
+<div class="vote-container d-flex align-items-center">
+  {% if user.is_authenticated %}
+    <div class="vote-buttons">
+      <button class="btn btn-sm{% if user_vote == 'upvote' %}btn-orange{% else %}btn-outline-orange{% endif %} vote-btn mr-1"
+              data-post-id="{{ post.id }}"
+              data-vote-type="upvote"
+              type="button">
+        <i class="bi bi-arrow-up-circle"></i>
+        <span class="vote-count upvote-count">{{ post.upvotes }}</span>
+      </button>
+    </div>
+    <span class="mx-1 vote-score">{{ post.score }}</span>
+    <div class="vote-buttons">
+      <button class="btn btn-sm{% if user_vote == 'downvote' %}btn-dark-orange{% else %}btn-outline-dark-orange{% endif %} vote-btn mr-1"
+              data-post-id="{{ post.id }}"
+              data-vote-type="downvote"
+              type="button">
+        <i class="bi bi-arrow-down-circle"></i>
+        <span class="vote-count downvote-count">{{ post.downvotes }}</span>
+      </button>
+    </div>
+  {% else %}
+    <span class="text-success mr-1"><i class="bi bi-arrow-up-circle"></i> {{ post.upvotes }}</span>
+    <span class="mx-1 vote-score">{{ post.score }}</span>
+    <span class="text-danger ml-1"><i class="bi bi-arrow-down-circle"></i> {{ post.downvotes }}</span>
+    {% if show_login_message %}
+      <small class="text-muted ml-2">(Login to vote)</small>
+    {% endif %}
+  {% endif %}
+</div>
+
+<style>
+.voting-container{
+  margin: 15px 0 !important;
+}
+
+.vote-container{
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 10px;
+}
+
+.vote-buttons{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vote-btn{
+  border: 1px solid #D3D3D3 !important;
+  font-weight: 600 !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.btn-outline-orange{
+  background-color: transparent !important;
+  color: #ec7a1c !important;
+  border-color: #ec7a1c !important;
+}
+
+.btn-outline-orange:hover{
+  background-color: #ec7a1c !important;
+  color: white !important;
+  border-color: #ec7a1c !important;
+}
+
+.btn-orange{
+  background-color: #ec7a1c !important;
+  color: white !important;
+  border-color: #ec7a1c !important;
+}
+
+.btn-orange:hover{
+  background-color: #d66d19 !important;
+  color: white !important;
+  border-color: #d66d19 !important;
+}
+
+.btn-outline-dark-orange{
+  background-color: transparent !important;
+  color: #90462c !important;
+  border-color: #90462c !important;
+}
+
+.btn-outline-dark-orange:hover{
+  background-color: #90462c !important;
+  color: white !important;
+  border-color: #90462c !important;
+}
+
+.btn-dark-orange{
+  background-color: #90462c !important;
+  color: white !important;
+  border-color: #90462c !important;
+}
+
+.btn-dark-orange:hover{
+  background-color: #7d3c25 !important;
+  color: white !important;
+  border-color: #7d3c25 !important;
+}
+
+.vote-btn:focus{
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(236, 122, 28, 0.2) !important;
+}
+
+.vote-btn:disabled{
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+.vote-score{
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  min-width: 30px !important;
+  text-align: center !important;
+  color: #333 !important;
+}
+
+.vote-count{
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.vote-display{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+}
+
+.vote-btn.processing{ /* TO LET THIS STUPID WBST PROCECSS VOTING PROCESSES AND NOT GET DOUBLE CLICKED AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA */
+  opacity: 0.7 !important;
+  cursor: wait !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 768px){
+  .vote-buttons{
+    gap: 8px;
+  }
+
+  .vote-btn{
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+  }
+
+  .vote-score{
+    font-size: 14px !important;
+    min-width: 25px !important;
+  }
+}
+</style>
+
+<script>
+$(document).ready(function(){
+  $(document).off('click', '.vote-btn');
+  $(document).on('click', '.vote-btn', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+
+    var $btn = $(this);
+
+    // PREVENT DOIUBLE CLICKING
+    if($btn.hasClass('processing')){ return false;}
+
+    var postId = $btn.data('post-id');
+    var voteType = $btn.data('vote-type');
+    var $voteContainer = $btn.closest('.vote-container');
+    var $upvoteBtn = $voteContainer.find('.vote-btn[data-vote-type="upvote"]');
+    var $downvoteBtn = $voteContainer.find('.vote-btn[data-vote-type="downvote"]');
+    var $upvoteCount = $upvoteBtn.find('.upvote-count');
+    var $downvoteCount = $downvoteBtn.find('.downvote-count');
+    var $voteScore = $voteContainer.find('.vote-score');
+
+    $upvoteBtn.addClass('processing');
+    $downvoteBtn.addClass('processing');
+
+    // CSRF TOKEN
+    function getCookie(name){
+      let cookVal = null;
+      if(document.cookie && document.cookie !== ''){
+        const cookies = document.cookie.split(';');
+        for(let i=0; i<cookies.length; i++){
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')){
+            cookVal = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookVal;
+    }
+
+    $.ajax({
+      url: `/post/${postId}/vote/${voteType}/`,
+      type: 'POST',
+      data:{ 'csrfmiddlewaretoken': getCookie('csrftoken')},
+      headers:{'X-Requested-With': 'XMLHttpRequest'},
+      timeout: 10000,
+      success: function(data){
+        if(data.success){
+          $upvoteCount.text(data.upvotes);
+          $downvoteCount.text(data.downvotes);
+          $voteScore.text(data.score);
+
+          // BTN STATES UPDATED
+          // ===== UPVOTE =====
+					if(data.message.includes('upvote')){
+            if(data.message.includes('removed')){
+              // removed upvote
+              $upvoteBtn.removeClass('btn-orange').addClass('btn-outline-orange');
+            } else{ // added/changed to upvote
+              $upvoteBtn.removeClass('btn-outline-orange').addClass('btn-orange');
+              $downvoteBtn.removeClass('btn-dark-orange').addClass('btn-outline-dark-orange');
+            }
+          }
+          // ===== DOWNVOTE =====
+          else if(data.message.includes('downvote')){
+            if(data.message.includes('removed')){
+              // removed downvote
+              $downvoteBtn.removeClass('btn-dark-orange').addClass('btn-outline-dark-orange');
+            } else{ // added/changed to downvote
+              $downvoteBtn.removeClass('btn-outline-dark-orange').addClass('btn-dark-orange');
+              $upvoteBtn.removeClass('btn-orange').addClass('btn-outline-orange');
+            }
+          }
+
+          showMessage(data.message, 'success');
+        } else{ showMessage('Error voting on post', 'danger');}
+      },
+      error: function(xhr, status, error){
+        console.error('Error voting on post:', error);
+        console.error('Status:', status);
+        console.error('Response:', xhr.responseText);
+
+        if(xhr.status === 500 && xhr.responseText.includes('UNIQUE constraint')){
+          showMessage('Please wait a moment before voting again', 'warning');
+        } else{ showMessage('Error voting on post. Please try again.', 'danger');}
+      },
+      complete: function(){
+        setTimeout(function(){
+          $upvoteBtn.removeClass('processing');
+          $downvoteBtn.removeClass('processing');
+        }, 500); // TO RPEVENT FAST CLIKCING =V=
+      }
+    });
+  });
+
+  function showMessage(message, type){
+    var $messagesContainer = $('#messages-container');
+    if($messagesContainer.length === 0){
+      $('body').prepend('<div id="messages-container" class="fixed-top" style="margin-top: 60px; z-index: 1000; width: 300px; right: 20px;"></div>');
+      $messagesContainer = $('#messages-container');
+    }
+
+    const alertHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    `;
+
+    $messagesContainer.append(alertHTML);
+    setTimeout(function(){ $('.alert').alert('close');}, 3000);
+  }
+});
+</script>

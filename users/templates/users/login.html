@@ -1,0 +1,6 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+	{% url 'register' as register_url %} <!-- var for include -->
+	{% include "blog/includes/form_layout.html" with title="Log In" form=form submit_btn_text="Login" show_border_link=True border_link_text="Don't Have an Account?" border_link_url=register_url border_link_label="Sign Up" %}
+{% endblock content %}

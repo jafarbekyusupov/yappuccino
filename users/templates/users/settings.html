@@ -1,0 +1,358 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="settings-container">
+  <h2 class="mb-4">
+    <i class="bi bi-gear"></i> Account Settings
+  </h2>
+
+  <!-- ACCOUNT INFO SECTION -->
+  <div class="settings-section">
+    <h4><i class="bi bi-person-circle"></i> Account Information</h4>
+    <div class="settings-item">
+      <div class="settings-label">Username</div>
+      <div class="settings-value">{{ user.username }}</div>
+    </div>
+    <div class="settings-item">
+      <div class="settings-label">Email</div>
+      <div class="settings-value">{{ user.email }}</div>
+    </div>
+    <div class="settings-item">
+      <div class="settings-label">Member Since</div>
+      <div class="settings-value">{{ user.date_joined|date:"F d, Y" }}</div>
+    </div>
+    <div class="settings-item">
+      <div class="settings-label">Last Login</div>
+      <div class="settings-value">{{ user.last_login|date:"F d, Y at g:i A" }}</div>
+    </div>
+    <div class="settings-item">
+      <a href="{% url 'profile' %}" class="btn btn-outline-orange">
+        <i class="bi bi-pencil"></i> Edit Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- ------ SECURITY ------ -->
+  <div class="settings-section">
+    <h4><i class="bi bi-shield-lock"></i> Security</h4>
+    <div class="settings-item">
+      <div class="settings-label">Password</div>
+      <div class="settings-value">
+        <span class="text-muted">••••••••</span>
+        <a href="{% url 'password_change' %}" class="btn btn-sm btn-outline-orange float-right">
+          <i class="bi bi-key"></i> Change Password
+        </a>
+      </div>
+    </div>
+    <div class="settings-item">
+      <div class="settings-label">Two-Factor Authentication</div>
+      <div class="settings-value">
+        <span class="badge badge-secondary">Not Enabled</span>
+        <button class="btn btn-sm btn-outline-orange float-right" disabled>
+          <i class="bi bi-phone"></i> Coming Soon
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ------ PRIVACY ------ -->
+  <div class="settings-section">
+    <h4><i class="bi bi-eye-slash"></i> Privacy</h4>
+    <form method="POST" id="privacyForm">
+      {% csrf_token %}
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showEmail" name="show_email" {% if user.profile.show_email %}checked{% endif %}>
+          <label class="form-check-label" for="showEmail">
+            Show email on profile
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showActivity" name="show_activity" {% if user.profile.show_activity %}checked{% endif %}>
+          <label class="form-check-label" for="showActivity">
+            Show activity status
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <button type="submit" class="btn btn-orange" name="privacy_submit">Save Privacy Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ------ NOTIFS ------ -->
+  <div class="settings-section">
+    <h4><i class="bi bi-bell"></i> Email Notifications</h4>
+    <form method="POST" id="notificationForm">
+      {% csrf_token %}
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="emailComments" name="email_comments" {% if user.profile.email_comments %}checked{% endif %}>
+          <label class="form-check-label" for="emailComments">
+            New comments on your posts
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="emailReplies" name="email_replies" {% if user.profile.email_replies %}checked{% endif %}>
+          <label class="form-check-label" for="emailReplies">
+            Replies to your comments
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="emailReposts" name="email_reposts" {% if user.profile.email_reposts %}checked{% endif %}>
+          <label class="form-check-label" for="emailReposts">
+            Someone reposts your content
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="emailNewsletter" name="email_newsletter" {% if user.profile.email_newsletter %}checked{% endif %}>
+          <label class="form-check-label" for="emailNewsletter">
+            Weekly newsletter
+          </label>
+        </div>
+      </div>
+      <div class="settings-item">
+        <button type="submit" class="btn btn-orange" name="notification_submit">Save Notification Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ------ APPEARANCE ------ -->
+  <div class="settings-section">
+    <h4><i class="bi bi-palette"></i> Appearance</h4>
+    <form method="POST" id="appearanceForm">
+      {% csrf_token %}
+      <div class="settings-item">
+        <div class="settings-label">Theme</div>
+        <div class="settings-value">
+          <select class="form-control w-auto d-inline-block" name="theme" id="themeSelect">
+            <option value="light" {% if user.profile.theme == 'light' %}selected{% endif %}>Light Mode</option>
+            <option value="dark" {% if user.profile.theme == 'dark' %}selected{% endif %} disabled>Dark Mode (Coming Soon)</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-label">Posts per page</div>
+        <div class="settings-value">
+          <select class="form-control w-auto d-inline-block" name="posts_per_page" id="postsPerPage">
+            <option value="5" {% if user.profile.posts_per_page == 5 %}selected{% endif %}>5 posts</option>
+            <option value="10" {% if user.profile.posts_per_page == 10 %}selected{% endif %}>10 posts</option>
+            <option value="20" {% if user.profile.posts_per_page == 20 %}selected{% endif %}>20 posts</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-item">
+        <button type="submit" class="btn btn-orange" name="appearance_submit">Save Appearance Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ------ DATA EXPORT - TODO ------  -->
+  <div class="settings-section">
+    <h4><i class="bi bi-download"></i> Your Data</h4>
+    <div class="settings-item">
+      <div class="settings-label">Export your data</div>
+      <div class="settings-value">
+        <p class="text-muted mb-2">Download all your posts, comments, and profile information</p>
+        <a href="{% url 'export-data' %}" class="btn btn-outline-orange">
+          <i class="bi bi-file-earmark-zip"></i> Request Data Export
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- DANGER ZONE (like in github) ---- -->
+  <div class="settings-section danger-zone">
+    <h4><i class="bi bi-exclamation-triangle"></i> Danger Zone</h4>
+    <div class="settings-item">
+      <div class="settings-label">Delete Account</div>
+      <div class="settings-value">
+        <p class="text-muted mb-2">Once you delete your account, there is no going back. Please be certain.</p>
+        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteAccountModal">
+          <i class="bi bi-trash"></i> Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ------ DELETE ACC ------ -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST" id="deleteAccountForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+          <p class="text-danger"><strong>All your posts, comments, and data will be permanently deleted.</strong></p>
+          <div class="form-group">
+            <label>Type your username <strong>{{ user.username }}</strong> to confirm:</label>
+            <input type="text" class="form-control" name="confirm_username" id="confirmUsername" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger" name="delete_account" id="confirmDeleteBtn" disabled>Delete My Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.settings-section {
+  margin-bottom: 40px;
+  padding: 30px;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.settings-section h4 {
+  color: var(--dark-orange);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--orange);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-item {
+  padding: 20px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-label {
+  font-weight: 600;
+  color: var(--gray);
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.settings-value {
+  color: #666;
+  font-size: 15px;
+}
+
+.settings-value .float-right {
+  float: right;
+}
+
+.form-check {
+  padding: 10px 0;
+}
+
+.form-check-label {
+  font-size: 15px;
+  color: #555;
+  margin-left: 8px;
+}
+
+.danger-zone {
+  border: 2px solid #dc3545;
+  background-color: #fff5f5;
+}
+
+.danger-zone h4 {
+  color: #dc3545;
+  border-bottom-color: #dc3545;
+}
+
+/* -- CHECKBOX -- */
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.form-check-input:checked {
+  background-color: var(--orange);
+  border-color: var(--orange);
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 10px;
+  }
+
+  .settings-section {
+    padding: 20px;
+  }
+
+  .settings-value .float-right {
+    float: none !important;
+    display: block;
+    margin-top: 10px;
+  }
+}
+
+.modal-content {
+  border-radius: 12px;
+}
+
+.modal-header {
+  background-color: #dc3545;
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header .close {
+  color: white;
+  opacity: 0.8;
+}
+
+.modal-header .close:hover {
+  opacity: 1;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+  // username confirmation for acc deletion
+  $('#confirmUsername').on('input', function() {
+    var username = $(this).val();
+    var expectedUsername = '{{ user.username }}';
+
+    if (username === expectedUsername) {
+      $('#confirmDeleteBtn').prop('disabled', false);
+    } else {
+      $('#confirmDeleteBtn').prop('disabled', true);
+    }
+  });
+
+  $('form').on('submit', function() {
+    var $button = $(this).find('button[type="submit"]');
+    $button.html('<i class="spinner-border spinner-border-sm"></i> Saving...');
+  });
+});
+</script>
+{% endblock content %}

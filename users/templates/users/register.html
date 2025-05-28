@@ -1,0 +1,6 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+	{% url 'login' as login_url %} {#	added var is include cant take nested var calls ig #}
+	{% include "blog/includes/form_layout.html" with title="Join Us Today" form=form submit_btn_text="Sign Up" show_border_link=True border_link_text="Already Have an Account?" border_link_url=login_url border_link_label="Sign In"%}
+{% endblock content %}

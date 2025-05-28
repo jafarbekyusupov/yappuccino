@@ -1,0 +1,43 @@
+{# ========== TAG_LIST ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% block content %}
+<div class="content-section" style="margin-top: 2rem;">
+  <h2>Tag Management</h2>
+  <div class="mb-3">
+    <a class="btn btn-orange" href="{% url 'tag-create' %}">Create New Tag</a>
+    <a class="btn btn-secondary" href="{% url 'blog-home' %}">Back to Home</a>
+  </div>
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Tag Name</th>
+        <th>URL Slug</th>
+        <th>Post Count</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tag in tags %}
+      <tr>
+        <td>{{ tag.name }}</td>
+        <td><code>{{ tag.slug }}</code></td>
+        <td>{{ tag.posts.count }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-orange" href="{% url 'tag-update' tag.id %}">
+            <i class="bi bi-pencil"></i> Edit
+          </a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'tag-delete' tag.id %}">
+            <i class="bi bi-trash"></i> Delete
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center">No tags have been created yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}

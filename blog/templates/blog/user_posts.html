@@ -1,0 +1,32 @@
+{# ========== USER_POSTS ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% block content %}
+  <div class="content-section mb-4">
+    <div class="media">
+      {% with username=view.kwargs.username %}
+        <img class="rounded-circle account-img mr-3" src="{{ posts.0.author.profile.image.url }}">
+        <div class="media-body">
+          <h2 class="account-heading">{{ username }}</h2>
+          <p class="text-muted">Posts by {{ username }} ({{ page_obj.paginator.count }})</p>
+          <a href="{% url 'user-activity' username %}" class="btn btn-sm btn-outline-orange mt-2">
+            <i class="bi bi-activity"></i> View Activity
+          </a>
+        </div>
+      {% endwith %}
+    </div>
+  </div>
+
+  <!-- FILTER CTLRS -->
+  {% include "blog/includes/filter_ctrls.html" with current_sort=current_sort current_order=current_order %}
+
+  {% for post in posts %}
+    {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True %}
+  {% empty %}
+    <div class="content-section">
+      <p class="text-muted">This user hasn't posted anything yet.</p>
+    </div>
+  {% endfor %}
+
+  {% include "blog/includes/pagination.html" %}
+{% endblock content %}

@@ -1,0 +1,128 @@
+{# ========= INCLUDES/FOOTER ========= #}
+<footer class="site-footer" id="footer">
+  <div class="container">
+    <div class="row footer-main-row align-items-start">
+			{# -- WEBSITE BRANDING -- #}
+      <div class="col-md-4 footer-brand-section">
+        <a class="navbar-brand" href="{% url 'blog-home' %}">
+{#          <img id="footer_logo" src="{{ MEDIA_URL }}Yappuccino_Logo.png" alt="Blog Logo" height="35">#}
+          <img id="footer_logo" src="{{ MEDIA_URL }}orange-no-bg.png" alt="Blog Logo" height="35">
+          <span id="footer_website_title">Yappuccino</span>
+        </a>
+        <p class="footer-tagline">"Who ordered the Yappuccino?"</p>
+      </div>
+
+			{# -- NAVIGATION SECTION -- #}
+      <div class="col-md-4 footer-resources-section">
+        <h6 class="footer-heading">Navigation</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'blog-home' %}">Home</a></li>
+          <li><a href="{% url 'blog-about' %}">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+
+			{# -- CONTACT -- #}
+      <div class="col-md-4 footer-contact-section">
+        <h6 class="footer-heading">Contact</h6>
+        <a href="mailto:info@blog.com" class="footer-email">info@yappuccino.com</a>
+      </div>
+    </div>
+
+		{# -- COPYRIGHT ROW -- #}
+    <div class="row mt-4">
+      <div class="col-12">
+        <p class="copyright-text">Copyright © 2025 Yappuccino. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  #footer,
+  .site-footer {
+    background-color: #44443b !important;
+    color: white !important;
+    padding: 40px 0 30px 0;
+  }
+
+  .footer-main-row {
+    margin-bottom: 20px;
+  }
+
+  .footer-brand-section .navbar-brand {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .footer-brand-section .navbar-brand span {
+    color: white;
+    margin-left: 8px;
+    font-size: 24px;
+  }
+
+  .footer-tagline {
+    color: #cbd5db !important;
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+  .footer-heading {
+    color: var(--orange) !important;
+    font-size: 25px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    margin-top: 5px;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+
+  .footer-links li {
+    margin-bottom: 8px;
+  }
+
+  .footer-links a,
+  .footer-email {
+    color: #cbd5db !important;
+    transition: color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover,
+  .footer-email:hover {
+    color: var(--orange) !important;
+  }
+
+	#footer_logo{
+		height: 5rem;
+	}
+
+	#footer_website_title {
+			font-size: xx-large;
+	}
+
+  .copyright-text {
+    font-size: 14px;
+    color: #979797 !important;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+  }
+
+
+  @media (max-width: 767px) {
+    .footer-resources-section,
+    .footer-contact-section {
+      margin-top: 25px;
+    }
+
+    .footer-heading {
+      margin-top: 0;
+    }
+  }
+</style>

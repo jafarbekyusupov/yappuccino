@@ -1,0 +1,241 @@
+{# ========= INCLUDES/SIDEBAR ========= #}
+<div class="col-md-4" id="sidebar-column">
+  <div class="sticky-sidebar" id="sidebar">
+    <div class="content-section">
+      <h3>Search Posts</h3>
+      <form action="{% url 'blog-home' %}" method="get" class="mb-4">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-outline-info" type="submit">
+              <i class="bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+
+        {# -- CATEGORIES -- #}
+      <h3>Categories</h3>
+      <div class="list-group mb-4" id="sidebar-categories">
+        {% for tag in tags %}
+          <a href="{% url 'blog-home' %}?tag={{ tag.slug|default:tag.name|urlencode }}" class="list-group-item d-flex justify-content-between align-items-center">
+            {{ tag.name }}
+            <span class="badge badge-info badge-pill ml-1">{{ tag.posts.count }}</span>
+          </a>
+        {% empty %}
+          <div class="list-group-item">No categories yet</div>
+        {% endfor %}
+      </div>
+
+        {# -- NAVIGATION -- #}
+      <h3>Navigation</h3>
+      <ul class="list-group" id="sidebar-nav">
+        <li class="list-group-item list-group-item-light p-0">
+            <a class="d-block p-3" href="{% url 'blog-home' %}?sort=date&order=desc">Latest Posts</a>
+        </li>
+        <li class="list-group-item list-group-item-light p-0">
+            <a class="d-block p-3" href="{% url 'blog-about' %}">About</a>
+        </li>
+        <li class="list-group-item list-group-item-light p-0">
+            <a class="d-block p-3" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<style>
+	.btn-primary,
+	.btn-info,
+	.btn-outline-info,
+	.btn-outline-primary{
+		background-color: var(--orange) !important;
+		border-color: var(--orange) !important;
+		color: white !important;
+	}
+
+	.btn-primary:hover,
+	.btn-info:hover,
+	.btn-outline-info:hover,
+	.btn-outline-primary:hover{
+		background-color: var(--light-orange) !important;
+		border-color: var(--light-orange) !important;
+		color: white !important;
+	}
+
+	#sidebar-nav li{ transition: all 0.2s ease;}
+
+	#sidebar-nav a{
+		text-decoration: none !important;
+		{#transition: all 0.2s ease;#}
+		{#display: block;#}
+		{#width: 100%;#}
+		color: var(--orange);
+	}
+
+	#sidebar-nav li:hover{
+		background-color: var(--dark-orange) !important;
+	}
+
+	#sidebar-nav li:hover a{
+		color: white !important;
+		font-weight: 900;
+  }
+
+	#sidebar-categories{ transition: all 0.2s ease}
+
+	#sidebar-categories a:hover{
+		background-color: var(--orange) !important;
+		color: white !important;
+	}
+
+	#sidebar-categories a:hover .badge{
+		background-color: white !important;
+		color: var(--orange) !important;
+	}
+
+	.btn-outline-info:not(:hover),
+	.btn-outline-primary:not(:hover){
+		background-color: transparent !important;
+		color: var(--orange) !important;
+	}
+
+	.form-control:focus,
+	.form-select:focus,
+	input[type="text"]:focus,
+	input[type="email"]:focus,
+	input[type="password"]:focus,
+	textarea:focus{
+		border-color: var(--orange) !important;
+		box-shadow: 0 0 0 0.2rem rgba(236, 122, 28, 0.25) !important;
+	}
+
+  .sticky-sidebar{
+    position: relative;
+    padding-top: 0;
+    width: 100% !important;
+  }
+
+  .sticky-sidebar.is-sticky{
+    position: fixed;
+    top: 70px;
+    width: inherit !important;
+    max-width: inherit;
+    overflow-y: auto;
+  }
+
+  /* WHEN SIDEBAR REACHES FOOTER - class applied via js */
+  .sticky-sidebar.is-at-bottom{
+    position: absolute;
+    top: auto;
+    bottom: 0;
+  }
+
+  @media (min-width: 768px){
+    .col-md-4{
+      width: 33.33333% !important;
+      flex: 0 0 33.33333% !important;
+      max-width: 33.33333% !important;
+    }
+
+    .col-md-8{
+      width: 66.66667% !important;
+      flex: 0 0 66.66667% !important;
+      max-width: 66.66667% !important;
+    }
+
+    #sidebar{
+      width: 100% !important;
+    }
+
+    #sidebar-column{
+      padding-right: 15px !important;
+      padding-left: 15px !important;
+    }
+  }
+
+  @media (max-width: 767px){
+    .sticky-sidebar.is-sticky,
+    .sticky-sidebar.is-at-bottom{
+      position: static !important;
+    }
+  }
+</style>
+
+<script>
+  $(document).ready(function(){
+    var $sidebar = $('#sidebar');
+    var $sidebarColumn = $('#sidebar-column');
+    var $contentColumn = $('#content-column');
+    var $footer = $('#footer');
+    var $window = $(window);
+    var navHeight = $('.navbar').outerHeight();
+    var sdb_wth = $sidebarColumn.width();
+
+    var sdbScrollHndlr = null;
+
+    function updSdBarDims(){ // update sidebar dimensions
+      sdb_wth = $sidebarColumn.width();
+      navHeight = $('.navbar').outerHeight();
+    }
+
+    // sidebar pos
+    function stickySidebar(){
+      var scrollTop = $window.scrollTop();
+      var contBttm = $contentColumn.offset().top + $contentColumn.height();
+      var ftrTop = $footer.offset().top;
+      var sidebarHeight = $sidebar.height();
+      var windowHeight = $window.height();
+
+      // STARTING POINT
+      if(scrollTop <= $sidebar.offset().top-navHeight){
+        // normal posit
+        $sidebar.removeClass('is-sticky is-at-bottom');
+        $sidebar.css({
+          'width': '',
+          'top': '',
+          'max-height': ''
+        });
+      }
+      // 2nd pos -- STICKY at the middle / not at footer
+      else if(scrollTop+navHeight+sidebarHeight < ftrTop){
+        $sidebar.addClass('is-sticky').removeClass('is-at-bottom');
+        $sidebar.css({
+          'width': sdb_wth + 'px',
+          'top': navHeight + 'px',
+          'max-height': (windowHeight - navHeight - 20) + 'px' // 20px buffer -- adj
+        });
+      }
+      // REACHED FOOTER
+      else{
+        $sidebar.removeClass('is-sticky').addClass('is-at-bottom');
+        $sidebar.css({
+          'width': sdb_wth + 'px',
+          'top': 'auto',
+          'bottom': '30px', // space above footer
+          'max-height': ''
+        });
+      }
+    }
+
+    function initSidebar(){
+      if(sdbScrollHndlr){ $window.off('scroll', sdbScrollHndlr);}
+
+      updSdBarDims();
+      stickySidebar();
+
+      sdbScrollHndlr = function(){ stickySidebar();};
+      $window.on('scroll', sdbScrollHndlr);
+    }
+
+    initSidebar();
+
+    var rszTmr;
+    $window.on('resize', function(){ clearTimeout(rszTmr); rszTmr = setTimeout(function(){ updSdBarDims(); stickySidebar();}, 250);});
+
+    // TAB CHANGES -- for activity page
+    $('#activityTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e){
+      // UPD -- waiting for tab to render first - byutipul
+      setTimeout(function(){ updSdBarDims(); stickySidebar();}, 150);
+    });
+  });
+</script>

@@ -1,0 +1,283 @@
+{# ============ BASE ============ #}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Underdog&display=swap" rel="stylesheet">
+
+  <!-- BOOTSTRAP CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  {# select2 js #}
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'blog/components.css' %}">
+
+  <!-- NAVBAR STYLES -->
+	<link rel="stylesheet" href="{% static 'blog/navbar_styles.css' %}">
+
+  <title>{% block title %}Blog{% endblock %}</title>
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'blog/js/main.js' %}"></script>
+    <script src="{% static 'blog/js/social_features.js' %}"></script>
+
+
+
+  {% block extrahead %}{% endblock %}
+
+  {% block additional_css %}{% endblock additional_css %}
+
+  <style>
+    .navbar.navbar-expand-lg.navbar-dark.bg-steel.fixed-top {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 9999 !important;
+      background-color: #44443b !important;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+    }
+
+    body{
+      padding-top: 56px !important;
+      margin-top: 0 !important;
+    }
+
+    main#main-container {
+      padding-top: 20px !important;
+      position: relative !important;
+      margin-top: 1.5rem !important;
+    }
+
+    .content-section.user-profile-header {
+      margin-top: 2rem !important;
+    }
+
+    .content-section[style*="margin-top: 2rem"] {
+      margin-top: 2rem !important;
+    }
+
+    article.media.content-section {
+      margin-top: 1rem !important;
+    }
+
+    .hero-section {
+      margin-top: -56px !important;
+      padding-top: 120px !important;
+    }
+
+    /* user activity pages */
+    .content-section.mb-4,
+    .content-section:first-of-type {
+      margin-top: 1.5rem !important;
+    }
+
+    h3, .mb-4 {
+      margin-top: 1.5rem !important;
+    }
+
+    /* for posts tagged with header */
+    h1 + .btn, h2 + .btn, h3 + .btn {
+      margin-top: 0.5rem !important;
+      margin-bottom: 1.5rem !important;
+    }
+
+    .hero-section {
+      margin-top: -56px !important;
+      padding-top: 150px !important; /* 120 → 150 */
+      padding-bottom: 120px !important;
+    }
+
+    /* search field */
+    .hero-section .input-group-lg {
+      margin-top: 30px !important;
+    }
+
+    .container {
+      padding-right: 15px !important;
+      padding-left: 15px !important;
+      margin-right: auto !important;
+      margin-left: auto !important;
+      width: 100% !important;
+      max-width: 1140px !important;
+    }
+
+    .row {
+      margin-right: -15px !important;
+      margin-left: -15px !important;
+      display: flex !important;
+      flex-wrap: wrap !important;
+    }
+
+    .django_ckeditor_5 {
+      width: 100%;
+      min-height: 300px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .ck-editor__editable {
+      min-height: 300px !important;
+      max-height: 600px !important;
+    }
+  </style>
+
+  <script>
+    // dynamic spacing based on navbar height
+    document.addEventListener('DOMContentLoaded', function() {
+      var navbar = document.querySelector('.navbar.fixed-top');
+      if (navbar) {
+        var navbarHeight = navbar.offsetHeight;
+        document.body.style.paddingTop = (navbarHeight + 5) + 'px';
+
+        // if user profile page
+        if (document.querySelector('.content-section.user-profile-header') ||
+            document.querySelector('.content-section.mb-4')) {
+          // → xtra padding for user pages
+          var mainContainer = document.getElementById('main-container');
+          if(mainContainer){ mainContainer.style.marginTop = '2rem';}
+        }
+      }
+    });
+  </script>
+</head>
+<body id="top">
+  <!-- NAVIGATION -->
+  <header class="site-header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-steel fixed-top">
+      <div class="container">
+        <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">
+          <img id="navbar_logo" src="{{ MEDIA_URL }}orange-no-bg.png" alt="Blog Logo" height="35">
+          <span id="navbar_website_title">{% block navbar_title %}Yappuccino{% endblock %}</span>
+        </a>
+
+{#        <!-- MOBILE NAVBAR BUTTONS -- inside navbar -->#}
+{#        <div class="mobile-nav-buttons d-md-none">#}
+{#          <button class="mobile-nav-btn" id="searchNavBtn" aria-label="Search">#}
+{#            <i class="bi bi-search"></i>#}
+{#          </button>#}
+{#          <button class="mobile-nav-btn" id="categoryNavBtn" aria-label="Categories">#}
+{#            <i class="bi bi-tag"></i>#}
+{#            <span class="badge-dot" id="newCategoryDot"></span>#}
+{#          </button>#}
+{#        </div>#}
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarToggle">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'blog-home' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'blog-about' %}">About</a>
+            </li>
+
+            {% for nav_tag in nav_tags %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'tag-detail' nav_tag.slug %}">{{ nav_tag.name }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+          <!-- USER RELATED NAVBAR -->
+          <div class="navbar-nav">
+            {% if user.is_authenticated %}
+              <a class="nav-item nav-link" href="{% url 'post-create' %}">
+                <i class="bi-pencil-square mr-2"></i> New Post
+              </a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
+                  <i class="bi-person-circle mr-2"></i> {{ user.username }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                  <a class="dropdown-item" href="{% url 'profile' %}">
+                    <i class="bi bi-person"></i> Profile
+                  </a>
+                  <a class="dropdown-item" href="{% url 'user-activity' user.username %}">
+                    <i class="bi bi-activity"></i> My Activity
+                  </a>
+                  <a class="dropdown-item" href="{% url 'settings' %}">
+                    <i class="bi bi-gear"></i> Settings
+                  </a>
+                  {% if user.is_authenticated and user.is_staff %}
+                  <a class="dropdown-item" href="{% url 'tag-list' %}">
+                      <i class="bi bi-tags"></i> Manage Tags
+                  </a>
+                  {% endif %}
+                  <div class="dropdown-divider"></div>
+                  <form method="POST" action="{% url 'logout' %}" style="margin: 0; padding: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item">
+                      <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                  </form>
+                </div>
+              </li>
+            {% else %}
+              <a class="nav-item nav-link" href="{% url 'login' %}">
+                <i class="bi-box-arrow-in-right mr-1"></i> Login
+              </a>
+              <a class="nav-item nav-link" href="{% url 'register' %}">
+                <i class="bi-person-plus mr-1"></i> Register
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="mobile-drawer-overlay d-md-none" id="drawerOverlay"></div>
+
+  <div class="mobile-drawer d-md-none" id="mobileDrawer">
+    <!-- TODO -->
+  </div>
+
+  <!-- SEARCH SECTION -- only on homepage -->
+  {% block hero %}{% endblock %}
+
+  <main id="main-container" role="main" class="container" style="margin-top: 3rem !important;">
+    <div class="row">
+      <div class="col-md-8" id="content-column">
+        <!-- CONTENT BLOCK -->
+        {% include "blog/includes/flash_messages.html" %}
+        {% block content %}{% endblock %}
+      </div>
+
+      <!-- SIDEBAR include -->
+      {% include 'blog/includes/sidebar.html' %}
+    </div>
+  </main>
+{#  <div id="messages-container" class="fixed-top" style="margin-top: 60px; z-index: 1000; width: 300px; right: 20px;"></div>#}
+	<div id="messages-container"></div>
+	{# --- FOOTER --- #}
+  {% include 'blog/includes/footer.html' %}
+
+  <!-- jQuery → Popper.js → Bootstrap JS -->
+{#  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+  {% block extrajs %}
+{#  	<!-- COMMENT VOTING JS -->#}
+{#  	<script src="{% static 'blog/js/main.js' %}"></script>#}
+  {% endblock %}
+
+  {% block additional_js %}{% endblock additional_js %}
+</body>
+</html>

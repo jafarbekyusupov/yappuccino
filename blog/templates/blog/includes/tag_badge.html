@@ -1,0 +1,4 @@
+{# ========= INCLUDES/TAG_BADGE ========= #}
+
+{#<a href="{% url 'blog-home' %}?tag={{ tag.slug|default:tag.name|urlencode }}" class="badge badge-secondary">{{ tag.name }}</a>#}
+<a href="{% url 'tag-detail' tag.slug %}" class="badge badge-secondary">{{ tag.name }}</a>

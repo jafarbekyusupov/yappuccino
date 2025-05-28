@@ -1,0 +1,70 @@
+{# ========== POST_DETAIL ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% block content %}
+  <article class="media content-section post-card">
+    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}" alt="{{ object.author }}">
+    <div class="media-body">
+      {# --- post header w metadata --- #}
+      <div class="article-metadata d-flex justify-content-between">
+        <div class="post-author-info">
+          <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+          <small class="text-muted">{{ object.date_posted|date:"F d, Y \a\t g:i A" }}</small>
+        </div>
+        <div class="post-stats d-flex">
+          <span class="badge badge-secondary mr-2">
+            <i class="bi bi-eye"></i> {{ object.view_count }}
+          </span>
+          <span class="badge badge-secondary mr-2">
+            <i class="bi bi-chat"></i> {{ object.comments_count }}
+          </span>
+          {% if object.reposts_count > 0 %}
+            <span class="badge badge-info">
+              <i class="bi bi-arrow-repeat"></i> {{ object.reposts_count }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {# --- POST TITlE --- #}
+      <h2 class="article-title">{{ object.title }}</h2>
+
+      {# --- POST CONTENT -- UPD: using get_safe_content w/ safe filter --- #}
+      <div class="article-content">
+        {{ object.get_safe_content|safe }}
+      </div>
+
+      {# --- POST FOOTER --- #}
+      <div class="post-footer">
+        {# --- VOTING SYS --- #}
+        <div class="voting-container">
+          {% include "blog/includes/voting_buttons.html" with post=object user_vote=user_vote %}
+        </div>
+
+        {# --- TAGS --- #}
+        {% if object.tags.all %}
+        <div class="tag-container">
+          {% for tag in object.tags.all %}
+            {% render_tag tag %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+
+  {# --- AUTHOR FUNCS --- #}
+  {% if object.author == user and not object.is_repost %}
+  <div class="author-actions mt-3 mb-3">
+    <a class="btn btn-secondary btn-sm" href="{% url 'post-update' object.id%}">
+      <i class="bi bi-pencil"></i> Update
+    </a>
+    <a class="btn btn-danger btn-sm" href="{% url 'post-delete' object.id%}">
+      <i class="bi bi-trash"></i> Delete
+    </a>
+  </div>
+  {% endif %}
+
+  {# --- COMMENTS --- #}
+  {% include "blog/includes/comment_section.html" %}
+{% endblock content %}

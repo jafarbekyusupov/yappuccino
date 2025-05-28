@@ -1,0 +1,904 @@
+/* =============================================
+ * ------------- MAIN.CSS STRUCT ---------------
+ * =============================================
+ *
+ * ======== VARIABLES ==========================
+ * --- color palette
+ * --- font sizes n weights
+ * --- border radius values
+ *
+ * ======== BASE STYLES ========================
+ * --- body n global settings
+ * --- typography hierarhy
+ * --- links n buttons
+ * --- selection styling, moz-selection too
+ *
+ * ======== LAYOUT SECTIONS ====================
+ * --- section padding n bgs
+ * --- overlays n containers
+ *
+ * ======== NAVIGATION =========================
+ * --- site header n navbar
+ * --- sticky navigation
+ * --- nav links n branding
+ *
+ * ======== HERO SECTION =======================
+ * --- hero bg n layout
+ * --- search input styling
+ *
+ * ======== CUSTOM BUTTONS =====================
+ * --- primary button styles
+ * --- outline button variants
+ * --- color variants - orange/dark-orange
+ *
+ * ======== BLOG CONTENT =======================
+ * --- content sections
+ * --- article styling
+ * --- metadata n imgs
+ *
+ * ======== PAGINATION =========================
+ * --- pagination container
+ * --- page links n states
+ * --- active n disabled states
+ *
+ * ======== VOTING SYSTEM ======================
+ * --- vote containers n scores
+ * --- voting button styles
+ *
+ * ======== REPOST n REPLY SYSTEM ==============
+ * --- repost headers n containers
+ * --- reply styling
+ *
+ * ======== COMMENT SYSTEM =====================
+ * --- comment lists n items
+ * --- comment authors n content
+ * --- reply threading
+ *
+ * ======== USER PROFILES ======================
+ * --- activity tabs
+ * --- user statistics
+ * --- profile headers
+ *
+ * ======== TOPICS n FEATURED CONTENT ==========
+ * --- feat sections
+ * --- custom blocks
+ *
+ * ======== FORM CTRLS =========================
+ * --- input focus states
+ * --- form validation
+ *
+ * ======== SPACING n LAYOUT FIXES =============
+ * --- main container positioning
+ * --- sidebar positioning
+ * --- responsive spacing
+ *
+ * ============================================= */
+
+
+/* =======================
+ * ------ VARIABLES ------
+ * ======================= */
+
+:root{
+  --white: #ffffff;
+  --orange: #ec7a1c;
+  --dark-orange: #90462c;
+  --light-orange: #f78e36;
+  --black: #000000;
+  --gray: #44443b;
+  --light-gray: #717275;
+  --off-white: #f0f8ff;
+  --border-gray: #e6e4e0;
+
+  /* -- FONTS -- */
+  --body-font: 'Underdog', cursive;
+  --heading-font: 'Roboto Condensed', sans-serif;
+
+  /* -- FONT SIZES -- */
+  --fs-xl: 58px;
+  --fs-lg: 46px;
+  --fs-md: 32px;
+  --fs-sm: 28px;
+  --fs-xs: 24px;
+  --fs-xxs: 22px;
+  --fs-base: 20px;
+  --fs-menu: 14px;
+  --fs-btn: 18px;
+  --fs-copyright: 16px;
+
+  /* -- FONT WEIGHTS -- */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* -- BORDER RADII -- */
+  --radius-lg: 100px;
+  --radius-md: 20px;
+  --radius-sm: 10px;
+}
+
+/* =======================
+ * ----- BASE STYLES -----
+ * ======================= */
+
+body{
+  background: #fafafa;
+  background-color: var(--white);
+  font-family: var(--body-font);
+  color: #333333;
+  margin-top: 0 !important;
+  padding-top: 56px !important;
+}
+
+/* ----- TYPOGRAPHY HIERARCHY ----- */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dark-orange);
+  font-family: var(--heading-font);
+  font-weight: var(--weight-semibold);
+}
+
+h1 {
+  font-size: var(--fs-xl);
+  font-weight: var(--weight-bold);
+}
+
+h2 {
+  font-size: var(--fs-lg);
+  font-weight: var(--weight-bold);
+}
+
+h3 {
+  font-size: var(--fs-md);
+}
+
+h4 {
+  font-size: var(--fs-sm);
+  color: var(--gray);
+}
+
+h5 {
+  font-size: var(--fs-xs);
+  color: var(--light-gray);
+}
+
+h6 {
+  color: var(--orange);
+  font-size: var(--ck-color-light-red);
+}
+
+p {
+  color: var(--light-gray);
+  font-size: var(--fs-base);
+  font-weight: var(--weight-normal);
+}
+
+ul li {
+  color: var(--light-gray);
+  font-size: var(--fs-base);
+  font-weight: var(--weight-normal);
+}
+
+/* ----- LINKS n BUTTONS ----- */
+a, button {
+  touch-action: manipulation;
+  transition: all 0.3s;
+}
+
+a {
+  display: inline-block;
+  color: var(--orange);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--light-orange);
+}
+
+b, strong {
+  font-weight: var(--weight-bold);
+}
+
+/* ----- SELECTION STYLING ----- */
+::selection {
+  background-color: var(--white);
+  color: var(--orange);
+}
+
+::-moz-selection {
+  background-color: var(--white);
+  color: var(--orange);
+}
+
+.article-content::selection {
+  background-color: var(--orange);
+  color: var(--white);
+}
+
+.article-content::-moz-selection {
+  background-color: var(--orange);
+  color: var(--white);
+}
+
+/* =======================
+ * --- LAYOUT SECTIONS ---
+ * ======================= */
+
+.section-padding {
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+.section-bg {
+  background-color: var(--off-white);
+}
+
+.section-overlay {
+  background-image: linear-gradient(15deg, var(--orange) 0%, var(--gray) 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+}
+
+.section-overlay + .container {
+  position: relative;
+}
+
+.container {
+  height: 100%;
+}
+
+/* =======================
+ * ----- NAVIGATION ------
+ * ======================= */
+
+/* ----- SITE HEADER ----- */
+.site-header {
+  background: transparent;
+  height: auto;
+  padding: 0;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1030;
+}
+
+header.site-header {
+  background-image: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  height: auto !important;
+  border: none !important;
+}
+
+/* ----- NAVBAR ----- */
+.navbar.bg-steel,
+.navbar.navbar-dark.bg-steel,
+.navbar-dark.bg-steel.fixed-top {
+  background-color: var(--gray) !important;
+  padding: 0.5rem 1rem;
+  position: fixed;
+  width: 100%;
+  z-index: 1030;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  top: 0;
+}
+
+.navbar.navbar-expand-lg.navbar-dark.bg-steel.fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1030;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.bg-steel {
+  background-color: var(--gray);
+}
+
+/* ----- STICKY NAVIGATION ----- */
+.sticky-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.sticky-wrapper.is-sticky .navbar {
+  background-color: var(--gray);
+}
+
+.navbar {
+  background: var(--gray);
+  z-index: 9;
+  padding: .65rem 1rem;
+}
+
+/* ----- NAVBAR BRAND n LINKS ----- */
+.navbar-brand, .navbar-brand:hover {
+  font-size: var(--fs-md);
+  font-weight: var(--weight-bold);
+  display: block;
+}
+
+.navbar-brand span {
+  font-family: var(--heading-font);
+}
+
+.navbar-expand-lg .navbar-nav .nav-link {
+  border-radius: var(--radius-lg);
+  margin: 10px;
+  padding: 10px;
+}
+
+.navbar-nav .nav-link {
+  display: inline-block;
+  color: var(--white);
+  font-family: var(--heading-font);
+  font-size: var(--fs-menu);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.site-header .navbar-nav .nav-link {
+  color: #cbd5db;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:hover,
+.site-header .navbar-nav .nav-link:hover {
+  color: var(--orange);
+}
+
+.site-header .navbar-nav .nav-link.active {
+  font-weight: 500;
+}
+
+/* =======================
+ * ---- HERO SECTION -----
+ * ======================= */
+
+.hero-section,
+section.hero-section {
+  background-image: linear-gradient(15deg, #ec7a1c 0%, #44443b 100%) !important;
+  position: relative;
+  overflow: hidden;
+  padding-top: 120px !important;
+  padding-bottom: 100px !important;
+  margin-top: -56px !important;
+}
+
+.hero-section .input-group {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 10px 15px;
+}
+
+.hero-section .input-group-text {
+  background-color: transparent;
+  border: 0;
+}
+
+.hero-section input[type="search"] {
+  border: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+.hero-section button[type="submit"] {
+  background-color: var(--orange);
+  border: 0;
+  border-radius: var(--radius-lg) !important;
+  color: var(--white);
+  max-width: 150px;
+}
+
+/* =======================
+ * --- CUSTOM BUTTONS ----
+ * ======================= */
+
+.custom-btn {
+  background: var(--orange);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  color: var(--white);
+  font-size: var(--fs-btn);
+  font-weight: var(--weight-semibold);
+  line-height: normal;
+  transition: all 0.3s;
+  padding: 10px 20px;
+}
+
+.custom-btn:hover {
+  background: var(--dark-orange);
+  color: var(--white);
+}
+
+.custom-border-btn {
+  background: transparent;
+  border: 2px solid var(--orange);
+  color: var(--orange);
+}
+
+.custom-border-btn:hover {
+  background: var(--orange);
+  border-color: transparent;
+  color: var(--white);
+}
+
+/* ----- BUTTON VARIANTS ----- */
+.btn-orange {
+  background-color: var(--orange);
+  border-color: var(--orange);
+  color: white;
+}
+
+.btn-orange:hover {
+  background-color: var(--light-orange);
+  border-color: var(--light-orange);
+  color: white;
+}
+
+.btn-outline-orange {
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+.btn-outline-orange:hover {
+  background-color: var(--orange);
+  color: white;
+}
+
+.btn-dark-orange {
+  background-color: var(--dark-orange);
+  border-color: var(--dark-orange);
+  color: white;
+}
+
+.btn-dark-orange:hover {
+  background-color: #7d3c25;
+  border-color: #7d3c25;
+  color: white;
+}
+
+.btn-outline-dark-orange {
+  color: var(--dark-orange);
+  border-color: var(--dark-orange);
+}
+
+.btn-outline-dark-orange:hover {
+  background-color: var(--dark-orange);
+  color: white;
+}
+
+/* =======================
+ * ---- BLOG CONTENT -----
+ * ======================= */
+
+.content-section {
+  background: var(--white);
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+.article-title {
+  color: #444444;
+}
+
+a.article-title:hover {
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.article-content {
+  white-space: pre-line;
+}
+
+.article-img {
+  height: 65px;
+  width: 65px;
+  margin-right: 16px;
+}
+
+.article-metadata {
+  padding-bottom: 1px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.article-metadata a:hover {
+  color: #333;
+  text-decoration: none;
+}
+
+/* =======================
+ * ----- PAGINATION ------
+ * ======================= */
+
+#content-column .pagination-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.pagination-container {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 1.5rem 0 !important;
+}
+
+.pagination {
+  display: inline-flex !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+.pagination,
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+  border-radius: 0 !important;
+}
+
+/* ----- PAGE LINKS ----- */
+.pagination .page-item .page-link {
+  background-color: #44443b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  margin: 0;
+  transition: all 0.2s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination .page-item:last-child .page-link {
+  border-right: none;
+}
+
+.pagination .page-item {
+  margin: 0 !important;
+}
+
+.pagination .page-link {
+  border: none !important;
+  margin: 0 !important;
+  padding: 0.75rem 1.25rem !important;
+}
+
+/* ----- ACTIVE n DISABLED STATES ----- */
+.pagination .page-item.active .page-link {
+  background-color: #90462c;
+  color: #dddddd;
+  border: none;
+  outline: none;
+}
+
+.pagination .page-item .page-link:focus,
+.pagination .page-item.active .page-link:focus {
+  box-shadow: none;
+  outline: none;
+  border: none;
+}
+
+.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+  background-color: #ec7a1c;
+  color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+  background-color: #333330 !important;
+  color: #777777 !important;
+  cursor: not-allowed !important;
+  opacity: 0.8 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  background-color: #333330 !important;
+  color: #777777 !important;
+  transform: none !important;
+}
+
+.pagination .page-item.disabled {
+  pointer-events: auto !important;
+  cursor: not-allowed !important;
+}
+
+/* =======================
+ * ---- VOTING SYSTEM ----
+ * ======================= */
+
+.vote-container {
+  display: flex;
+  align-items: center;
+}
+
+.vote-score {
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--gray);
+}
+
+.voting-container .btn-sm {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+/* =======================
+ * -- REPOST n REPLIES ---
+ * ======================= */
+
+/* --- BASE | DIV now wrapped inside <a>, was vice versa b4 --- */
+.repost-header {
+  display: block;
+  padding: 8px 15px;
+  background-color: #f8f9fa;
+  border-left: 4px solid var(--orange);
+  margin-bottom: 25px;
+  color: var(--gray);
+  text-decoration: none !important;
+  transition: all 0.15s ease-out; /* .25 → .15 */
+}
+
+.repost-header i {
+  margin-right: 8px;
+  color: var(--orange);
+  transition: inherit;
+}
+
+/* HOVER | UPD -- border radius added */
+.repost-header:hover {
+  background-color: #D3D3D3;
+  border-radius: 10px;
+  border-left-color: var(--dark-orange);
+  font-weight: 900;
+  color: var(--dark-orange);
+}
+.repost-header:hover i{ color: inherit; }
+
+.repost-header:hover .repost-content{ transform: translateX(2px);}
+
+.repost-container, .reply-container {
+  padding: 15px;
+  border: 1px solid #e6e4e0;
+  border-radius: 8px;
+  margin-top: 10px;
+  background-color: #fafafa;
+}
+
+/* =======================
+ * --- COMMENT SYSTEM ----
+ * ======================= */
+
+.comments-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: var(--gray);
+  text-decoration: none;
+}
+
+.comment-content {
+  margin-top: 5px;
+  white-space: pre-line;
+}
+
+/* ----- REPLY STYLES ----- */
+.reply-item {
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.reply-img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+}
+
+.reply-author {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.reply-content {
+  font-size: 0.9rem;
+}
+
+.reply-toggle {
+  color: var(--orange);
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+/* =======================
+ * ---- USER PROFILES ----
+ * ======================= */
+
+.activity-tabs .nav-item .nav-link {
+  color: var(--gray);
+  border-bottom: 2px solid transparent;
+}
+
+.activity-tabs .nav-item .nav-link.active {
+  color: var(--orange);
+  border-bottom: 2px solid var(--orange);
+  background-color: transparent;
+}
+
+.activity-container {
+  padding: 20px 0;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.user-stat-item {
+  text-align: center;
+}
+
+.user-stat-item .stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--orange);
+}
+
+.user-stat-item .stat-label {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+/* =========================
+ * --- TOPICS n FEATURED ---
+ * ========================= */
+
+.featured-section {
+  background-color: var(--gray);
+  border-radius: 0 0 100px 100px;
+  padding-bottom: 100px;
+}
+
+.featured-section .row {
+  position: relative;
+  bottom: 100px;
+  margin-bottom: -100px;
+}
+
+.custom-block {
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.custom-block:hover {
+  background-color: var(--gray);
+  transform: translateY(-3px);
+}
+
+/* ========================
+ * ----- POST DETAILS -----
+ * ======================== */
+
+.post-actions {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.post-stats .badge {
+  display: flex;
+  align-items: center;
+  padding: 0.5em 0.7em;
+}
+
+.post-stats .badge i {
+  margin-right: 4px;
+}
+
+.badge-info {
+  background-color: var(--orange);
+}
+
+/* ========================
+ * ------ FORM CTRLS ------
+ * ======================== */
+
+.form-control:focus,
+.form-select:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--orange) !important;
+  box-shadow: 0 0 0 0.2rem rgba(236, 122, 28, 0.25) !important;
+}
+
+/* ========================
+ * --- SPACING n LAYOUT ---
+ * ======================== */
+
+/* ----- MAIN CONTAINER ----- */
+main#main-container {
+  margin-top: 56px !important;
+  padding-top: 2rem;
+}
+
+#main-container.container {
+  padding-top: 20px;
+  position: relative;
+}
+
+main#main-container {
+  margin-top: 2rem !important;
+  position: relative;
+}
+
+body:not(.home-page) main#main-container {
+  margin-top: 4rem !important;
+}
+
+/* ----- SIDEBAR ----- */
+#sidebar {
+  position: sticky !important;
+  top: 76px !important;
+}
+
+/* ----- CONTENT SECTIONS ----- */
+.content-section.user-profile-header,
+.content-section.mb-4,
+.content-section:first-of-type {
+  margin-top: 1.5rem !important;
+}
+
+article.media.content-section:first-of-type {
+  margin-top: 2rem !important;
+}
+
+/* ----- SEARCH SUBTITLE ----- */
+#search_subtitle {
+  color: #cbd5db !important;
+}

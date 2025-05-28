@@ -1,0 +1,137 @@
+{# ========== USER_ACTIVITY ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% block content %}
+	{# ---	USER PROFILE HEADER --- #}
+  {% include "blog/includes/user_profile_header.html" with profile_user=user_obj show_stats=True posts_count=posts_count comments_count=comments_count votes_count=votes_count reposts_count=reposts_count %}
+
+  {# --- ACTIVITY TABS --- #}
+  <div class="activity-tabs-container mb-4">
+    <ul class="nav nav-tabs activity-tabs" id="activityTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="posts-tab" data-toggle="tab" href="#posts" role="tab" aria-controls="posts" aria-selected="true">Posts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="comments-tab" data-toggle="tab" href="#comments" role="tab" aria-controls="comments" aria-selected="false">Comments</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="reposts-tab" data-toggle="tab" href="#reposts" role="tab" aria-controls="reposts" aria-selected="false">Reposts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="upvoted-tab" data-toggle="tab" href="#upvoted" role="tab" aria-controls="upvoted" aria-selected="false">Upvoted</a>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="activityTabsContent">
+			{# --- POSTS TAB --- #}
+      <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+        <div class="activity-container">
+          {# --- FILTER FOR POSTS include --- #}
+          {% include "blog/includes/filter_ctrls.html" with current_sort=current_sort current_order=current_order %}
+
+          {% for post in posts %}
+            {% if not post.is_repost %}
+              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True %}
+            {% endif %}
+          {% empty %}
+            <div class="content-section">
+              <p class="text-muted">No posts yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# --- COMMENTS --- #}
+      <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab">
+        <div class="activity-container">
+          {% for comment in comments %}
+            <div class="media comment-item mb-3 content-section">
+              <img class="rounded-circle comment-img mr-3" src="{{ comment.author.profile.image.url }}" width="40" height="40">
+              <div class="media-body">
+                <div class="comment-metadata">
+                  <a href="{% url 'user-posts' comment.author.username %}" class="comment-author">{{ comment.author }}</a>
+                  <small class="text-muted ml-2">{{ comment.date_posted|date:"F d, Y" }}</small>
+                  <small class="text-muted ml-2">on <a href="{% url 'post-detail' comment.post.id %}">{{ comment.post.title }}</a></small>
+                </div>
+                <div class="comment-content mt-1">
+                  {{ comment.get_safe_content|safe }}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="content-section">
+              <p class="text-muted">No comments yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+			{# --- REPOSTS --- #}
+      <div class="tab-pane fade" id="reposts" role="tabpanel" aria-labelledby="reposts-tab">
+        <div class="activity-container">
+          {% for post in posts %}
+            {% if post.is_repost %}
+              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True %}
+            {% endif %}
+          {% empty %}
+            <div class="content-section">
+              <p class="text-muted">No reposts yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- UPVOTES TAB -->
+      <div class="tab-pane fade" id="upvoted" role="tabpanel" aria-labelledby="upvoted-tab">
+        <div class="activity-container">
+          {% for vote in upvoted_posts %}
+            <article class="media content-section">
+              <img class="rounded-circle article-img" src="{{ vote.post.author.profile.image.url }}">
+              <div class="media-body">
+                <div class="article-metadata">
+                  <a class="mr-2" href="{% url 'user-posts' vote.post.author.username %}">{{ vote.post.author }}</a>
+                  <small class="text-muted">{{ vote.post.date_posted|date:"F d, Y" }}</small>
+                </div>
+                <h2><a class="article-title" href="{% url 'post-detail' vote.post.id %}">{{ vote.post.title }}</a></h2>
+                <div class="article-content">{{ vote.post.get_safe_content|safe }}</div>
+              </div>
+            </article>
+          {% empty %}
+            <div class="content-section">
+              <p class="text-muted">No upvoted posts yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+	{% include "blog/includes/user_profile_styles.html" %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      var modal = document.getElementById('imageModal');
+      var img = document.getElementById('profileImage');
+      var modalImg = document.getElementById('fullSizeImage');
+
+      img.onclick = function(){
+        modal.style.display = "block";
+        modalImg.src = this.src;
+      }
+
+      var span = document.getElementsByClassName("close")[0];
+
+      span.onclick = function(){ modal.style.display = "none";}
+
+      modal.onclick = function(event){ if(event.target == modal){ modal.style.display = "none";}}
+    });
+
+    // filter saved across tabs
+    $(document).ready(function(){
+      // store curr tab session storage
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){ sessionStorage.setItem('activeTab', $(e.target).attr('href'));});
+
+      // then restore active tab on paegload
+      var activeTab = sessionStorage.getItem('activeTab');
+      if(activeTab){ $('#activityTabs a[href="' + activeTab + '"]').tab('show');}
+    });
+  </script>
+{% endblock content %}

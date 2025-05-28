@@ -1,0 +1,69 @@
+{# ========= INCLUDES/USER_PROFILE_HEADER ========= #}
+<div class="content-section user-profile-header">
+  <div class="media profile-container">
+    <div class="profile-image-container">
+      <img class="rounded-circle account-img profile-image" src="{{ profile_user.profile.image.url }}" id="profileImage">
+			{# -- ==== IMG MODAL ==== -- #}
+      <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="fullSizeImage">
+      </div>
+    </div>
+    <div class="media-body profile-info">
+      <h2 class="account-heading">{{ profile_user.username }}</h2>
+      <p class="text-secondary">{{ profile_user.email }}</p>
+
+      {% if show_stats %}
+      <div class="user-stats mt-3">
+        <div class="user-stat-item">
+          <div class="stat-value">{{ posts_count }}</div>
+          <div class="stat-label">Posts</div>
+        </div>
+        <div class="user-stat-item">
+          <div class="stat-value">{{ comments_count }}</div>
+          <div class="stat-label">Comments</div>
+        </div>
+        <div class="user-stat-item">
+          <div class="stat-value">{{ votes_count }}</div>
+          <div class="stat-label">Votes</div>
+        </div>
+        <div class="user-stat-item">
+          <div class="stat-value">{{ reposts_count }}</div>
+          <div class="stat-label">Reposts</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if show_activity_link %}
+      <a href="{% url 'user-activity' profile_user.username %}" class="btn btn-sm btn-outline-orange mt-2">
+        <i class="bi bi-activity"></i> View Activity
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // img modal
+  document.addEventListener('DOMContentLoaded', function(){
+    var modal = document.getElementById('imageModal');
+
+    // get img → insert inside modal
+    var img = document.getElementById('profileImage');
+    var modalImg = document.getElementById('fullSizeImage');
+
+    img.onclick = function(){
+      modal.style.display = "block";
+      modalImg.src = this.src;
+    }
+
+    // span elem that closes modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // when user clicks on (x) → close modal
+    span.onclick = function(){ modal.style.display = "none";}
+
+    // close when clicking anywhere on modal
+    modal.onclick = function(event){ if(event.target == modal){ modal.style.display = "none";}}
+  });
+</script>

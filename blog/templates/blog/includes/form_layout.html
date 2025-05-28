@@ -1,0 +1,29 @@
+{# ========= INCLUDES/FORM_LAYOUT ========= #}
+{% load crispy_forms_tags %}
+
+<div class="content-section">
+  <form method="POST" {% if multipart %}enctype="multipart/form-data"{% endif %}>
+    {% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">{{ title }}</legend>
+      {{ form|crispy }}
+      {% if u_form %}{{ u_form|crispy }}{% endif %}
+      {% if p_form %}{{ p_form|crispy }}{% endif %}
+    </fieldset>
+    <div class="form-group">
+      <button class="btn {{ submit_btn_class|default:'btn-outline-info' }}" type="submit">{{ submit_btn_text }}</button>
+      {% if cancel_url %}
+      <a class="btn btn-secondary" href="{{ cancel_url }}">Cancel</a>
+      {% endif %}
+      {% block extra_buttons %}{% endblock %}
+    </div>
+  </form>
+
+  {% if show_border_link %}
+  <div class="border-top pt-3">
+    <small class="text-muted">
+      {{ border_link_text }} <a class="ml-2" href="{{ border_link_url }}">{{ border_link_label }}</a>
+    </small>
+  </div>
+  {% endif %}
+</div>

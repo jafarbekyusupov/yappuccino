@@ -1,0 +1,95 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<div class="logout-container">
+  <div class="logout-icon">
+    <i class="bi bi-box-arrow-right"></i>
+  </div>
+
+  <h2 class="logout-message">You've been logged out</h2>
+  <p class="logout-submessage">Thanks for spending some quality time with us today.</p>
+
+  <div class="logout-actions">
+    <a href="{% url 'login' %}" class="btn btn-orange">
+      <i class="bi bi-box-arrow-in-right"></i> Log In Again
+    </a>
+    <a href="{% url 'blog-home' %}" class="btn btn-outline-orange">
+      <i class="bi bi-house"></i> Go to Home
+    </a>
+  </div>
+
+  <div class="mt-5">
+    <p class="text-muted">
+      <i class="bi bi-shield-check"></i> Your session has been securely closed.
+    </p>
+  </div>
+</div>
+
+<style>
+.logout-container {
+  text-align: center;
+  padding: 60px 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.logout-icon {
+  font-size: 80px;
+  color: var(--orange);
+  margin-bottom: 30px;
+  animation: slideOut 0.5s ease-out;
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(20px);
+    opacity: 0.8;
+  }
+}
+
+.logout-message {
+  font-size: 28px;
+  color: var(--gray);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.logout-submessage {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 18px;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.logout-actions .btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .logout-actions {
+    flex-direction: column;
+  }
+
+  .logout-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+{% endblock content %}

@@ -1,0 +1,166 @@
+{# ============ HOME ============ #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+
+{% block additional_css %}
+<style>
+  {# -- TYPING ANIMATION -- #}
+  .typing-container {
+			display: inline-flex;
+			align-items: baseline;
+			justify-content: center;
+			line-height: 1.2;
+  		font-size: 4rem;
+  }
+
+  .static-text {
+			margin-right: 10px;
+			font-weight: bold;
+			color: white;
+  }
+
+  .dynamic-text {
+	    position: relative;
+			align-items: baseline;
+  	  line-height: 1.2;
+    	color: #ec7a1c;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    height: .8em;
+    background-color: #ec7a1c;
+    margin-left: 2px;
+    animation: blink 0.7s infinite;
+    vertical-align: text-top;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+{% endblock additional_css %}
+
+{#{% include 'blog/includes/mobile_sidebar_ctrls.html' %}#}
+
+{% block hero %}
+{% if not tag and not search %}
+<section class="hero-section d-flex justify-content-center align-items-center">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-12 mx-auto">
+        <h1 class="text-white text-center">
+          <div class="typing-container">
+            <span class="static-text">Surf for</span>
+            <span class="dynamic-text" id="typingText"></span>
+            <span class="cursor"></span>
+          </div>
+        </h1>
+        <h4 class="text-center" id="search_subtitle">A platform for Certified Yappers</h4>
+
+        <form method="get" action="{% url 'blog-home' %}" class="custom-form mt-4 pt-2 mb-lg-0 mb-5" role="search">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bi-search" id="basic-addon1"></span>
+            <input name="search" type="search" class="form-control" id="keyword" placeholder="Search for topics you are interested in" aria-label="Search">
+            <button type="submit" class="form-control">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock hero %}
+
+{% block content %}
+	{% if tag %}
+	<div class="mb-4">
+		<h3>Posts tagged with "{{ tag_name|default:tag }}"</h3>
+		<a href="{% url 'blog-home' %}" class="btn btn-sm btn-outline-info">View All Posts</a>
+	</div>
+	{% endif %}
+
+	{% if search %}
+	<div class="mb-4">
+		<h3>Search results for "{{ search }}"</h3>
+		<a href="{% url 'blog-home' %}" class="btn btn-sm btn-outline-info">Clear Search</a>
+	</div>
+	{% endif %}
+
+
+
+	{# --- FILTER --- #}
+	{% include "blog/includes/filter_ctrls.html" with current_sort=current_sort current_order=current_order show_relevance=show_relevance %}
+
+	{# --- POSTS FEED --- #}
+	{% for post in posts %}
+		{% include "blog/includes/ult_post_card.html" with post=post display_mode="feed" show_actions=True show_stats=True user_vote=post.user_vote original_user_vote=post.original_user_vote %}
+	{% empty %}
+	<div class="content-section">
+		<h3>No posts found</h3>
+		<p>
+			{% if tag %}
+			There are no posts with the tag "{{ tag }}".
+			{% elif search %}
+			No posts matching "{{ search }}" were found.
+			{% else %}
+			There are no posts available. Be the first to create a post!
+			{% endif %}
+		</p>
+		{% if tag or search %}
+		<a href="{% url 'blog-home' %}" class="btn btn-outline-info">View All Posts</a>
+		{% endif %}
+	</div>
+	{% endfor %}
+
+	{# --- PAGINATION --- #}
+	{% include "blog/includes/pagination.html" %}
+{% endblock content %}
+
+{% block additional_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // WORDS TO TYPE
+    const words = ["Tech Stuff", "Threads", "Talks", "Tutorials", "Opinions", "Inspiration"];
+
+    const typingElement = document.getElementById('typingText');
+
+    let wrdIdx = 0;
+    let charIdx = 0;
+
+    // to switch between 2 acts -- typing/deleting -- speed depends on this
+    let isDeleting = false;
+
+    function typeEffect() {
+      const curWord = words[wrdIdx];
+
+      let typingSpeed = isDeleting ? 50 : 100; // faster when deleting
+
+      if(!isDeleting && charIdx < curWord.length){
+				typingElement.textContent = curWord.substring(0, charIdx+1); // type fwd → add next char
+        charIdx++;
+      }
+      else if(!isDeleting && charIdx === curWord.length){ // complete word → pause b4 deleting
+        isDeleting = true;
+        typingSpeed = 1000; // slowing down so it looks like pause
+      }
+      else if(isDeleting && charIdx>0){ // delete chars
+        typingElement.textContent = curWord.substring(0, charIdx - 1);
+        charIdx--;
+      }
+      else if(isDeleting && charIdx === 0){ // done deleting → MOVE to NEXT WORD
+        isDeleting = false;
+        wrdIdx = (wrdIdx + 1) % words.length;
+        typingSpeed = 500; // slight pause
+      }
+
+      setTimeout(typeEffect, typingSpeed);
+    }
+
+    // RUN ITTTTTTTTTTTTTTTTTTTTT
+    setTimeout(typeEffect, 1000);
+  });
+</script>
+{% endblock additional_js %}

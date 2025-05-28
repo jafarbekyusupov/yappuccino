@@ -1,0 +1,25 @@
+{# ========== TAG_POSTS ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% block content %}
+	<div class="mb-4">
+		<h3>Posts tagged with "{{ tag_name }}"</h3>
+		<a href="{% url 'blog-home' %}" class="btn btn-sm btn-outline-info">View All Posts</a>
+	</div>
+
+	{# --- FILTER --- #}
+	{% include "blog/includes/filter_ctrls.html" with current_sort=current_sort current_order=current_order %}
+
+	{% for post in posts %}
+		{% include "blog/includes/ult_post_card.html" with post=post display_mode="feed" show_actions=True show_stats=True %}
+	{% empty %}
+		<div class="content-section">
+			<p>No posts found with this tag.</p>
+		</div>
+	{% endfor %}
+
+	{# --- PAGINATION --- #}
+	{% if is_paginated %}
+		{% include "blog/includes/pagination.html" %}
+	{% endif %}
+{% endblock content %}

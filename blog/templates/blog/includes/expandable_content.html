@@ -1,0 +1,68 @@
+{# ========= INCLUDES/EXPANDABLE_CONTENT ========= #}
+
+{% load blog_extras %}
+<div class="article-content">
+  <div class="content-preview" id="content-preview-{{ post.id }}">
+    {{ content_truncated.content|safe }}
+  </div>
+
+  {% if content_truncated.truncated %}
+  <div class="content-full d-none" id="content-full-{{ post.id }}">
+    {{ content_truncated.full_content|safe }}
+  </div>
+
+  <div class="text-center mt-2">
+    <button class="btn btn-sm btn-outline-secondary show-more-btn" data-post-id="{{ post.id }}">
+      <i class="bi bi-arrows-expand"></i> Show More
+    </button>
+    <button class="btn btn-sm btn-outline-secondary show-less-btn d-none" data-post-id="{{ post.id }}">
+      <i class="bi bi-arrows-collapse"></i> Show Less
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const showMoreBtns = document.querySelectorAll('.show-more-btn[data-post-id="{{ post.id }}"]');
+    const showLessBtns = document.querySelectorAll('.show-less-btn[data-post-id="{{ post.id }}"]');
+
+		/* -- show MORE buttons -- */
+    showMoreBtns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const postId = this.getAttribute('data-post-id');
+        const prevEl = document.getElementById('content-preview-' + postId);
+        const fullEl = document.getElementById('content-full-' + postId);
+        const showLessBtn = document.querySelector('.show-less-btn[data-post-id="' + postId + '"]');
+
+        // hide preview → show full content
+        prevEl.classList.add('d-none');
+        fullEl.classList.remove('d-none');
+
+        // hide show more → show "show less"
+        this.classList.add('d-none');
+        showLessBtn.classList.remove('d-none');
+      });
+    });
+		/* -- show LESS buttons -- */
+    showLessBtns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const postId = this.getAttribute('data-post-id');
+        const prevEl = document.getElementById('content-preview-' + postId);
+        const fullEl = document.getElementById('content-full-' + postId);
+        const showMoreBtn = document.querySelector('.show-more-btn[data-post-id="' + postId + '"]');
+
+        // show preview → hide full content
+        prevEl.classList.remove('d-none');
+        fullEl.classList.add('d-none');
+
+        // show 'show more' → hide show less
+        this.classList.add('d-none');
+        showMoreBtn.classList.remove('d-none');
+
+        // scroll back to top of post
+        prevEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+  });
+</script>

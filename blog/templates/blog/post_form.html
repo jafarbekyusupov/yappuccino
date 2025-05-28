@@ -1,0 +1,639 @@
+{# ========== POST_FORM ========== #}
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{% if object %}Edit YapPost{% else %}Create YapPost{% endif %}{% endblock %}
+
+{% block extrahead %}
+{{ form.media.css }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <form method="POST" id="postForm">
+       {% csrf_token %}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">
+                <h3>{% if object %}Edit YapPost{% else %}Create YapPost{% endif %}</h3>
+            </legend>
+
+						{# -- TITLE -- #}
+            <div class="form-group">{# style="font-size: large; font-weight: 550;" #}
+               {{ form.title|as_crispy_field }}
+            </div>
+
+						{# -- CONTENT -- #}
+            <div class="form-group">
+                <label for="{{ form.content.id_for_label }}">{{ form.content.label }}{% if form.content.field.required %}*{% endif %}</label>
+               {{ form.content }}
+               {% if form.content.errors %}
+                    <div class="alert alert-danger mt-2">
+                       {{ form.content.errors }}
+                    </div>
+               {% endif %}
+            </div>
+
+           {# -- TAGS FIELD -- #}
+            <div class="form-group">
+                <label class="form-label">
+                    Tags <span class="text-danger">*</span>
+                    <small class="text-muted">(Select at least one)</small>
+                </label>
+                <p class="form-text text-muted mb-3">
+                    <i class="bi bi-info-circle"></i>
+                    Choose existing tags or type to create new ones. Press Enter or comma to add custom tags.
+                </p>
+
+								{# -- TAG INPUT CONTAINER -- #}
+                <div class="tag-selector-container">
+                    <div class="selected-tags-display" id="selectedTagsDisplay">
+                        <!-- selected tags will be here -->
+                    </div>
+
+                    <!-- TAG INPUT -->
+                    <div class="input-group mb-3">
+                        <input type="text"
+                               class="form-control"
+                               id="tagSearchInput"
+                               placeholder="Type to search existing tags or create new ones..."
+                               autocomplete="off">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-orange" id="addTagBtn">
+                                <i class="bi bi-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- suggestions dropdown -->
+                    <div class="suggestions-dropdown" id="suggestionsDropdown" style="display: none;"></div>
+
+                    <!-- popular tags -->
+                    <div class="popular-tags-section">
+                        <h6 class="popular-tags-title">
+                            <i class="bi bi-fire"></i> Popular Tags
+                        </h6>
+                        <div class="popular-tags-container" id="popularTagsContainer"></div>
+                    </div>
+
+                    <!-- hidden inputs for FORM SUBMISSION -->
+                    <div id="hiddenTagInputs"></div>
+                    
+                    <div class="invalid-feedback" id="tagError" style="display: none;">
+                        Please select at least one tag.
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-orange btn-lg">
+                <i class="bi bi-send"></i>
+               {% if object %}Update Post{% else %}Publish Post{% endif %}
+            </button>
+            <a href="{% if object %}{% url 'post-detail' object.id %}{% else %}{% url 'blog-home' %}{% endif %}"
+               class="btn btn-secondary btn-lg ml-2">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    :root{
+        --orange: #ec7a1c;
+        --dark-orange: #90462c;
+        --light-orange: #f78e36;
+        --gray: #44443b;
+    }
+
+    .tag-selector-container{
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #fafafa;
+        position: relative;
+    }
+
+    .tag-selector-container:focus-within{
+        border-color: var(--orange);
+        box-shadow: 0 0 0 3px rgba(236, 122, 28, 0.1);
+        background-color: white;
+    }
+    
+    .selected-tags-display{
+        min-height: 40px;
+        margin-bottom: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .selected-tag{
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, var(--orange), var(--light-orange));
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease;
+    }
+
+    .selected-tag.new-tag{
+        background: linear-gradient(135deg, #28a745, #20c997);
+        position: relative;
+    }
+
+    .selected-tag.new-tag::after{
+        content: "NEW";
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #fd7e14;
+        color: white;
+        font-size: 10px;
+        padding: 2px 5px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .tag-remove{
+        background: none;
+        border: none;
+        color: white;
+        margin-left: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+    }
+
+    .tag-remove:hover{
+        opacity: 1;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+    }
+
+    @keyframes slideIn{
+        from{
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to{
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .suggestions-dropdown{
+        position: absolute;
+        top: 100%;
+        left: 15px;
+        right: 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .suggestion-item{
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .suggestion-item:last-child{
+        border-bottom: none;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.highlighted{
+        background-color: #f8f9fa;
+    }
+
+    .suggestion-item.create-new{
+        background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+        border-left: 4px solid #28a745;
+        font-weight: 500;
+    }
+
+    .suggestion-meta{
+        font-size: 12px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .popular-tags-section{
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+
+    .popular-tags-title{
+        color: var(--gray);
+        margin-bottom: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .popular-tags-title i{
+        color: var(--orange);
+    }
+
+    .popular-tags-container{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .popular-tag{
+        background: white;
+        border: 1px solid #ddd;
+        color: var(--gray);
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .popular-tag:hover{
+        background: var(--orange);
+        color: white;
+        border-color: var(--orange);
+        transform: translateY(-2px);
+    }
+
+    .popular-tag.selected{
+        background: var(--dark-orange);
+        color: white;
+        border-color: var(--dark-orange);
+    }
+
+    .tag-count{
+        font-size: 11px;
+        opacity: 0.8;
+        background: rgba(0,0,0,0.1);
+        padding: 2px 6px;
+        border-radius: 8px;
+    }
+    
+    .btn-orange{
+        background-color: var(--orange);
+        border-color: var(--orange);
+        color: white;
+    }
+
+    .btn-orange:hover{
+        background-color: var(--light-orange);
+        border-color: var(--light-orange);
+        color: white;
+    }
+
+    .btn-outline-orange{
+        color: var(--orange);
+        border-color: var(--orange);
+    }
+
+    .btn-outline-orange:hover{
+        background-color: var(--orange);
+        color: white;
+    }
+
+    .tag-selector-container.is-invalid{
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback{
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    @media (max-width: 768px){
+        .popular-tags-container{
+            justify-content: center;
+        }
+
+        .selected-tags-display{
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+$(document).ready(function(){
+    let selectedTags = [];
+    let allTags = [];
+    let currentHighlight = -1;
+
+   {% if object and object.tags.all %}
+       {% for tag in object.tags.all %}
+            selectedTags.push({
+                id:{{ tag.id }},
+                name: '{{ tag.name|escapejs }}',
+                isNew: false
+            });
+       {% endfor %}
+        renderSelectedTags();
+        updateHiddenInputs();
+   {% endif %}
+
+    loadPopularTags();
+
+    function loadPopularTags(){
+        $.ajax({
+            url: '{% url "tag-suggestions" %}',
+            method: 'GET',
+            success: function(data){
+                allTags = data.suggestions;
+                renderPopularTags(data.suggestions.slice(0, 8));
+            },
+            error: function(){
+                const fallbackTags = [
+                   {% for tag in tags|slice:":8" %}
+                   {
+                        id:{{ tag.id }},
+                        name: '{{ tag.name|escapejs }}',
+                        post_count:{{ tag.posts.count }}
+                    }{% if not forloop.last %},{% endif %}
+                   {% endfor %}
+                ];
+                allTags = fallbackTags;
+                renderPopularTags(fallbackTags);
+            }
+        });
+    }
+
+    function renderPopularTags(tags){
+        const container = $('#popularTagsContainer');
+        container.empty();
+        if(tags.length === 0){ container.html('<p class="text-muted small">No popular tags available</p>'); return;}
+
+        tags.forEach(tag =>{
+            const isSelected = selectedTags.some(t => t.name.toLowerCase() === tag.name.toLowerCase());
+            const tagElement = $(`
+                <div class="popular-tag ${isSelected ? 'selected' : ''}"
+                     data-tag-id="${tag.id}"
+                     data-tag-name="${tag.name}">
+                    <span>${tag.name}</span>
+                    <span class="tag-count">${tag.post_count || 0}</span>
+                </div>
+            `);
+            container.append(tagElement);
+        });
+    }
+
+    function addTag(tagName, tagId = null, isNew = false){
+        if(!tagName || !tagName.trim()){ return;}
+
+        tagName = tagName.trim();
+
+        if(selectedTags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())){ return;}
+
+        const tag ={
+            id: tagId || Date.now(),
+            name: tagName,
+            isNew: isNew
+        };
+
+        selectedTags.push(tag);
+        renderSelectedTags();
+        updateHiddenInputs();
+        updatePopularTags();
+        clearInput();
+        validateTags();
+    }
+
+    function removeTag(tagId){
+        selectedTags = selectedTags.filter(tag => tag.id != tagId);
+        renderSelectedTags();
+        updateHiddenInputs();
+        updatePopularTags();
+        validateTags();
+    }
+
+    function renderSelectedTags(){
+        const container = $('#selectedTagsDisplay');
+        container.empty();
+
+        selectedTags.forEach(tag =>{
+            const tagElement = $(`
+                <div class="selected-tag ${tag.isNew ? 'new-tag' : ''}" data-tag-id="${tag.id}">
+                    <span>${tag.name}</span>
+                    <button type="button" class="tag-remove" data-tag-id="${tag.id}">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            `);
+            container.append(tagElement);
+        });
+    }
+
+    function updateHiddenInputs(){
+        const container = $('#hiddenTagInputs');
+        container.empty();
+
+        selectedTags.forEach(tag =>{
+            if(tag.isNew){ container.append(`<input type="hidden" name="new_tags" value="${tag.name}">`);}
+            else{ container.append(`<input type="hidden" name="tags" value="${tag.id}">`);}
+        });
+        console.log('Hidden inputs created:', container.html());
+    }
+
+    function updatePopularTags(){
+        $('.popular-tag').each(function(){
+            const tagName = $(this).data('tag-name');
+            const isSelected = selectedTags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+            $(this).toggleClass('selected', isSelected);
+        });
+    }
+
+    function clearInput(){
+        $('#tagSearchInput').val('');
+        $('#suggestionsDropdown').hide();
+        currentHighlight = -1;
+    }
+
+    function showSuggestions(query){
+        if(!query.trim()){ $('#suggestionsDropdown').hide(); return;}
+        const suggestions = allTags.filter(tag =>
+            tag.name.toLowerCase().includes(query.toLowerCase()) &&
+            !selectedTags.some(selected => selected.name.toLowerCase() === tag.name.toLowerCase())
+        );
+
+        const dropdown = $('#suggestionsDropdown');
+        dropdown.empty();
+
+        suggestions.forEach((tag, index) =>{
+            dropdown.append(`
+                <div class="suggestion-item ${index === 0 ? 'highlighted' : ''}"
+                     data-tag-id="${tag.id}"
+                     data-tag-name="${tag.name}">
+                    <span>${tag.name}</span>
+                    <span class="suggestion-meta">
+                        <i class="bi bi-tag"></i> ${tag.post_count || 0} posts
+                    </span>
+                </div>
+            `);
+        });
+
+        const exactMatch = suggestions.some(tag => tag.name.toLowerCase() === query.toLowerCase());
+        if (!exactMatch){
+            dropdown.append(`
+                <div class="suggestion-item create-new"
+                     data-tag-name="${query}"
+                     data-is-new="true">
+                    <span><i class="bi bi-plus-circle"></i> Create "${query}"</span>
+                    <span class="suggestion-meta">
+                        <i class="bi bi-star"></i> New tag
+                    </span>
+                </div>
+            `);
+        }
+
+        currentHighlight = 0;
+        updateHighlight();
+        dropdown.show();
+    }
+
+    function updateHighlight(){
+        $('.suggestion-item').removeClass('highlighted');
+        $('.suggestion-item').eq(currentHighlight).addClass('highlighted');
+    }
+
+    function validateTags(){
+        const isValid = selectedTags.length > 0;
+        $('.tag-selector-container').toggleClass('is-invalid', !isValid);
+        $('#tagError').toggle(!isValid);
+        return isValid;
+    }
+
+    $('#tagSearchInput').on('input', function(){ showSuggestions($(this).val());});
+
+    $('#tagSearchInput').on('keydown', function(e){
+        const suggestions = $('.suggestion-item');
+
+        if(e.key === 'ArrowDown'){
+            e.preventDefault();
+            currentHighlight = Math.min(currentHighlight+1, suggestions.length - 1);
+            updateHighlight();
+        } else if(e.key === 'ArrowUp'){
+            e.preventDefault();
+            currentHighlight = Math.max(currentHighlight-1, 0);
+            updateHighlight();
+        } else if(e.key === 'Enter' || e.key === ','){
+            e.preventDefault();
+            const highlighted = suggestions.eq(currentHighlight);
+            if(highlighted.length){
+                const tagName = highlighted.data('tag-name');
+                const tagId = highlighted.data('tag-id');
+                const isNew = highlighted.data('is-new');
+                addTag(tagName, tagId, isNew);
+            } else{
+                const query = $(this).val().trim();
+                if(query){ addTag(query, null, true);}
+            }
+        } else if(e.key === 'Escape'){ clearInput();}
+    });
+
+    $('#addTagBtn').on('click', function(){
+        const query = $('#tagSearchInput').val().trim();
+        if(query){ addTag(query, null, true);}
+    });
+
+    $(document).on('click', '.popular-tag:not(.selected)', function(){
+        const tagName = $(this).data('tag-name');
+        const tagId = $(this).data('tag-id');
+        addTag(tagName, tagId, false);
+    });
+
+    $(document).on('click', '.tag-remove', function(e){
+        e.stopPropagation();
+        const tagId = $(this).data('tag-id');
+        removeTag(tagId);
+    });
+
+    $(document).on('click', '.suggestion-item', function(){
+        const tagName = $(this).data('tag-name');
+        const tagId = $(this).data('tag-id');
+        const isNew = $(this).data('is-new');
+        addTag(tagName, tagId, isNew);
+    });
+
+    $(document).on('click', function(e){ if(!$(e.target).closest('.tag-selector-container').length){ $('#suggestionsDropdown').hide();}});
+
+    $('#postForm').on('submit', function(e){
+        console.log('Form submission started');
+
+        if(!validateTags()){
+            console.log('Tag validation failed');
+            e.preventDefault();
+            $('#tagSearchInput').focus();
+
+            alert('Please select at least one tag before publishing your post.');
+            return false;
+        }
+
+        const formData = new FormData(this);
+        console.log('Form data being submitted:');
+        for(let [key, value] of formData.entries()){ console.log(key + ': ' + value);}
+
+        const title = $('#id_title').val().trim();
+        const content = $('.django_ckeditor_5').length ?
+            (window.CKEDITOR ? CKEDITOR.instances[Object.keys(CKEDITOR.instances)[0]].getData() : 'content') :
+            $('#id_content').val();
+
+        if(!title){
+            alert('Please enter a title for your post.');
+            e.preventDefault();
+            $('#id_title').focus();
+            return false;
+        }
+
+        if(!content || content.trim() === '' || content === '<p></p>'){
+            alert('Please enter some content for your post.');
+            e.preventDefault();
+            return false;
+        }
+
+        console.log('All validations passed, submitting form...');
+
+        const $submitBtn = $(this).find('button[type="submit"]');
+        const originalText = $submitBtn.html();
+        $submitBtn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> Publishing...');
+
+        return true;
+    });
+
+    validateTags();
+});
+</script>
+{% endblock %}
+
+{% block extrajs %}
+{{ form.media.js }}
+{% endblock %}

@@ -1,0 +1,7 @@
+{# ========== TAG_FORM ========== #}
+{% extends "blog/base.html" %}
+{% load blog_extras %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% include "blog/includes/form_layout.html" with title=object|yesno:"Update Tag,Create New Tag" form=form submit_btn_text=object|yesno:"Update,Create" submit_btn_class="btn-orange" cancel_url="tag-list" %}
+{% endblock content %}

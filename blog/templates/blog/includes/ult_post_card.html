@@ -1,0 +1,218 @@
+{# ========= INCLUDES/ULT_POST_CARD ========= #}
+{% comment %}
+---- ULTIMATE POSTCARD = POST CARD + REPOST_POST_CARD (in future -- TODO -- more post types)
+  
+=== PARAMS ===
+---→ post: post obj to display
+---→ display_mode: 'feed'(default), 'profile', or 'detail'
+---→ show_actions: bool to show/hide action buttons | default - true
+---→ user_vote: users vote on current post -- if exists
+---→ original_user_vote: for reposts → the users vote on the original post
+---→ show_stats: bool to show stats on feed view | default - false
+{% endcomment %}
+{% load blog_extras %}
+
+<article class="media content-section post-card">
+  {# -- AUTHOR IMG -- #}
+  <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}" alt="{{ post.author }}">
+  <div class="media-body">
+    {# -- POST HEADER w METADATA -- #}
+    <div class="article-metadata d-flex justify-content-between">
+      <div class="post-author-info">
+        <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+        <small class="text-muted">{{ post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
+      </div>
+
+      {# -- STATS -- views - comments - reposts(if any) -- #}
+      {% if display_mode != 'feed' or show_stats %}
+      <div class="post-stats d-flex">
+        <span class="badge badge-secondary mr-2">
+          <i class="bi bi-eye"></i> {{ post.view_count }}
+        </span>
+        <span class="badge badge-secondary mr-2">
+          <i class="bi bi-chat"></i> {{ post.comments_count }}
+        </span>
+        {% if post.reposts_count > 0 %}
+          <span class="badge badge-info">
+            <i class="bi bi-arrow-repeat"></i> {{ post.reposts_count }}
+          </span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# ========================== #}
+    {# ========= REPOST ========= #}
+    {# ========================== #}
+    {% if post.is_repost %}
+      <a class="repost-header" href="{% url 'post-detail' post.id %}">
+        <div>
+          <i class="bi bi-arrow-repeat"></i>
+          <span>
+            {{ post.author.username }} reposted
+          </span>
+        </div>
+      </a>
+
+      {# -- ORIGINAL POST CONTENT -- #}
+      <div class="repost-container">
+        <div class="article-metadata d-flex justify-content-between">
+          <div>
+            <a class="mr-2" href="{% url 'user-posts' post.original_post.author.username %}">{{ post.original_post.author }}</a>
+            <small class="text-muted">{{ post.original_post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
+          </div>
+          {% if display_mode != 'feed' or show_stats %}
+          <div class="post-stats d-flex">
+            <span class="badge badge-secondary mr-2">
+              <i class="bi bi-eye"></i> {{ post.original_post.view_count }}
+            </span>
+            <span class="badge badge-secondary mr-2">
+              <i class="bi bi-chat"></i> {{ post.original_post.comments_count }}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+
+        <h2>
+          <a class="article-title" href="{% url 'post-detail' post.original_post.id %}" title="{{ post.original_post.title }}">
+            {% if post.original_post.title|length > 50 %}
+              {{ post.original_post.title|slice:":50" }}...
+            {% else %}
+              {{ post.original_post.title }}
+            {% endif %}
+          </a>
+        </h2>
+
+        <div class="article-content">
+          {% if display_mode == 'feed' %}
+            {% with truncated=post.original_post.get_safe_content|truncate_words:40 %}
+              <div class="content-preview">
+                {{ truncated.0|safe }}
+              </div>
+              {% if truncated.1 %}
+                <div class="text-center mt-2">
+                  <a href="{% url 'post-detail' post.original_post.id %}" class="btn btn-sm btn-outline-secondary show-more-btn">
+                    <i class="bi bi-arrows-expand"></i> Show More
+                  </a>
+                </div>
+              {% endif %}
+            {% endwith %}
+          {% else %}
+            {{ post.original_post.get_safe_content|safe }}
+          {% endif %}
+        </div>
+
+        {% if show_actions %}
+        <div class="post-footer">
+          {# -- VOTING SYSTEM FOR ORIGINAL POST -- #}
+          <div class="voting-container">
+            <div class="original-post-label">
+              <small class="text-muted">Original post votes:</small>
+            </div>
+            {% include "blog/includes/voting_buttons.html" with post=post.original_post user_vote=post.original_user_vote %}
+          </div>
+
+          {# -- TAGS -- #}
+          {% if post.original_post.tags.all %}
+          <div class="tag-container">
+            {% for tag in post.original_post.tags.all %}
+              {% render_tag tag %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      {# -- REPOST VOTING SECTION -- #}
+      <div class="post-footer">
+        <div class="voting-container">
+          <div class="repost-label">
+            <small class="text-muted">Repost votes:</small>
+          </div>
+          {% include "blog/includes/voting_buttons.html" with post=post user_vote=post.user_vote %}
+        </div>
+      </div>
+
+      {# -- REPOST ACTIONS -- #}
+      <div class="post-actions mt-2">
+        <a href="{% url 'post-detail' post.id %}" class="btn btn-sm btn-outline-orange">
+          <i class="bi bi-chat-text"></i> Comment
+        </a>
+      </div>
+
+    {# ================================ #}
+    {# ========= REGULAR POST ========= #}
+    {# ================================ #}
+    {% else %}
+      <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+
+      {# -- post content -- #}
+      <div class="article-content">
+        {% if display_mode == 'feed' %}
+          {% with truncated=post.get_safe_content|truncate_words:40 %}
+            {{ truncated.0|safe }}
+            {% if truncated.1 %}
+              <a href="{% url 'post-detail' post.id %}" class="show-more-btn">
+                <i class="bi bi-arrows-expand"></i> Show More
+              </a>
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          {{ post.get_safe_content|safe }}
+        {% endif %}
+      </div>
+
+      {% if show_actions %}
+      <div class="post-footer">
+        {# -- VOTING SYSTEM -- #}
+        <div class="voting-container">
+          {% include "blog/includes/voting_buttons.html" with post=post user_vote=post.user_vote %}
+        </div>
+
+        {# -- TAGS -- #}
+        {% if post.tags.all %}
+        <div class="tag-container">
+          {% for tag in post.tags.all %}
+            {% render_tag tag %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {# -- COMMENT, REPOST BUTTONS -- #}
+      <div class="post-actions mt-2">
+        <a href="{% url 'post-detail' post.id %}" class="btn btn-sm btn-outline-orange">
+          <i class="bi bi-chat-text"></i> Comment
+        </a>
+
+        {% if user.is_authenticated and user != post.author %}
+          <a href="{% url 'repost' post.id %}" class="btn btn-sm btn-outline-orange ml-2">
+            <i class="bi bi-arrow-repeat"></i> Repost
+          </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</article>
+
+<style>
+.original-post-label, .repost-label {
+  margin-bottom: 5px;
+}
+
+.original-post-label small {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.repost-label small {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+.voting-container {
+  margin-bottom: 10px;
+}
+</style>

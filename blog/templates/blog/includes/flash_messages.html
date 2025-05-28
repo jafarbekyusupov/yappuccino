@@ -1,0 +1,10 @@
+{# ========= INCLUDES/FLASH_MESSAGES ========= #}
+<div id="messages-container" class="col-md-2 fixed-top" style="margin-top: 6rem; z-index: 1000; width: 300px; right: 20px;">
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-{{message.tags}}">
+				{{message}}
+			</div>
+		{% endfor %}
+	{% endif %}
+</div>

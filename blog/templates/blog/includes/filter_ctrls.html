@@ -1,0 +1,443 @@
+{# ========= INCLUDES/FILTER_CTRLS ========= #}
+{% comment %}
+ == PARAMS:
+ --→ current_sort: curr sort parameter
+ --→ current_order: curr order - asc/desc
+ --→ show_relevance: bool to show relevance option - for search results
+{% endcomment %}
+
+{# -- collapsible for all screen sizes -- #}
+<div class="filter-controls-wrapper mb-4">
+	{# -- TOGGLE BUTTON -- #}
+  <div class="filter-toggle-container">
+  <button class="btn btn-outline-orange btn-filter-toggle" type="button" data-toggle="collapse" data-target="#filterPanel" aria-expanded="false" aria-controls="filterPanel">
+      <i class="bi bi-funnel mr-1"></i>
+      <span class="filter-text">Filter & Sort</span>
+			{# -- DIFF BADGES DEPENDING ON FILTER TYPE - QUICK FILTERS, CUSTOM, via SEARCH or TAG FILTER -- #}
+      {% if current_sort and current_sort != 'date' or current_order and current_order != 'desc' or search or tag %}
+        <span class="badge badge-orange ml-2">
+          {% if current_sort and current_sort != 'date' %}
+            {{ current_sort|title }}
+          {% elif current_order and current_order != 'desc' %}
+            Custom Order
+          {% elif search %}
+            Search Active
+          {% elif tag %}
+            Tag Filter
+          {% endif %}
+        </span>
+      {% endif %}
+      <i class="bi bi-chevron-down toggle-icon ml-2"></i>
+    </button>
+
+		{# -- if not default filer - CLEAR ALL btn appears -- #}
+    {% if current_sort and current_sort != 'date' or current_order and current_order != 'desc' or search or tag %}
+      <a href="{% url 'blog-home' %}" class="btn btn-sm btn-outline-secondary ml-2">
+        <i class="bi bi-x-circle"></i> Clear All
+      </a>
+    {% endif %}
+  </div>
+
+	{# -- FILTER PANEL - COLLAPSIBLE -- #}
+  <div class="collapse filter-panel" id="filterPanel">
+    <div class="content-section filter-section mt-3">
+      <form method="get" action="" id="filterForm">
+				{# -- SAVE CURR PARAMS -- #}
+        {% if search %}
+          <input type="hidden" name="search" value="{{ search }}">
+        {% endif %}
+        {% if tag %}
+          <input type="hidden" name="tag" value="{{ tag }}">
+        {% endif %}
+
+				{# -- SORT BY - OPTIONS DROPDOWN --#}
+        <div class="row">
+          <div class="col-md-6 mb-3" style="height: fit-content">
+            <div class="form-group" style="height: 100%;">
+              <label for="sortBy" class="filter-label">
+                <i class="bi bi-sort-down"></i> Sort By
+              </label>
+																																												{# na glazok #}
+              <select name="sort" id="sortBy" class="form-control custom-select" style="height: calc(1.45em + 1.2rem + 5px); line-height: 1.5;">
+                <option value="date" {% if not current_sort or current_sort == 'date' %}selected{% endif %}>
+                  📅 Date Posted
+                </option>
+                <option value="popularity" {% if current_sort == 'popularity' %}selected{% endif %}>
+                  🔥 Popularity (Views + Engagement)
+                </option>
+                <option value="comments" {% if current_sort == 'comments' %}selected{% endif %}>
+                  💬 Most Discussed
+                </option>
+                <option value="votes" {% if current_sort == 'votes' %}selected{% endif %}>
+                  ⭐ Highest Voted
+                </option>
+                {% if show_relevance %}
+                  <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>
+                    🎯 Relevance
+                  </option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+					{# -- ORDER - ASC/DESC - DESC(high→low) is default -- #}
+          <div class="col-md-6 mb-3">
+            <div class="form-group">
+              <label class="filter-label">
+                <i class="bi bi-arrow-down-up"></i> Order
+              </label>
+              <div class="btn-group btn-group-toggle d-flex order-toggle" data-toggle="buttons">
+                <label class="btn btn-outline-orange {% if not current_order or current_order == 'desc' %}active{% endif %}">
+                  <input type="radio" name="order" value="desc" {% if not current_order or current_order == 'desc' %}checked{% endif %}>
+                  <i class="bi bi-sort-down-alt"></i> High to Low
+                </label>
+                <label class="btn btn-outline-orange {% if current_order == 'asc' %}active{% endif %}">
+                  <input type="radio" name="order" value="asc" {% if current_order == 'asc' %}checked{% endif %}>
+                  <i class="bi bi-sort-up"></i> Low to High
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+				{# -- QUICK FILTERS -- #}
+        <div class="quick-filters-section">
+          <label class="filter-label mb-2">
+            <i class="bi bi-lightning"></i> Quick Filters
+          </label>
+          <div class="quick-filters">
+            <a href="?sort=date&order=desc{% if search %}&search={{ search }}{% endif %}{% if tag %}&tag={{ tag }}{% endif %}"
+               class="btn btn-sm quick-filter-btn {% if not current_sort or current_sort == 'date' and not current_order or current_order == 'desc' %}active{% endif %}"
+               title="Default sorting">
+              <i class="bi bi-clock"></i> Latest <small>(default)</small>
+            </a>
+            <a href="?sort=popularity&order=desc{% if search %}&search={{ search }}{% endif %}{% if tag %}&tag={{ tag }}{% endif %}"
+               class="btn btn-sm quick-filter-btn {% if current_sort == 'popularity' and current_order == 'desc' %}active{% endif %}">
+              <i class="bi bi-fire"></i> Most Popular
+            </a>
+            <a href="?sort=votes&order=desc{% if search %}&search={{ search }}{% endif %}{% if tag %}&tag={{ tag }}{% endif %}"
+               class="btn btn-sm quick-filter-btn {% if current_sort == 'votes' and current_order == 'desc' %}active{% endif %}">
+              <i class="bi bi-star"></i> Top Rated
+            </a>
+            <a href="?sort=comments&order=desc{% if search %}&search={{ search }}{% endif %}{% if tag %}&tag={{ tag }}{% endif %}"
+               class="btn btn-sm quick-filter-btn {% if current_sort == 'comments' and current_order == 'desc' %}active{% endif %}">
+              <i class="bi bi-chat-dots"></i> Most Discussed
+            </a>
+          </div>
+        </div>
+
+        <div class="filter-actions mt-4">
+          <button type="submit" class="btn btn-orange">
+            <i class="bi bi-check-circle"></i> Apply Filters
+          </button>
+          <button type="button" class="btn btn-outline-secondary ml-2" data-toggle="collapse" data-target="#filterPanel">
+            <i class="bi bi-x"></i> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+	{# -- ACTIVE FILTERS DISPLAY - UNDER FILTER TOGGLE -- #}
+  <div class="active-filters-display mt-3">
+    <div class="d-flex flex-wrap align-items-center">
+      <small class="text-muted mr-2">
+        <i class="bi bi-funnel{% if current_sort and current_sort != 'date' or current_order and current_order != 'desc' or search or tag %}-fill{% endif %}"></i>
+        {% if current_sort and current_sort != 'date' or current_order and current_order != 'desc' or search or tag %}
+          Active filters:
+        {% else %}
+          Current view:
+        {% endif %}
+      </small>
+
+			{# -- ALWAYS SHOW SORT FILTER -- #}
+      <span class="badge badge-pill {% if current_sort == 'date' or not current_sort %}badge-light{% else %}badge-orange{% endif %} mr-2">
+        <i class="bi bi-sort-down"></i>
+        {% if current_sort == 'popularity' %}
+          Popularity
+        {% elif current_sort == 'comments' %}
+          Most Discussed
+        {% elif current_sort == 'votes' %}
+          Highest Voted
+        {% elif current_sort == 'relevance' %}
+          Relevance
+        {% else %}
+          Date Posted
+        {% endif %}
+        {% if current_order == 'asc' %}
+          <i class="bi bi-arrow-up"></i>
+        {% else %}
+          <i class="bi bi-arrow-down"></i>
+        {% endif %}
+        {% if not current_sort or current_sort == 'date' %}
+					{% if not current_order or current_order == 'desc' %}
+						<small>(default)</small>
+					{% endif %}
+				{% endif %}
+      </span>
+
+      {% if search %}
+        <span class="badge badge-pill badge-info mr-2">
+          <i class="bi bi-search"></i> "{{ search|truncatechars:20 }}"
+        </span>
+      {% endif %}
+      {% if tag %}
+        <span class="badge badge-pill badge-secondary mr-2">
+          <i class="bi bi-tag"></i> {{ tag_name|default:tag }}
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .filter-controls-wrapper {
+    position: relative;
+  }
+
+  .filter-toggle-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .btn-filter-toggle {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 1.25rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .btn-filter-toggle:hover {
+    background-color: var(--orange);
+    color: white;
+    border-color: var(--orange);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(236, 122, 28, 0.3);
+  }
+
+  .btn-filter-toggle[aria-expanded="true"] {
+    background-color: var(--orange);
+    color: white;
+    border-color: var(--orange);
+  }
+
+  .btn-filter-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  .toggle-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .filter-panel {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .filter-section {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .filter-label {
+    color: var(--gray);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .custom-select {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .custom-select:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 0.2rem rgba(236, 122, 28, 0.25);
+  }
+
+  .order-toggle .btn {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+    border-width: 2px;
+  }
+
+  .order-toggle .btn.active {
+    background-color: var(--orange);
+    color: white;
+    border-color: var(--orange);
+    box-shadow: 0 2px 4px rgba(236, 122, 28, 0.3);
+  }
+
+  .quick-filters-section {
+    background-color: rgba(236, 122, 28, 0.05);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .quick-filter-btn {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    color: var(--gray);
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .quick-filter-btn small {
+    font-size: 0.75em;
+    opacity: 0.8;
+  }
+
+  .quick-filter-btn:hover {
+    background-color: var(--orange);
+    color: white;
+    border-color: var(--orange);
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  .quick-filter-btn.active {
+    background-color: var(--orange);
+    color: white;
+    border-color: var(--orange);
+  }
+
+  .filter-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .active-filters-display {
+    background-color: #f8f9fa;
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  .active-filters-display .badge {
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .active-filters-display .badge-light {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+  }
+
+  .active-filters-display .badge-light small {
+    opacity: 0.7;
+    font-weight: normal;
+    font-size: 0.75em;
+  }
+
+  @media (max-width: 767px) {
+    .filter-toggle-container {
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .btn-filter-toggle {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .filter-section {
+      padding: 20px 15px;
+    }
+
+    .quick-filters {
+      justify-content: center;
+    }
+
+    .filter-actions {
+      flex-direction: column;
+    }
+
+    .filter-actions .btn {
+      width: 100%;
+    }
+
+    .order-toggle .btn {
+      font-size: 0.85rem;
+      padding: 0.5rem;
+    }
+  }
+
+  * { /* TRANSITIONS */
+    transition-property: background-color, color, border-color, transform, box-shadow;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+  }
+</style>
+
+<script>
+  $(document).ready(function(){
+    // UPD -- auto submit on select change -- for better ux | desktop only
+    if(window.innerWidth > 768){
+      $('#sortBy').on('change', function(){
+        // loading indicator
+        $(this).parent().append('<div class="spinner-border spinner-border-sm ml-2" role="status"><span class="sr-only">Loading...</span></div>');
+        $('#filterForm').submit();
+      });
+    }
+
+    //filter panel animation on show/hide
+    $('#filterPanel').on('show.bs.collapse',function(){ $('.btn-filter-toggle').addClass('active-filter');});
+    $('#filterPanel').on('hide.bs.collapse',function(){ $('.btn-filter-toggle').removeClass('active-filter');});
+
+    // save filter state
+    const filterState = localStorage.getItem('filterPanelOpen');
+    if(filterState === 'true' && !$('#filterPanel').hasClass('show')){
+      $('#filterPanel').collapse('show');
+    }
+
+    $('#filterPanel').on('shown.bs.collapse',function(){ localStorage.setItem('filterPanelOpen', 'true');});
+
+    $('#filterPanel').on('hidden.bs.collapse',function(){ localStorage.setItem('filterPanelOpen','false');});
+
+    // hover effects for quick filter btns
+    $('.quick-filter-btn').hover(
+      function(){ $(this).find('i').addClass('bi-animate-spin');},
+      function(){ $(this).find('i').removeClass('bi-animate-spin');}
+    );
+  });
+</script>

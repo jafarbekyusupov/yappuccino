@@ -1,0 +1,195 @@
+{# ========= INCLUDES/MOBILE_SIDEBAR_CTRLS ========= #}
+
+<div class="mobile-sidebar-controls d-md-none">
+  <div class="mobile-sidebar-tabs">
+    <button class="sidebar-toggle active" data-target="search-tab">
+      <i class="bi bi-search"></i> Search
+    </button>
+    <button class="sidebar-toggle" data-target="categories-tab">
+      <i class="bi bi-tags"></i> Categories
+    </button>
+  </div>
+
+  <div class="mobile-sidebar-content">
+		{# -- SEARCH TAB -- #}
+    <div id="search-tab" class="sidebar-tab-content active">
+      <form action="{% url 'blog-home' %}" method="get" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="search" class="form-control" placeholder="Search..." aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-orange" type="submit">
+              <i class="bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+		{# -- CATEGORIES -->#}
+    <div id="categories-tab" class="sidebar-tab-content">
+      <div class="categories-grid">
+        {% for tag in tags %}
+          <a href="{% url 'blog-home' %}?tag={{ tag.slug|default:tag.name|urlencode }}" class="category-item">
+            {{ tag.name }}
+            <span class="badge badge-light badge-pill">{{ tag.posts.count }}</span>
+          </a>
+        {% empty %}
+          <div class="text-muted">No categories yet</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+	{# -- TOGGEL BTN → SHOW/HIDE ON SCROLL -- #}
+  <button class="mobile-sidebar-collapse-btn">
+    <i class="bi bi-chevron-up"></i>
+  </button>
+</div>
+
+<style>
+  .mobile-sidebar-controls {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 65px; /* prob gotta adjust basing on height */
+    z-index: 100;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-sidebar-controls.collapsed {
+    max-height: 50px;
+    overflow: hidden;
+  }
+
+  .mobile-sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+  }
+
+  .sidebar-toggle {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: #666;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .sidebar-toggle.active {
+    color: var(--orange);
+    border-bottom: 2px solid var(--orange);
+    background-color: rgba(236, 122, 28, 0.05);
+  }
+
+  .sidebar-tab-content {
+    padding: 15px;
+    display: none;
+  }
+
+  .sidebar-tab-content.active {
+    display: block;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    color: #444;
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.2s ease;
+  }
+
+  .category-item:hover {
+    background-color: var(--orange);
+    color: white;
+    text-decoration: none;
+  }
+
+  .category-item:hover .badge {
+    background-color: rgba(255,255,255,0.3);
+    color: white;
+  }
+
+  .mobile-sidebar-collapse-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #f5f5f5;
+    border: none;
+    padding: 5px;
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    display: none;
+  }
+
+  .mobile-sidebar-controls.collapsed .mobile-sidebar-collapse-btn i {
+    transform: rotate(180deg);
+  }
+
+  @media (max-width: 767.98px) {
+    #sidebar-column {
+      display: none;
+    }
+
+    .mobile-sidebar-collapse-btn {
+      display: block;
+    }
+
+    #content-column {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+<script>
+  $(document).ready(function(){
+    // tab switching
+    $('.sidebar-toggle').click(function(){
+      var target = $(this).data('target');
+
+      // upd active tab
+      $('.sidebar-toggle').removeClass('active');
+      $(this).addClass('active');
+
+      // upd active content
+      $('.sidebar-tab-content').removeClass('active');
+      $('#' + target).addClass('active');
+    });
+
+    // collapse / expand
+    $('.mobile-sidebar-collapse-btn').click(function(){
+      $('.mobile-sidebar-controls').toggleClass('collapsed');
+    });
+
+    // auto collapse on scroll
+    var lastScrTop = 0;
+    $(window).scroll(function(){
+      var scrTop = $(this).scrollTop();
+
+      // scrlo down more than 150px → collapse
+      if(scrTop>lastScrTop && scrTop>150){ $('.mobile-sidebar-controls').addClass('collapsed');}
+      // scroll up → expand
+      else if(scrTop<lastScrTop && scrTop<300){ $('.mobile-sidebar-controls').removeClass('collapsed');}
+
+      lastScrTop = scrTop;
+    });
+  });
+</script>

@@ -1,0 +1,73 @@
+{# ========= INCLUDES/PAGINATION ========= #}
+{% if is_paginated %}
+<div class="pagination-container" id="pagination">
+  <ul class="pagination justify-content-center">
+		{# -- prev btn -- #}
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}" aria-label="Previous">
+          <span aria-hidden="true">Previous</span>
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Previous</span>
+      </li>
+    {% endif %}
+
+		{# -- 1st page -- #}
+    <li class="page-item {% if page_obj.number == 1 %}active{% endif %}">
+      <a class="page-link" href="?page=1{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}">1</a>
+    </li>
+
+		{# -- 1st "..." - CLICKABLE -- #}
+    {% if page_obj.number > 4 %}
+      <li class="page-item">
+        {% with jump_page=page_obj.number|add:"-3" %}
+          <a class="page-link" href="?page={{ jump_page }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}">...</a>
+        {% endwith %}
+      </li>
+    {% endif %}
+
+		{# -- page nums around cur page -- #}
+    {% for i in page_obj.paginator.page_range %}
+      {% if i > 1 and i < page_obj.paginator.num_pages %}
+        {% if i >= page_obj.number|add:"-2" and i <= page_obj.number|add:"2" %}
+          <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+            <a class="page-link" href="?page={{ i }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}">{{ i }}</a>
+          </li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+		{# -- 2nd "..." - CLICKABLE -- #}
+    {% if page_obj.number < page_obj.paginator.num_pages|add:"-3" %}
+      <li class="page-item">
+        {% with jump_page=page_obj.number|add:"3" %}
+          <a class="page-link" href="?page={{ jump_page }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}">...</a>
+        {% endwith %}
+      </li>
+    {% endif %}
+
+		{# -- last page -- if NOT 1 -- #}
+    {% if page_obj.paginator.num_pages > 1 %}
+      <li class="page-item {% if page_obj.number == page_obj.paginator.num_pages %}active{% endif %}">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+      </li>
+    {% endif %}
+
+		{# -- next btn -- #}
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if tag %}&tag={{ tag }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}" aria-label="Next">
+          <span aria-hidden="true">Next</span>
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next</span>
+      </li>
+    {% endif %}
+  </ul>
+</div>
+{% endif %}

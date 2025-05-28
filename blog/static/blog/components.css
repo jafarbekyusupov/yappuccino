@@ -1,0 +1,443 @@
+/* =============================================
+ * ----------- COMPONENTS.CSS STRUCT -----------
+ * =============================================
+ *
+ * ====== ARTICLE ==============================
+ * --- content styling
+ * --- metadata n footer
+ * --- tags
+ * --- show more/less
+ *
+ * ====== POST CARDS ===========================
+ * --- card - main part
+ * --- media
+ * --- responsive elements
+ *
+ * ====== COMMENTS =============================
+ * --- thread styling
+ * --- comment items
+ * --- expansion controls - show all comments
+ * --- resp elements
+ *
+ * ====== EDITOR STYLES ========================
+ * --- CKEditor integration
+ * --- content rendering
+ *
+ * ====== FOOTER STYLES ========================
+ * --- footer
+ * --- link styles
+ *
+ * ====== RESP CORRECTIONS FOR MOBILE RES ======
+ *
+ * ============================================= */
+
+
+/* =======================
+ * ------- ARTICLE -------
+ * ======================= */
+
+.article-content {
+  white-space: normal;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 1.5rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.article-content p {
+  margin-bottom: 1em;
+}
+
+.article-content br {
+  display: block;
+  content: "";
+  margin-bottom: 0.5rem;
+}
+
+.article-content img,
+.comment-content img,
+.reply-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+.article-metadata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.tag-container .badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: normal;
+  background-color: #f1f1f1;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.tag-container .badge:hover {
+  background-color: var(--orange);
+  color: white;
+  border-color: var(--orange);
+}
+
+/* ----- show MORE/LESS ----- */
+.show-more-link {
+  margin: 5px 0;
+}
+
+.show-more-btn,
+.show-less-btn {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: #f8f9fa;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.show-more-btn:hover,
+.show-less-btn:hover {
+  background-color: var(--orange);
+  color: white;
+  border-color: var(--orange);
+}
+
+/* ======================
+ * ----- POST CARDS -----
+ * ====================== */
+
+.post-card {
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.post-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.article-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3.2rem;
+  word-wrap: break-word;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+/* ----- MEDIA ELEMENTS ----- */
+.media-body {
+  padding: 0.5rem;
+}
+
+.article-img {
+  height: 65px;
+  width: 65px;
+  margin-right: 16px;
+}
+
+/* ----- figures n captions ----- */
+.article-content figure.image {
+  margin: 1rem auto;
+  max-width: 100%;
+  text-align: center;
+}
+
+.article-content figure.image.image-style-align-left {
+  float: left;
+  margin-right: 1rem;
+  max-width: 50%;
+}
+
+.article-content figure.image.image-style-align-right {
+  float: right;
+  margin-left: 1rem;
+  max-width: 50%;
+}
+
+.article-content figcaption {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 0.5em;
+  text-align: center;
+  font-style: italic;
+}
+
+/* clearfix → floated elements */
+.article-content:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* ----- VOTING SYSTEM ----- */
+.vote-container {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+.vote-score {
+  display: inline-block;
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--gray);
+}
+
+.voting-container .btn-sm {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+}
+
+/* ======================
+ * ------ COMMENTS ------
+ * ====================== */
+
+/* --- THREAD styling --- */
+.comment-thread {
+  max-width: calc(100% - 5px);
+  border-left: 3px solid;
+  padding-left: 15px;
+  margin-left: 5px;
+  margin-top: 10px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.comment-thread::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -3px;
+  width: 3px;
+  height: 10px;
+  background-color: inherit;
+}
+
+.comment-thread::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: inherit;
+}
+
+.comment-thread-0 { border-color: var(--dark-orange); }
+.comment-thread-1 { border-color: var(--orange); }
+.comment-thread-2 { border-color: #f78e30; }
+.comment-thread-3 { border-color: var(--gray); }
+
+/* ----- COMMENT ITEMS ----- */
+.comment-item {
+  padding: 15px;
+  margin-bottom: 15px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.comment-item:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  border-color: #d0d0d0;
+}
+
+.comment-item.recent {
+  background-color: #fffdf5;
+  border-left: 3px solid var(--orange);
+}
+
+.comment-content {
+  margin: 15px 0;
+  line-height: 1.6;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* ----- EXPANSION CTRLS ----- */
+.comments-list {
+  max-height: 600px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+  position: relative;
+  padding-right: 5px;
+}
+
+.comments-list.expanded {
+  max-height: none !important;
+  overflow-y: visible;
+}
+
+.comments-list:not(.expanded)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.9));
+  pointer-events: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.expand-comments-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 0 0 8px 8px;
+  margin-top: 10px;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.expand-comments-btn:hover {
+  background-color: #f0f0f0;
+  color: var(--orange);
+}
+
+/* =======================
+ * ---- EDITOR STYLES ----
+ * ======================= */
+
+.django_ckeditor_5 {
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.ck-editor__editable {
+  min-height: 300px !important;
+  max-height: 600px !important;
+}
+
+.ck-editor__top {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+/* smaller editor for comments */
+#comment-form .django_ckeditor_5 {
+  min-height: 150px;
+}
+
+#comment-form .ck-editor__editable {
+  min-height: 150px !important;
+  max-height: 400px !important;
+}
+
+/* =======================
+ * ---- FOOTER STYLES ----
+ * ======================= */
+
+.site-footer {
+  background-color: var(--gray) !important;
+  color: white;
+  padding: 30px 0;
+}
+
+.site-footer h6 {
+  color: var(--orange);
+}
+
+.site-footer a {
+  color: #cbd5db;
+  transition: all 0.2s ease;
+}
+
+.site-footer a:hover {
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.site-footer-link-item {
+  margin-bottom: 8px;
+}
+
+.copyright-text {
+  font-size: 0.9rem;
+  color: #979797;
+}
+
+/* ===============================================
+ * ---- RESPONSIVE CORRECTIONS FOR MOBILE RES ----
+ * =============================================== */
+
+@media (max-width: 768px) {
+  .post-footer {
+    flex-wrap: nowrap;
+  }
+
+  .tag-container {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .comment-thread {
+    margin-left: 3px;
+    padding-left: 10px;
+  }
+
+  .comment-thread .comment-thread {
+    margin-left: 5px;
+  }
+}

@@ -1,0 +1,368 @@
+{# ============ ABOUT ============ #}
+{% extends "blog/base.html" %}
+{% block content %}
+<div class="about-container">
+  <div class="about-hero">
+    <h1>About Our Platform</h1>
+    <p class="lead">A platform for Certified Yappers to share their thoughts, ideas, and stories with the world.</p>
+  </div>
+
+	{# --- features --- #}
+  <div class="about-features">
+		<a href="{% url 'post-create' %}" style="text-decoration: none;">
+			<div class="feature-card">
+				<div class="feature-icon">
+					<i class="bi bi-pencil-square"></i>
+				</div>
+				<h3>Write & Share</h3>
+				<p>Create beautiful posts with our rich text editor. Add images, format text, and make your content stand out.</p>
+			</div>
+		</a>
+{#		<a href="{% url 'blog-home' %}" class="feature-card-link" style="text-decoration: none;">#}
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="bi bi-chat-dots"></i>
+      </div>
+      <h3>Engage & Discuss</h3>
+      <p>Join conversations through comments and replies. Build connections with other writers and readers.</p>
+    </div>
+{#		</a>#}
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="bi bi-tags"></i>
+      </div>
+      <h3>Organize & Discover</h3>
+      <p>Use tags to categorize your posts and discover content that matches your interests.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <h3>Share & Amplify</h3>
+      <p>Repost content you love to share it with your followers and give credit to original authors.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="bi bi-star"></i>
+      </div>
+      <h3>Vote & Rank</h3>
+      <p>Upvote great content and help the best posts rise to the top. Your voice matters!</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="bi bi-person-circle"></i>
+      </div>
+      <h3>Build Your Profile</h3>
+      <p>Create your unique profile, track your activity, and build your reputation in the community.</p>
+    </div>
+  </div>
+
+	{# --- MISSION --- #}
+  <div class="about-mission">
+    <h2>Our Mission</h2>
+    <p>We believe everyone has a story to tell and knowledge to share. Our platform provides a space where ideas can flourish, conversations can happen, and connections can be made.</p>
+    <blockquote class="mission-quote">
+      "Who ordered Yappuccino?" - (i could come up with any meaningful quote, ironically matches the vibe the of the site)
+    </blockquote>
+  </div>
+
+	{# --- STATS --- #}
+  <div class="about-stats">
+    <div class="stat-item">
+      <div class="stat-number" id="postsCount">{{ posts_count|default:"0" }}</div>
+      <div class="stat-label">Posts Published</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="usersCount">{{ users_count|default:"0" }}</div>
+      <div class="stat-label">Active Writers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="commentsCount">{{ comments_count|default:"0" }}</div>
+      <div class="stat-label">Discussions Started</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="tagsCount">{{ tags_count|default:"0" }}</div>
+      <div class="stat-label">Tags Created</div>
+    </div>
+  </div>
+
+	{# --- join us/CTA section --- #}
+  <div class="about-cta">
+    <h2>Ready to Start Yapping?</h2>
+    <p>Join our community and start sharing your stories today!</p>
+    <div class="cta-buttons">
+      {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="btn btn-orange btn-lg">
+          <i class="bi bi-person-plus"></i> Sign Up Now
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-outline-orange btn-lg">
+          <i class="bi bi-box-arrow-in-right"></i> Log In
+        </a>
+      {% else %}
+        <a href="{% url 'post-create' %}" class="btn btn-orange btn-lg">
+          <i class="bi bi-pencil-square"></i> Write Your First Post
+        </a>
+        <a href="{% url 'blog-home' %}" class="btn btn-outline-orange btn-lg">
+          <i class="bi bi-compass"></i> Explore Posts
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+	.about-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+
+	.about-hero {
+		background: linear-gradient(135deg, var(--orange) 0%, var(--dark-orange) 100%);
+		color: white;
+		padding: 80px 40px;
+		text-align: center;
+		border-radius: 20px;
+		margin-bottom: 60px;
+		box-shadow: 0 10px 30px rgba(236, 122, 28, 0.3);
+	}
+
+	.about-hero h1 {
+		font-size: 48px;
+		margin-bottom: 20px;
+		color: white;
+		font-weight: 700;
+	}
+
+	.about-hero .lead {
+		font-size: 20px;
+		opacity: 0.95;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.lead{
+			color: white;
+	}
+	.about-features {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 30px;
+		margin-bottom: 80px;
+	}
+
+	.feature-card {
+		background: white;
+		padding: 40px 30px;
+		border-radius: 15px;
+		box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+		text-align: center;
+		transition: all 0.3s ease;
+		border: 2px solid transparent;
+	}
+
+	.feature-card:hover {
+		transform: translateY(-8px);
+		box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+		border-color: var(--orange);
+	}
+
+	.feature-icon {
+		font-size: 48px;
+		color: var(--orange);
+		margin-bottom: 25px;
+		display: inline-block;
+		transition: transform 0.3s ease;
+	}
+
+	.feature-card:hover .feature-icon {
+		transform: scale(1.1) rotate(5deg);
+	}
+
+	.feature-card h3 {
+		color: var(--gray);
+		margin-bottom: 15px;
+		font-size: 24px;
+	}
+
+	.feature-card p {
+		color: #666;
+		line-height: 1.6;
+	}
+
+	.about-mission {
+		background: #f8f9fa;
+		padding: 60px 40px;
+		border-radius: 20px;
+		text-align: center;
+		margin-bottom: 80px;
+	}
+
+	.about-mission h2 {
+		color: var(--dark-orange);
+		margin-bottom: 30px;
+		font-size: 36px;
+	}
+
+	.about-mission p {
+		font-size: 18px;
+		line-height: 1.8;
+		color: #555;
+		max-width: 800px;
+		margin: 0 auto 30px;
+	}
+
+	.mission-quote {
+		font-style: italic;
+		color: var(--orange);
+		font-size: 20px;
+		padding: 20px;
+		border-left: 4px solid var(--orange);
+		background: white;
+		border-radius: 10px;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.about-stats {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 30px;
+		margin-bottom: 80px;
+	}
+
+	.stat-item {
+		text-align: center;
+		padding: 30px;
+		background: white;
+		border-radius: 15px;
+		box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+	}
+
+	.stat-number {
+		font-size: 48px;
+		font-weight: 700;
+		color: var(--orange);
+		margin-bottom: 10px;
+	}
+
+	.stat-label {
+		font-size: 16px;
+		color: #666;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	.about-cta {
+		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		padding: 60px 40px;
+		border-radius: 20px;
+		text-align: center;
+	}
+
+	.about-cta h2 {
+		color: var(--gray);
+		margin-bottom: 20px;
+		font-size: 36px;
+	}
+
+	.about-cta p {
+		font-size: 18px;
+		color: #666;
+		margin-bottom: 30px;
+	}
+
+	.cta-buttons {
+		display: flex;
+		gap: 20px;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.cta-buttons .btn-lg {
+		padding: 15px 40px;
+		font-size: 18px;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	@media (max-width: 768px) {
+		.about-hero h1{ font-size: 36px;}
+
+		.about-hero{ padding: 60px 30px;}
+
+		.about-features{ grid-template-columns: 1fr;}
+
+		.about-mission,
+		.about-cta {
+			padding: 40px 20px;
+		}
+
+		.cta-buttons{ flex-direction: column;}
+
+		.cta-buttons .btn-lg{
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
+	/* numbers animation for stats */
+	@keyframes countUp {
+		from{
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.stat-number {
+		animation: countUp 0.5s ease-out;
+	}
+</style>
+
+<script>
+// animating nums on scorll
+$(document).ready(function(){
+  var animtd = false;
+
+  function animateNumbers(){
+    if(animtd){ return;}
+
+    var $stats = $('.about-stats');
+    var statsTop = $stats.offset().top;
+    var statsHeight = $stats.outerHeight();
+    var windowHeight = $(window).height();
+    var windowTop = $(window).scrollTop();
+
+    if(windowTop + windowHeight > statsTop && windowTop < statsTop + statsHeight){
+      animtd = true;
+
+      $('.stat-number').each(function(){
+        var $this = $(this);
+        var countTo = parseInt($this.text());
+
+        $({ countNum: 0 }).animate({ countNum: countTo},
+					{
+            duration: 2000,
+						easing: 'swing',
+						step: function() {
+              $this.text(Math.floor(this.countNum));
+          }, complete: function(){ $this.text(this.countNum);}
+        });
+      });
+    }
+  }
+
+  $(window).on('scroll', animateNumbers);
+  animateNumbers();
+});
+</script>
+{% endblock content %}

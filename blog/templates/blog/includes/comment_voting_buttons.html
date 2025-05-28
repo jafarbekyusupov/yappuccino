@@ -1,0 +1,70 @@
+{# ========= INCLUDES/COMMENT_VOTING_BUTTONS ========= #}
+<div class="comment-vote-container">
+  {% if user.is_authenticated %}
+    <button class="comment-vote-btn upvote-btn {% if user_vote == 'up' %}active{% endif %}"
+            data-comment-id="{{ comment.id }}"
+            data-vote-type="up">
+      <i class="bi bi-hand-thumbs-up"></i>
+      <span class="upvote-count">{{ comment.upvotes }}</span>
+    </button>
+    <button class="comment-vote-btn downvote-btn {% if user_vote == 'down' %}active{% endif %}"
+            data-comment-id="{{ comment.id }}"
+            data-vote-type="down">
+      <i class="bi bi-hand-thumbs-down"></i>
+      <span class="downvote-count">{{ comment.downvotes }}</span>
+    </button>
+  {% else %}
+    <span class="text-muted mr-2">
+      <i class="bi bi-hand-thumbs-up"></i> {{ comment.upvotes }}
+    </span>
+    <span class="text-muted">
+      <i class="bi bi-hand-thumbs-down"></i> {{ comment.downvotes }}
+    </span>
+  {% endif %}
+</div>
+<style>
+	.comment-vote-container {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-top: 5px;
+	}
+
+	.comment-vote-btn {
+		background: none;
+		border: none;
+		color: #666;
+		font-size: 14px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		transition: all 0.2s ease;
+	}
+
+	.comment-vote-btn:hover {
+		background-color: #f0f0f0;
+	}
+
+	.comment-vote-btn.upvote-btn.active {
+		color: var(--orange);
+	}
+
+	.comment-vote-btn.downvote-btn.active {
+		color: var(--dark-orange);
+	}
+
+	.comment-vote-btn:focus {
+		outline: none;
+	}
+
+	.comment-vote-btn i {
+		font-size: 14px;
+	}
+
+	.upvote-count, .downvote-count {
+		font-size: 12px;
+		font-weight: 500;
+	}
+</style>
