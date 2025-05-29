@@ -59,7 +59,7 @@ if 'B2_ACCESS_KEY_ID' in os.environ:
     CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
     CKEDITOR_5_UPLOAD_PATH = "uploads/"
 
-    MEDIA_URL = f'https://f002.backblazeb2.com/file/{B2_BUCKET_NAME}/'
+    MEDIA_URL = f'https://f003.backblazeb2.com/file/{B2_BUCKET_NAME}/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
