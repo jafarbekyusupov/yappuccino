@@ -26,7 +26,7 @@ if 'B2_ACCESS_KEY_ID' in os.environ:
     B2_ACCESS_KEY_ID = os.environ.get('B2_ACCESS_KEY_ID')
     B2_SECRET_ACCESS_KEY = os.environ.get('B2_SECRET_ACCESS_KEY')
     B2_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
-    B2_REGION = os.environ.get('B2_REGION', 'us-west-004')
+    B2_REGION = os.environ.get('B2_REGION', 'eu-central-003')
 
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
