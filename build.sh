@@ -24,7 +24,7 @@ def fix_duplicate_slug_migrations():
     mp = 'blog/migrations/0007_add_tag_slug_field.py'
     if os.path.exists(mp):
         dt = rmgrt(mp)
-        mdt = re.sub(r"migrations\.AddField\(\s*model_name='tag',\s*name='slug',.*?\),", dt, flags=re.DOTALL)
+        mdt = re.sub(r"migrations\.AddField\(\s*model_name='tag',\s*name='slug',.*?\),","", dt, flags=re.DOTALL)
 
         if mdt != dt: wmgrt(mp, mdt); print("Fixed duplicate slug field issue")
         else: print("No changes needed in 0007_add_tag_slug_field.py")
