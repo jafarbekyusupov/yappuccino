@@ -1,15 +1,57 @@
 #!/usr/bin/env bash
 set -o errexit
-
 pip install -r requirements.txt
+cat > verify_db.py << 'EOF'
+import os
+import sys
+import django
+from django.db import connection
 
-mkdir -p original_migrations
-cp blog/migrations/*.py original_migrations/ || true
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.settings')
+django.setup()
 
+def check_database():
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            print("Database connection successful!")
+            return True
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+        return False
+
+def list_tables():
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+            """)
+            tables = cursor.fetchall()
+            if tables:
+                print("Tables in database:")
+                for tt in tables: print(f"  - {tt[0]}")
+            else: print("No tables found in database!")
+
+    except Exception as e:
+        print(f"Error listing tables: {e}")
+
+if check_database():
+    list_tables()
+else:
+    sys.exit(1)
+EOF
+
+echo "Verifying database connection..."
+python verify_db.py
+
+echo "Removing existing migrations..."
 rm -f blog/migrations/0*.py
 touch blog/migrations/__init__.py
 
-cat > blog/migrations/0001_initial_consolidated.py << 'EOF'
+echo "Creating consolidated migration file..."
+cat > blog/migrations/0001_initial.py << 'EOF'
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
@@ -19,7 +61,9 @@ from django.core.validators import MaxLengthValidator
 
 class Migration(migrations.Migration):
     initial = True
-    dependencies = [ migrations.swappable_dependency(settings.AUTH_USER_MODEL),]
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
     operations = [
         migrations.CreateModel(
@@ -116,7 +160,7 @@ class Migration(migrations.Migration):
     ]
 EOF
 
-cat > blog/migrations/0002_create_default_tags.py << 'EOF'
+cat > blog/migrations/0002_default_tags.py << 'EOF'
 from django.db import migrations
 from django.utils.text import slugify
 
@@ -152,7 +196,7 @@ def remove_default_tags(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('blog', '0001_initial_consolidated'),
+        ('blog', '0001_initial'),
     ]
 
     operations = [
@@ -160,10 +204,45 @@ class Migration(migrations.Migration):
     ]
 EOF
 
-echo "Running migrations..."
-python manage.py migrate
+python manage.py migrate --verbosity 2
+echo "Verifying migrations and database tables..."
+python verify_db.py
+
+cat > verify_models.py << 'EOF'
+import os
+import sys
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.settings')
+django.setup()
+
+from django.contrib.auth.models import User
+from blog.models import Post, Tag, Comment, Vote, CommentVote, TagAlias
+
+def check_models():
+    models = [
+        (User, 'User'),
+        (Post, 'Post'),
+        (Tag, 'Tag'),
+        (Comment, 'Comment'),
+        (Vote, 'Vote'),
+        (CommentVote, 'CommentVote'),
+        (TagAlias, 'TagAlias')
+    ]
+
+    for model, name in models:
+        try:
+            count = model.objects.count()
+            print(f"Model {name} is accessible (count: {count})")
+        except Exception as e:
+            print(f"Error accessing model {name}: {e}")
+
+check_models()
+EOF
+
+python verify_models.py
 
 echo "Collecting static files..."
 python manage.py collectstatic --no-input
 
-echo "Build process completed successfully!"
+echo "Build process completed!"

@@ -9,10 +9,17 @@ ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 if os.environ.get('ALLOWED_HOSTS'):
     ALLOWED_HOSTS += os.environ.get('ALLOWED_HOSTS').split(',')
 
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         conn_max_age=0,
+#         ssl_require=True,
+#     )
+# }
+
 DATABASES = {
     'default': dj_database_url.config(
-        conn_max_age=0,
-        ssl_require=True,
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
     )
 }
 
