@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
+import dj_database_url
 from pathlib import Path
 import os
 from django.conf.global_settings import LOGIN_REDIRECT_URL, MEDIA_ROOT, EMAIL_BACKEND
@@ -22,13 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p3tskz8lqdio_t=i@8utbuet(hom%b0$tddhr*pe$ez_t67j41'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-p3tskz8lqdio_t=i@8utbuet(hom%b0$tddhr*pe$ez_t67j41')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['yappuccino-ef85d40e1d34.herokuapp.com', 'localhost', '127.0.0.1']
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -46,9 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'whitenoise.runserver_nostatic',
+    'storages',
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -110,6 +116,8 @@ DATABASES = {
     }
 }
 
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -145,7 +153,40 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# whiteNoise for static files in prod
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ==== backblaze B2 settings ==== #
+if not DEBUG:
+    # credentials
+    B2_ACCESS_KEY_ID = os.environ.get('B2_ACCESS_KEY_ID')
+    B2_SECRET_ACCESS_KEY = os.environ.get('B2_SECRET_ACCESS_KEY')
+    B2_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
+
+    # storage
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    # b2 settings
+    AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = B2_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = B2_BUCKET_NAME
+    AWS_S3_ENDPOINT_URL = 'https://s3.eu-central-003.backblazeb2.com'
+    AWS_S3_REGION_NAME = 'eu-central-003'
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_VERIFY = True
+
+    # ckeditor config → use b2 for uploads
+    CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
+    CKEDITOR_5_UPLOAD_PATH = "uploads/"
+
+    MEDIA_URL = f'https://{B2_BUCKET_NAME}.s3.eu-central-003.backblazeb2.com/'
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 CKEDITOR_RESTRICT_BY_USER = False
@@ -201,9 +242,6 @@ BLEACH_ALLOWED_STYLES = [
 ]
 
 BLEACH_STRIP_COMMENTS = True
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # dir to store files | OLD -- MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

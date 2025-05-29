@@ -152,7 +152,7 @@
       }
       else if(isDeleting && charIdx === 0){ // done deleting → MOVE to NEXT WORD
         isDeleting = false;
-        wrdIdx = (wrdIdx + 1) % words.length;
+        wrdIdx = (wrdIdx+1) % words.length;
         typingSpeed = 500; // slight pause
       }
 

@@ -3,6 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 import uuid
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 # TODO -- PROBLEM W IMG UPLOAD PERMISSIONS - for some reason only admin can do that
 #  => DONE -- SOL - OVERRIDE ORIGINAL FUNC
@@ -10,7 +12,6 @@ import uuid
 def patch_ckeditor_upload():
 	try:
 		import django_ckeditor_5.views as ckeditor_views
-
 		orig_upload = ckeditor_views.upload_file # might need later
 
 		@csrf_exempt
@@ -18,20 +19,15 @@ def patch_ckeditor_upload():
 			if request.method != 'POST' or not request.FILES.get('upload'):
 				return JsonResponse({'error': 'No file provided'}, status=400)
 
-			upldd_file = request.FILES['upload']
-			file_extension = os.path.splitext(upldd_file.name)[1]
+			upldF = request.FILES['upload']
+			file_extension = os.path.splitext(upldF.name)[1]
 
-			filename = f"{uuid.uuid4()}{file_extension}"
-			upload_path = os.path.join(settings.MEDIA_ROOT, 'uploads', filename)
+			filename = f"{uuid.uuid4()}{file_extension}" #unique filename
+			upload_path = os.path.join(settings.CKEDITOR_5_UPLOAD_PATH, filename) # custom unique path for s3
 
-			os.makedirs(os.path.dirname(upload_path), exist_ok=True) # checking that dir is there
+			path = default_storage.save(upload_path, ContentFile(upldF.read()))
+			file_url = default_storage.url(path) # based on storage backend
 
-			with open(upload_path, 'wb+') as destination:
-				for chunk in upldd_file.chunks():
-					destination.write(chunk)
-
-			# url to ckeditor
-			file_url = f"{settings.MEDIA_URL}uploads/{filename}"
 			return JsonResponse({
 				'url': file_url,
 				'uploaded': '1',
@@ -41,5 +37,6 @@ def patch_ckeditor_upload():
 		ckeditor_views.upload_file = new_upload_file
 		return True
 
-	except:
+	except Exception as e:
+		print(f"Error patching CKEditor: {e}")
 		return False
