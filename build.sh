@@ -19,7 +19,6 @@ from django.core.validators import MaxLengthValidator
 
 class Migration(migrations.Migration):
     initial = True
-
     dependencies = [ migrations.swappable_dependency(settings.AUTH_USER_MODEL),]
 
     operations = [
@@ -83,7 +82,9 @@ class Migration(migrations.Migration):
                 ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='votes', to='blog.post')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
-            options={ 'unique_together': {('post', 'user')},},
+            options={
+                'unique_together': {('post', 'user')},
+            },
         ),
 
         migrations.CreateModel(
@@ -95,7 +96,9 @@ class Migration(migrations.Migration):
                 ('comment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='votes', to='blog.comment')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
-            options={ 'unique_together': {('comment', 'user')},},
+            options={
+                'unique_together': {('comment', 'user')},
+            },
         ),
 
         migrations.CreateModel(
@@ -106,7 +109,9 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='aliases', to='blog.tag')),
             ],
-            options={ 'verbose_name_plural': 'Tag Aliases',},
+            options={
+                'verbose_name_plural': 'Tag Aliases',
+            },
         ),
     ]
 EOF
