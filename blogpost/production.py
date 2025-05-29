@@ -1,7 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
-from .settings import *  # Import base settings
+from .settings import *
 
 DEBUG = False
 
@@ -11,13 +11,17 @@ if os.environ.get('ALLOWED_HOSTS'):
 
 DATABASES = {
     'default': dj_database_url.config(
-        conn_max_age=600,
+        conn_max_age=0,
         ssl_require=True,
-        default='sqlite:///db.sqlite3'
     )
 }
 
-# if im gonna need a debouncer
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+}
+
+DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+#
 # if 'DATABASE_URL' in os.environ and 'pgbouncer=true' in os.environ.get('DATABASE_URL'):
 #     DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 #     DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True

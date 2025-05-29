@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
-import os
 from django.conf.global_settings import LOGIN_REDIRECT_URL, MEDIA_ROOT, EMAIL_BACKEND
 # from decouple import config
 
@@ -116,8 +115,19 @@ DATABASES = {
     }
 }
 
+def clean_database_url(url):
+    # remove pgbouncer param in url --  if exists
+    if url and 'pgbouncer=true' in url:
+        parts = url.split('?')
+        if len(parts)>1:
+            base = parts[0]
+            params = parts[1].split('&')
+            filtered_params = [p for p in params if not p.startswith('pgbouncer=')]
+            return base + '?' + '&'.join(filtered_params)
+    return url
+
 if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+    os.environ['DATABASE_URL'] = clean_database_url(os.environ['DATABASE_URL'])
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
