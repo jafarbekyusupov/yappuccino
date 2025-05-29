@@ -17,6 +17,12 @@ DATABASES = {
     )
 }
 
+# if im gonna need a debouncer
+if 'DATABASE_URL' in os.environ and 'pgbouncer=true' in os.environ.get('DATABASE_URL'):
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+    DATABASES['default']['CONN_MAX_AGE'] = 0
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
