@@ -3,16 +3,18 @@ services:
     name: yappuccino
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn blogpost.wsgi:application"
+    startCommand: "gunicorn blogpost.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
-      - key: ALLOWED_HOSTS
-        value: ".onrender.com"
+      - key: DJANGO_SETTINGS_MODULE
+        value: "blogpost.production"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: your-database-name
+          property: connectionString
       - key: B2_ACCESS_KEY_ID
         sync: false
       - key: B2_SECRET_ACCESS_KEY
@@ -21,3 +23,8 @@ services:
         sync: false
       - key: B2_REGION
         sync: false
+
+databases:
+  - name: yappuccino
+    databaseName: yappuccino_db
+    user: yappuccino_user
