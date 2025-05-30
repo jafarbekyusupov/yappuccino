@@ -24,7 +24,6 @@ except ImportError:
     logger.warning(f"Could not import storage class, using default_storage")
     strg_inst = default_storage
 
-
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(

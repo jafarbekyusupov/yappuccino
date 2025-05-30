@@ -6,7 +6,6 @@ from django.conf import settings
 
 class Command(BaseCommand):
     help = 'testing B2 storage connect n config'
-
     def handle(self, *args, **options):
         self.stdout.write("testingggg STORAGE...")
 

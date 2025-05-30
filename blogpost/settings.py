@@ -16,7 +16,6 @@ from pathlib import Path
 from django.conf.global_settings import LOGIN_REDIRECT_URL, MEDIA_ROOT, EMAIL_BACKEND
 import bleach
 from bleach.css_sanitizer import CSSSanitizer
-# from decouple import config
 
 try:
     from dotenv import load_dotenv
