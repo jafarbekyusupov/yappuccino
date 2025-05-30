@@ -1,13 +1,16 @@
 # Yappuccino 🗣️☕
 *A platform for Certified Yappers*
 
-![Django](https://img.shields.io/badge/Django-5.2.1-green.svg)
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-4.0-purple.svg)
-![CKEditor](https://img.shields.io/badge/CKEditor-5-orange.svg)
+<div>  
+   <img src="https://img.shields.io/badge/Django-5.2.1-white?logo=django&logoColor=white&labelColor=092E20&style=for-the-badge" alt="Django">  
+  <img src="https://img.shields.io/badge/Python-3.8+-white?logo=python&logoColor=white&labelColor=3776AB&style=for-the-badge" alt="Python">  
+  <img src="https://img.shields.io/badge/Bootstrap-4-white?logo=bootstrap&logoColor=white&labelColor=7952B3&style=for-the-badge" alt="Bootstrap">  
+  <img src="https://img.shields.io/badge/CKEditor-5-white?logo=ckeditor&logoColor=white&labelColor=0287D0&style=for-the-badge" alt="CKEditor">  
+  <img src="https://img.shields.io/badge/PostgreSQL-white?logo=postgresql&logoColor=white&labelColor=4169E1&style=for-the-badge" alt="PostgreSQL">  
+  <img src="https://img.shields.io/badge/Backblaze_B2-white?logo=backblaze&logoColor=white&labelColor=003B88&style=for-the-badge" alt="Backblaze B2">  
+</div>
 
-# 🔥 Live Demo
-
+## 🔥 Live Demo
 [![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://github.com/jafarbekyusupov/yappuccino)
 > [!IMPORTANT]  
 > 🔸 **Cold Start Delay**: This demo runs on a free-tier cloud service. If the link hasn't been clicked recently, the server may enter *sleep mode*.  
