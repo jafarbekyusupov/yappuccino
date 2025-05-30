@@ -10,8 +10,8 @@
   <img src="https://img.shields.io/badge/Backblaze_B2-white?logo=backblaze&logoColor=white&labelColor=003B88&style=for-the-badge" alt="Backblaze B2">  
 </div>
 
-## 🔥 Live Demo
-[![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://github.com/jafarbekyusupov/yappuccino)
+## 🔥 [Live Demo](https://yappuccino.onrender.com/)
+[![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://yappuccino.onrender.com/)
 > [!IMPORTANT]  
 > 🔸 **Cold Start Delay**: This demo runs on a free-tier cloud service. If the link hasn't been clicked recently, the server may enter *sleep mode*.  
 > 🔸 **First load** could upto **50 seconds**
