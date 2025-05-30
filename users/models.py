@@ -4,7 +4,9 @@ from PIL import Image
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 import io
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -30,45 +32,57 @@ class Profile(models.Model):
     @property
     def image_url(self):
         try:
-            if self.image and hasattr(self.image, 'url'):
-                return self.image.url
-        except (ValueError, OSError):
-            pass
+            if self.image and hasattr(self.image, 'url'): return self.image.url
+        except (ValueError, OSError) as e:
+            logger.warning(f"Error getting image URL for user {self.user.username}: {e}")
         return '/static/images/default-profile.png'
 
     def save(self, *args, **kwargs):
         if self.image and self.image.name != 'default.jpg':
             try:
+                logger.info(f"Processing image upload for user: {self.user.username}")
+                logger.info(f"Storage backend: {default_storage.__class__.__name__}")
+
                 image_file = self.image.open()
                 img = Image.open(image_file)
 
-                if img.height > 300 or img.width > 300:
+                logger.info(f"Original image size: {img.size}")
+
+                if img.height>300 or img.width>300:
                     output_size = (300, 300)
                     img.thumbnail(output_size, Image.Resampling.LANCZOS)
-                    img_io = io.BytesIO()
+                    logger.info(f"Resized image to: {img.size}")
 
-                    img_format = img.format if img.format else 'JPEG'
-                    if img_format == 'JPEG':
-                        if img.mode in ('RGBA', 'LA', 'P'):
-                            bg = Image.new('RGB', img.size, (255, 255, 255))
-                            if img.mode == 'P': img = img.convert('RGBA')
-                            bg.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-                            img = bg
+                img_io = io.BytesIO()
 
-                    img.save(img_io, format=img_format, quality=85, optimize=True)
-                    img_io.seek(0)
+                img_format = img.format if img.format else 'JPEG'
+                if img_format == 'JPEG':
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        bg = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode == 'P': img = img.convert('RGBA')
+                        bg.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                        img = bg
 
-                    new_image = ContentFile(img_io.getvalue())
+                img.save(img_io, format=img_format, quality=85, optimize=True)
+                img_io.seek(0)
 
-                    orig_img = self.image.name
+                new_image = ContentFile(img_io.getvalue())
 
-                    if default_storage.exists(orig_img):    default_storage.delete(orig_img)
+                orig_img = self.image.name
 
-                    self.image.save(orig_img, new_image, save=False)
+                if hasattr(default_storage, 'bucket_name'): # b2/s3
+                    if default_storage.exists(orig_img):
+                        logger.info(f"Deleting old file: {orig_img}")
+                        default_storage.delete(orig_img)
+
+                self.image.save(orig_img, new_image, save=False)
 
                 image_file.close()
+                img_io.close()
+
+                logger.info(f"Image processed and saved successfully for user: {self.user.username}")
 
             except Exception as e:
-                print(f"Error processing image: {e}")
+                logger.error(f"Error processing image for user {self.user.username}: {e}")
 
         super().save(*args, **kwargs)

@@ -1,13 +1,47 @@
 #!/usr/bin/env bash
 set -o errexit
+
+export DJANGO_SETTINGS_MODULE=blogpost.production
+
 pip install -r requirements.txt
+cat > verify_settings.py << 'EOF'
+import os
+import django
+from django.conf import settings
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.production')
+django.setup()
+
+print("=== settings verif ===")
+print(f"Settings module: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
+print(f"DEBUG: {settings.DEBUG}")
+print(f"Storage backend: {settings.DEFAULT_FILE_STORAGE if hasattr(settings, 'DEFAULT_FILE_STORAGE') else 'Not set'}")
+
+b2v = ['B2_ACCESS_KEY_ID', 'B2_SECRET_ACCESS_KEY', 'B2_BUCKET_NAME', 'B2_REGION']
+print("\n=== b2 env vars ===")
+for ii in b2v:
+    vv = os.environ.get(ii)
+    if vv:
+        dspv = vv[:8] + '...' if 'KEY' in ii else vv
+        print(f"OK {ii}: {dspv}")
+    else: print(f"x {ii}: Not set")
+
+if hasattr(settings, 'AWS_STORAGE_BUCKET_NAME'):
+    print(f"\n OK AWS_STORAGE_BUCKET_NAME: {settings.AWS_STORAGE_BUCKET_NAME}")
+if hasattr(settings, 'AWS_S3_ENDPOINT_URL'):
+    print(f"OK AWS_S3_ENDPOINT_URL: {settings.AWS_S3_ENDPOINT_URL}")
+EOF
+
+echo "verif settings n env"
+python verify_settings.py
+
 cat > verify_db.py << 'EOF'
 import os
 import sys
 import django
 from django.db import connection
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.production')
 django.setup()
 
 def check_database():
@@ -37,10 +71,8 @@ def list_tables():
     except Exception as e:
         print(f"Error listing tables: {e}")
 
-if check_database():
-    list_tables()
-else:
-    sys.exit(1)
+if check_database(): list_tables()
+else: sys.exit(1)
 EOF
 
 echo "Verifying database connection..."
@@ -48,9 +80,11 @@ python verify_db.py
 
 echo "Removing existing migrations..."
 rm -f blog/migrations/0*.py
+rm -f users/migrations/0*.py
 touch blog/migrations/__init__.py
+touch users/migrations/__init__.py
 
-echo "Creating consolidated migration file..."
+echo "Creating consolidated migration files..."
 cat > blog/migrations/0001_initial.py << 'EOF'
 from django.db import migrations, models
 import django.db.models.deletion
@@ -160,47 +194,34 @@ class Migration(migrations.Migration):
     ]
 EOF
 
-cat > blog/migrations/0002_default_tags.py << 'EOF'
-from django.db import migrations
-from django.utils.text import slugify
-
-def create_default_tags(apps, schema_editor):
-    Tag = apps.get_model('blog', 'Tag')
-    default_tags = [
-        'Software Development',
-        'AI & ML',
-        'Cybersecurity',
-        'Hardware',
-        'Design',
-        'Popsci'
-    ]
-
-    for tag_name in default_tags:
-        Tag.objects.get_or_create(
-            name=tag_name,
-            defaults={'slug': slugify(tag_name)}
-        )
-
-def remove_default_tags(apps, schema_editor):
-    Tag = apps.get_model('blog', 'Tag')
-    default_tags = [
-        'Software Development',
-        'AI & ML',
-        'Cybersecurity',
-        'Hardware',
-        'Design',
-        'Popsci'
-    ]
-
-    Tag.objects.filter(name__in=default_tags).delete()
+cat > users/migrations/0001_initial.py << 'EOF'
+from django.db import migrations, models
+import django.db.models.deletion
+from django.conf import settings
 
 class Migration(migrations.Migration):
+    initial = True
     dependencies = [
-        ('blog', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        migrations.RunPython(create_default_tags, remove_default_tags),
+        migrations.CreateModel(
+            name='Profile',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('image', models.ImageField(default='default.jpg', upload_to='profile_pics')),
+                ('show_email', models.BooleanField(default=False)),
+                ('show_activity', models.BooleanField(default=True)),
+                ('email_comments', models.BooleanField(default=True)),
+                ('email_replies', models.BooleanField(default=True)),
+                ('email_reposts', models.BooleanField(default=True)),
+                ('email_newsletter', models.BooleanField(default=False)),
+                ('theme', models.CharField(default='light', max_length=20)),
+                ('posts_per_page', models.IntegerField(default=5)),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
     ]
 EOF
 
@@ -208,41 +229,12 @@ python manage.py migrate --verbosity 2
 echo "Verifying migrations and database tables..."
 python verify_db.py
 
-cat > verify_models.py << 'EOF'
-import os
-import sys
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.settings')
-django.setup()
-
-from django.contrib.auth.models import User
-from blog.models import Post, Tag, Comment, Vote, CommentVote, TagAlias
-
-def check_models():
-    models = [
-        (User, 'User'),
-        (Post, 'Post'),
-        (Tag, 'Tag'),
-        (Comment, 'Comment'),
-        (Vote, 'Vote'),
-        (CommentVote, 'CommentVote'),
-        (TagAlias, 'TagAlias')
-    ]
-
-    for model, name in models:
-        try:
-            count = model.objects.count()
-            print(f"Model {name} is accessible (count: {count})")
-        except Exception as e:
-            print(f"Error accessing model {name}: {e}")
-
-check_models()
-EOF
-
-python verify_models.py
-
 echo "Collecting static files..."
 python manage.py collectstatic --no-input
+
+echo "Testing storage configuration..."
+if [ -f "blog/management/commands/test_b2.py" ]; then
+    python manage.py test_b2 || echo "B2 test failed - check env vars"
+fi
 
 echo "Build process completed!"

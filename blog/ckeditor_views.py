@@ -1,33 +1,58 @@
+import os
+import uuid
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import os
 from django.conf import settings
-import uuid
-from .ckeditor_upload_permissions import user_has_upload_permission
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @login_required
-@user_has_upload_permission  # decorator to enforce permissions
 def ckeditor_upload(request):
-	if request.method != 'POST' or 'upload' not in request.FILES:
-		return JsonResponse({'error': 'No image found in request'}, status=400)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method allowed'}, status=405)
 
-	upldd_file = request.FILES['upload']
-	file_extension = os.path.splitext(upldd_file.name)[1]
-	filename = f"{uuid.uuid4()}{file_extension}"
-	upload_path = os.path.join(settings.MEDIA_ROOT, 'uploads', filename)
+    if 'upload' not in request.FILES:
+        return JsonResponse({'error': 'No image found in request'}, status=400)
 
-	os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+    try:
+        upldd_file = request.FILES['upload']
 
-	with open(upload_path, 'wb+') as destination:
-		for chunk in upldd_file.chunks():
-			destination.write(chunk)
+        if upldd_file.size > 5*1024*1024:
+            return JsonResponse({'error': 'File too large. Maximum size is 5MB.'}, status=400)
 
-	file_url = f"{settings.MEDIA_URL}uploads/{filename}"
-	return JsonResponse({
-		'url': file_url,
-		'uploaded': '1',
-		'fileName': filename
-	})
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+        if upldd_file.content_type not in allowed_types:
+            return JsonResponse({'error': 'Invalid file type. Only JPEG, PNG and GIF files are allowed.'}, status=400)
+
+        file_extension = os.path.splitext(upldd_file.name)[1].lower()
+        if not file_extension: file_extension = '.jpg' # default
+
+        filename = f"{uuid.uuid4()}{file_extension}"
+
+        upload_path = os.path.join(getattr(settings, 'CKEDITOR_5_UPLOAD_PATH', 'uploads/'), filename)
+
+        logger.info(f"User {request.user.username} uploading file: {filename}")
+        logger.info(f"Upload path: {upload_path}")
+        logger.info(f"Storage backend: {default_storage.__class__.__name__}")
+
+        file_content = upldd_file.read()
+        path = default_storage.save(upload_path, ContentFile(file_content))
+
+        file_url = default_storage.url(path)
+
+        logger.info(f"File uploaded successfully: {file_url}")
+
+        return JsonResponse({
+            'url': file_url,
+            'uploaded': '1',
+            'fileName': filename
+        })
+
+    except Exception as e:
+        logger.error(f"Error uploading file for user {request.user.username}: {str(e)}")
+        return JsonResponse({ 'error': f'Upload failed: {str(e)}'}, status=500)
