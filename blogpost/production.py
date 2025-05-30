@@ -16,26 +16,55 @@ DATABASES = {
     )
 }
 
+ENABLE_DEBUG_LOGGING = os.environ.get('ENABLE_DEBUG_LOGGING', 'False') == 'True'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers':{
         'console':{
-            'level': 'INFO',
+            'level': 'DEBUG',  # tmp -- INFO → DEBUG
             'class': 'logging.StreamHandler',
         },
     },
     'loggers':{
         'users.models':{
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG' if ENABLE_DEBUG_LOGGING else 'INFO',  # tmp -- INFO → DEBUG
+            'propagate': False,
         },
         'blog.patch_ckeditor':{
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',  # tmp -- INFO → DEBUG
+            'propagate': True,
+        },
+        'storages':{
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers':{
+#         'console':{
+#             'level': 'INFO',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers':{
+#         'users.models':{
+#             'handlers': ['console'],
+#             'level': 'INFO',
+#         },
+#         'blog.patch_ckeditor':{
+#             'handlers': ['console'],
+#             'level': 'INFO',
+#         },
+#     },
+# }
 
 if 'postgresql' in DATABASES['default']['ENGINE']: #ssl config for postg
     DATABASES['default']['OPTIONS'] = { 'sslmode': 'require',}
@@ -71,8 +100,9 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     AWS_DEFAULT_ACL = 'public-read'
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_VERIFY = True
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_CUSTOM_DOMAIN = f'f003.backblazeb2.com/file/{B2_BUCKET_NAME}'
+    AWS_S3_FILE_OVERWRITE = False # True
+
+    AWS_S3_CUSTOM_DOMAIN = f'{B2_BUCKET_NAME}.s3.{B2_REGION}.backblazeb2.com'
 
     CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
     CKEDITOR_5_UPLOAD_PATH = "uploads/"

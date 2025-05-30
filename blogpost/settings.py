@@ -18,6 +18,13 @@ import bleach
 from bleach.css_sanitizer import CSSSanitizer
 # from decouple import config
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Environment vars loaded from .env file")
+except ImportError:
+    print("py-dotenv not installed, using env vars idc")
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -25,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-p3tskz8lqdio_t=i@8utbuet(hom%b0$tddhr*pe$ez_t67j41')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-key-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
