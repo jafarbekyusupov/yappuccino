@@ -14,6 +14,8 @@ import os
 import dj_database_url
 from pathlib import Path
 from django.conf.global_settings import LOGIN_REDIRECT_URL, MEDIA_ROOT, EMAIL_BACKEND
+import bleach
+from bleach.css_sanitizer import CSSSanitizer
 # from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -231,6 +233,12 @@ CKEDITOR_5_CONFIGS = {
     },
 }
 
+css_sanitizer = CSSSanitizer(allowed_css_properties=[
+    'font-family', 'font-size', 'font-weight', 'font-style', 'text-decoration',
+    'text-align', 'color', 'background-color', 'margin', 'padding', 'width',
+    'height', 'border', 'border-color', 'border-width', 'border-style', 'float',
+])
+
 BLEACH_ALLOWED_TAGS = [
     'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol',
     'p', 'strong', 'ul', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'span',
@@ -259,6 +267,7 @@ BLEACH_ALLOWED_STYLES = [
 ]
 
 BLEACH_STRIP_COMMENTS = True
+BLEACH_CSS_SANITIZER = css_sanitizer
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

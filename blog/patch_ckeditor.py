@@ -15,18 +15,18 @@ def patch_ckeditor_upload():
 		orig_upload = ckeditor_views.upload_file # might need later
 
 		@csrf_exempt
-		def new_upload_file(request): # upload func with no permission checks
+		def new_upload_file(request):
 			if request.method != 'POST' or not request.FILES.get('upload'):
 				return JsonResponse({'error': 'No file provided'}, status=400)
 
 			upldF = request.FILES['upload']
 			file_extension = os.path.splitext(upldF.name)[1]
 
-			filename = f"{uuid.uuid4()}{file_extension}" #unique filename
-			upload_path = os.path.join(settings.CKEDITOR_5_UPLOAD_PATH, filename) # custom unique path for s3
+			filename = f"{uuid.uuid4()}{file_extension}"
+			upload_path = os.path.join(settings.CKEDITOR_5_UPLOAD_PATH, filename)
 
 			path = default_storage.save(upload_path, ContentFile(upldF.read()))
-			file_url = default_storage.url(path) # based on storage backend
+			file_url = default_storage.url(path)
 
 			return JsonResponse({
 				'url': file_url,
