@@ -16,31 +16,35 @@ DATABASES = {
     )
 }
 
-ENABLE_DEBUG_LOGGING = os.environ.get('ENABLE_DEBUG_LOGGING', 'False') == 'True'
+# ENABLE_DEBUG_LOGGING = os.environ.get('ENABLE_DEBUG_LOGGING', 'False') == 'True'
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers':{
         'console':{
-            'level': 'DEBUG',  # tmp -- INFO → DEBUG
+            # 'level': 'DEBUG',  # tmp -- INFO → DEBUG
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers':{
         'users.models':{
             'handlers': ['console'],
-            'level': 'DEBUG' if ENABLE_DEBUG_LOGGING else 'INFO',  # tmp -- INFO → DEBUG
+            # 'level': 'DEBUG' if ENABLE_DEBUG_LOGGING else 'INFO',  # tmp -- INFO → DEBUG
+            'level': 'INFO',
             'propagate': False,
         },
         'blog.patch_ckeditor':{
             'handlers': ['console'],
-            'level': 'DEBUG',  # tmp -- INFO → DEBUG
+            # 'level': 'DEBUG',  # tmp -- INFO → DEBUG
+            'level': 'INFO',
             'propagate': True,
         },
         'storages':{
             'handlers': ['console'],
-            'level': 'DEBUG',
+            # 'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
     },
