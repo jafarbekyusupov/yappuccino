@@ -1,10 +1,17 @@
-# Yappuccino 🍕☕
-*A Modern Social Blogging Platform*
+# Yappuccino 🗣️☕
+*A platform for Certified Yappers*
 
 ![Django](https://img.shields.io/badge/Django-5.2.1-green.svg)
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-4.0-purple.svg)
 ![CKEditor](https://img.shields.io/badge/CKEditor-5-orange.svg)
+
+# 🔥 Live Demo
+
+[![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://github.com/jafarbekyusupov/yappuccino)
+> [!IMPORTANT]  
+> 🔸 **Cold Start Delay**: This demo runs on a free-tier cloud service. If the link hasn't been clicked recently, the server may enter *sleep mode*.  
+> 🔸 **First load** could upto **50 seconds**
 
 ## 🌟 Overview
 
@@ -61,24 +68,24 @@ Yappuccino is a feature-rich social blogging platform that combines traditional 
 ```
 yappuccino/
 ├── blog/                          # Main blog application
-│   ├── migrations/               # Database migrations
-│   ├── static/blog/             # Static files (CSS, JS, images)
-│   │   ├── css/                 # Stylesheets
-│   │   └── js/                  # JavaScript files
-│   ├── templates/blog/          # HTML templates
-│   │   └── includes/            # Reusable template components
-│   ├── templatetags/            # Custom template tags
-│   ├── models.py               # Database models
-│   ├── views.py                # View logic
-│   ├── forms.py                # Form definitions
-│   └── urls.py                 # URL routing
-├── users/                       # User management application
-│   ├── templates/users/        # User-related templates
-│   ├── models.py              # User profile models
-│   ├── views.py               # User views
-│   └── forms.py               # User forms
-├── media/                      # User-uploaded files
-└── requirements.txt           # Python dependencies
+│   ├── migrations/                # Database migrations
+│   ├── static/blog/               # Static files (CSS, JS, images)
+│   │   ├── css/                   # Stylesheets
+│   │   └── js/                    # JavaScript files
+│   ├── templates/blog/            # HTML templates
+│   │   └── includes/              # Reusable template components
+│   ├── templatetags/              # Custom template tags
+│   ├── models.py                  # Database models
+│   ├── views.py                   # View logic
+│   ├── forms.py                   # Form definitions
+│   └── urls.py                    # URL routing
+├── users/                         # User management application
+│   ├── templates/users/           # User-related templates
+│   ├── models.py                  # User profile models
+│   ├── views.py                   # User views
+│   └── forms.py                   # User forms
+├── media/                         # User-uploaded files
+└── requirements.txt               # Python dependencies
 ```
 
 ## 🚀 Installation & Setup
