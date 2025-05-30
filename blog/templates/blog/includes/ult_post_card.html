@@ -153,9 +153,11 @@
           {% with truncated=post.get_safe_content|truncate_words:40 %}
             {{ truncated.0|safe }}
             {% if truncated.1 %}
-              <a href="{% url 'post-detail' post.id %}" class="show-more-btn">
-                <i class="bi bi-arrows-expand"></i> Show More
-              </a>
+                <div class="text-center mt-2">
+                    <a href="{% url 'post-detail' post.id %}" class="btn btn-sm btn-outline-secondary show-more-btn">
+                        <i class="bi bi-arrows-expand"></i> Show More
+                    </a>
+                </div>
             {% endif %}
           {% endwith %}
         {% else %}
