@@ -225,12 +225,12 @@ class Migration(migrations.Migration):
     ]
 EOF
 
-python manage.py migrate --verbosity 2
+python manage.py migrate --noinput --verbosity 2
 echo "Verifying migrations and database tables..."
 python verify_db.py
 
 echo "Collecting static files..."
-python manage.py collectstatic --no-input
+python manage.py collectstatic --noinput
 
 echo "Testing storage configuration..."
 if [ -f "blog/management/commands/test_b2.py" ]; then

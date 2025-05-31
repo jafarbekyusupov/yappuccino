@@ -13,7 +13,7 @@ services:
         value: "blogpost.production"
       - key: DATABASE_URL
         fromDatabase:
-          name: your-database-name
+          name: yappuccino_db
           property: connectionString
       - key: B2_ACCESS_KEY_ID
         sync: false
