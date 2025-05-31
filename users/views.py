@@ -1,9 +1,17 @@
+import logging
+import traceback
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import (
     UserRegisterForm,
     UserUpdateForm,
@@ -34,25 +42,93 @@ def register(request):
 	return render(request, 'users/register.html', {'form': form})
 
 
+logger = logging.getLogger(__name__)
+
+
 @login_required
 def profile(request):
 	if request.method == 'POST':
-		u_form = UserUpdateForm(request.POST, instance=request.user)
-		p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+		try:
+			logger.info(f"Profile update started for user: {request.user.username}")
+			logger.info(f"POST data keys: {list(request.POST.keys())}")
+			logger.info(f"FILES data keys: {list(request.FILES.keys())}")
 
-		if u_form.is_valid() and p_form.is_valid():
-			u_form.save()
-			p_form.save()
-			messages.success(request, "Your account has been updated!")
+			u_form = UserUpdateForm(request.POST, instance=request.user)
+			p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+
+			logger.info(f"Forms created successfully")
+
+			u_form_valid = u_form.is_valid()
+			p_form_valid = p_form.is_valid()
+
+			logger.info(f"User form valid: {u_form_valid}")
+			logger.info(f"Profile form valid: {p_form_valid}")
+
+			if not u_form_valid:
+				logger.error(f"User form errors: {u_form.errors}")
+			if not p_form_valid:
+				logger.error(f"Profile form errors: {p_form.errors}")
+
+			if u_form_valid and p_form_valid:
+				logger.info("Both forms valid, attempting to save...")
+
+				try:
+					u_form.save()
+					logger.info("User form saved successfully")
+				except Exception as e:
+					logger.error(f"Error saving user form: {e}")
+					logger.error(f"User form save traceback: {traceback.format_exc()}")
+					raise
+
+				try:
+					if 'image' in request.FILES:
+						uploaded_file = request.FILES['image']
+						logger.info(f"Processing uploaded image: {uploaded_file.name}")
+						logger.info(f"Image size: {uploaded_file.size} bytes")
+						logger.info(f"Image content type: {uploaded_file.content_type}")
+
+					p_form.save()
+					logger.info("Profile form saved successfully")
+
+				except Exception as e:
+					logger.error(f"Error saving profile form: {e}")
+					logger.error(f"Profile form save traceback: {traceback.format_exc()}")
+
+					if 'image' in request.FILES:
+						logger.error("This error occurred during image upload")
+
+					messages.error(request, f'Error uploading profile picture: {str(e)}')
+					return redirect('profile')
+
+				messages.success(request, "Your account has been updated!")
+				return redirect('profile')
+			else:
+				error_msg = "Please correct the errors below:"
+				if u_form.errors:
+					error_msg += f" User: {u_form.errors}"
+				if p_form.errors:
+					error_msg += f" Profile: {p_form.errors}"
+				messages.error(request, error_msg)
+
+		except Exception as e:
+			logger.error(f"Unexpected error in profile view: {e}")
+			logger.error(f"Full traceback: {traceback.format_exc()}")
+
+			# if its stg related err
+			if 'B2' in str(e) or 'S3' in str(e) or 'storage' in str(e).lower():
+				messages.error(request, 'File storage error. Please check your B2 configuration.')
+			elif 'PIL' in str(e) or 'Image' in str(e):
+				messages.error(request, 'Image processing error. Please try a different image format.')
+			else:
+				messages.error(request, f'An error occurred: {str(e)}')
+
 			return redirect('profile')
+
 	else:
 		u_form = UserUpdateForm(instance=request.user)
 		p_form = ProfileUpdateForm(instance=request.user.profile)
 
-	context = {
-		'u_form': u_form,
-		'p_form': p_form,
-	}
+	context = { 'u_form': u_form, 'p_form': p_form,}
 	return render(request, 'users/profile.html', context)
 
 
@@ -177,3 +253,39 @@ def profile_completion_check(user):
 	completion['percentage'] = (completed_items / 4) * 100
 
 	return completion
+
+
+@csrf_exempt
+def test_storage(request):
+	try:
+		test_content = "test file content"
+		test_file = ContentFile(test_content.encode('utf-8'))
+
+		file_path = default_storage.save('test_uploads/test.txt', test_file)
+		logger.info(f"Test file saved to: {file_path}")
+
+		file_url = default_storage.url(file_path)
+		logger.info(f"Test file URL: {file_url}")
+
+		if default_storage.exists(file_path):
+			with default_storage.open(file_path, 'r') as f:
+				content = f.read()
+				logger.info(f"Test file content: {content}")
+
+		default_storage.delete(file_path)
+
+		return JsonResponse({
+			'success': True,
+			'message': 'Storage test passed',
+			'file_path': file_path,
+			'file_url': file_url,
+			'storage_class': default_storage.__class__.__name__
+		})
+
+	except Exception as e:
+		logger.error(f"Storage test failed: {e}")
+		return JsonResponse({
+			'success': False,
+			'error': str(e),
+			'storage_class': default_storage.__class__.__name__
+		})

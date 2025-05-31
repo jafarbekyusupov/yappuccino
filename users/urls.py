@@ -6,4 +6,5 @@ urlpatterns = [
     path('password-change/', views.CustomPasswordChangeView.as_view(), name='password_change'),
     path('export-data/', views.export_user_data, name='export-data'),
     path('delete-account/', views.delete_account_confirm, name='delete-account-confirm'),
+    path('test-storage/', views.test_storage, name='test-storage')
 ]
