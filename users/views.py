@@ -310,14 +310,36 @@ def debug_storage(request):
 			'B2_REGION': os.environ.get('B2_REGION', 'X Missing'),
 		}
 
-		django_settings = {
-			'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set'),
-			'AWS_ACCESS_KEY_ID': '- OK - Set' if getattr(settings, 'AWS_ACCESS_KEY_ID', None) else 'X Missing',
-			'AWS_SECRET_ACCESS_KEY': '- OK - Set' if getattr(settings, 'AWS_SECRET_ACCESS_KEY', None) else 'X Missing',
-			'AWS_STORAGE_BUCKET_NAME': getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'X Missing'),
-			'AWS_S3_ENDPOINT_URL': getattr(settings, 'AWS_S3_ENDPOINT_URL', 'X Missing'),
-			'MEDIA_URL': getattr(settings, 'MEDIA_URL', 'X Missing'),
-		}
+		django_settings = {}
+		try:
+			django_settings['DEFAULT_FILE_STORAGE'] = getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set')
+		except:
+			django_settings['DEFAULT_FILE_STORAGE'] = 'Error accessing setting'
+
+		try:
+			django_settings['AWS_ACCESS_KEY_ID'] = 'OK Set' if getattr(settings, 'AWS_ACCESS_KEY_ID', None) else 'x Missing'
+		except:
+			django_settings['AWS_ACCESS_KEY_ID'] = 'Error accessing setting'
+
+		try:
+			django_settings['AWS_SECRET_ACCESS_KEY'] = 'OK Set' if getattr(settings, 'AWS_SECRET_ACCESS_KEY', None) else 'x Missing'
+		except:
+			django_settings['AWS_SECRET_ACCESS_KEY'] = 'Error accessing setting'
+
+		try:
+			django_settings['AWS_STORAGE_BUCKET_NAME'] = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'x Missing')
+		except:
+			django_settings['AWS_STORAGE_BUCKET_NAME'] = 'Error accessing setting'
+
+		try:
+			django_settings['AWS_S3_ENDPOINT_URL'] = getattr(settings, 'AWS_S3_ENDPOINT_URL', 'x Missing')
+		except:
+			django_settings['AWS_S3_ENDPOINT_URL'] = 'Error accessing setting'
+
+		try:
+			django_settings['MEDIA_URL'] = getattr(settings, 'MEDIA_URL', 'x Missing')
+		except:
+			django_settings['MEDIA_URL'] = 'Error accessing setting'
 
 		storage_info = {
 			'default_storage_class': default_storage.__class__.__name__,
@@ -378,6 +400,38 @@ def debug_storage(request):
 			}
 		})
 
+
+@csrf_exempt
+def simple_settings_check(request):
+	try:
+		from django.conf import settings as django_settings
+
+		result = {
+			'success': True,
+			'settings_type': str(type(django_settings)),
+			'django_settings_module': os.environ.get('DJANGO_SETTINGS_MODULE'),
+			'storage_class': default_storage.__class__.__name__,
+		}
+		#sum basic stuff
+		try:
+			result['debug_setting'] = django_settings.DEBUG
+		except Exception as e:
+			result['debug_setting_error'] = str(e)
+
+		try:
+			result['default_file_storage'] = django_settings.DEFAULT_FILE_STORAGE
+		except Exception as e:
+			result['default_file_storage_error'] = str(e)
+
+		return JsonResponse(result)
+
+	except Exception as e:
+		import traceback
+		return JsonResponse({
+			'success': False,
+			'error': str(e),
+			'traceback': traceback.format_exc()
+		})
 
 @csrf_exempt
 def test_storage_reload(request):
