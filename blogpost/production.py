@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
+from botocore.config import Config
 from .settings import *
 
 DEBUG = False
@@ -40,6 +41,11 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     print("===================================== B2 STG CONFIG =====================================")
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+    boto3_config = Config(
+        request_checksum_calculation='when_required',
+        response_checksum_validation='when_required'
+    )
+
     AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY = B2_SECRET_ACCESS_KEY
     AWS_STORAGE_BUCKET_NAME = B2_BUCKET_NAME
@@ -52,6 +58,8 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     AWS_S3_VERIFY = True
     AWS_S3_FILE_OVERWRITE = True
 
+    AWS_S3_BOTO3_CONFIG = boto3_config
+
     AWS_S3_USE_SSL = True
     AWS_S3_SIGNATURE_NAME = 's3v4'
     AWS_S3_REGION_NAME = B2_REGION
@@ -61,6 +69,7 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
 
     # env vars to fix boto3 checksum errs
     import os
+
     os.environ['AWS_S3_ADDRESSING_STYLE'] = 'path'
     os.environ['AWS_S3_SIGNATURE_VERSION'] = 's3v4'
 
@@ -73,20 +82,6 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     print(f"- OK - DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
     print(f"- OK - Media URL = {MEDIA_URL}")
     print(f"- OK - S3 Endpoint = {AWS_S3_ENDPOINT_URL}")
-
-else:
-    print("x B2 credentials incomplete - Using local storage")
-    missing = []
-    if not B2_ACCESS_KEY_ID: missing.append('B2_ACCESS_KEY_ID')
-    if not B2_SECRET_ACCESS_KEY: missing.append('B2_SECRET_ACCESS_KEY')
-    if not B2_BUCKET_NAME: missing.append('B2_BUCKET_NAME')
-    print(f"x Missing: {missing}")
-
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-    print(f"x Fallback: DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
