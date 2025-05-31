@@ -56,6 +56,18 @@ if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
     print(f"- OK - Media URL = {MEDIA_URL}")
     print(f"- OK - S3 Bucket = {AWS_STORAGE_BUCKET_NAME}")
 
+    try:
+        import django.core.files.storage
+        from storages.backends.s3boto3 import S3Boto3Storage
+
+        s3_storage = S3Boto3Storage()
+        django.core.files.storage.default_storage = s3_storage
+
+        print(f"OK FORCED DEFAULT_STORAGE: {django.core.files.storage.default_storage.__class__.__name__}")
+
+    except Exception as e:
+        print(f"X STORAGE RELOAD FAILED: {e}")
+
 else:
     print("x S3 credentials incomplete - Using local storage")
     missing = []
