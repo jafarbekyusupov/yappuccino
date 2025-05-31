@@ -120,7 +120,7 @@ def profile(request):
 
 			# if its stg related err
 			if 'B2' in str(e) or 'S3' in str(e) or 'storage' in str(e).lower():
-				messages.error(request, 'File storage error. Please check your B2 configuration.')
+				messages.error(request, 'File storage error. Please check your S3 configuration.')
 			elif 'PIL' in str(e) or 'Image' in str(e):
 				messages.error(request, 'Image processing error. Please try a different image format.')
 			else:
@@ -303,11 +303,11 @@ def debug_storage(request):
 			'debug_mode': settings.DEBUG,
 		}
 
-		b2_vars = {
-			'B2_ACCESS_KEY_ID': '- OK - Set' if os.environ.get('B2_ACCESS_KEY_ID') else 'X Missing',
-			'B2_SECRET_ACCESS_KEY': '- OK - Set' if os.environ.get('B2_SECRET_ACCESS_KEY') else 'X Missing',
-			'B2_BUCKET_NAME': os.environ.get('B2_BUCKET_NAME', 'X Missing'),
-			'B2_REGION': os.environ.get('B2_REGION', 'X Missing'),
+		s3_vars = {
+			'AWS_ACCESS_KEY_ID': '- OK - Set' if os.environ.get('AWS_ACCESS_KEY_ID') else 'X Missing',
+			'AWS_SECRET_ACCESS_KEY': '- OK - Set' if os.environ.get('AWS_SECRET_ACCESS_KEY') else 'X Missing',
+			'AWS_STORAGE_BUCKET_NAME': os.environ.get('AWS_STORAGE_BUCKET_NAME', 'X Missing'),
+			'AWS_S3_REGION_NAME': os.environ.get('AWS_S3_REGION_NAME', 'X Missing'),
 		}
 
 		django_settings = {}
@@ -383,7 +383,7 @@ def debug_storage(request):
 		return JsonResponse({
 			'success': True,
 			'debug_info': debug_info,
-			'b2_environment_vars': b2_vars,
+			's3_environment_vars': s3_vars,
 			'django_settings': django_settings,
 			'storage_info': storage_info,
 			'test_results': test_results,
