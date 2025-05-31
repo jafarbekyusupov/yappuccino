@@ -208,12 +208,14 @@ if not DEBUG:
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    CKEDITOR_5_UPLOAD_PATH = "uploads/"
 
 CKEDITOR_RESTRICT_BY_USER = False
 CKEDITOR_BROWSE_SHOW_DIRS = True
 
-CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-CKEDITOR_5_UPLOAD_PATH = "uploads/"
+# CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+# CKEDITOR_5_UPLOAD_PATH = "uploads/"
 
 CKEDITOR_5_CONFIGS = {
     'default': {

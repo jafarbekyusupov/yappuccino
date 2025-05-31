@@ -21,12 +21,11 @@ logger = logging.getLogger(__name__)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-    # image = models.ImageField(
-    #     default='default.jpg',
-    #     upload_to='profile_pics',
-    #     storage=s3stg
-    # )
+    image = models.ImageField(
+        default='default.jpg',
+        upload_to='profile_pics',
+        storage=default_storage
+    )
 
     show_email = models.BooleanField(default=False)
     show_activity = models.BooleanField(default=True)
@@ -55,67 +54,31 @@ class Profile(models.Model):
                 self.image.name = f'profile_pics/{filename}'
 
         super().save(*args, **kwargs)
+        self._resize_image()
+
+    def _resize_image(self):
+        if not self.image or self.image.name == 'default.jpg': return
 
         try:
-            if not hasattr(settings, 'DEFAULT_FILE_STORAGE') or 'S3Boto3Storage' not in settings.DEFAULT_FILE_STORAGE:
-                # local - safe to resize
-                if self.image and hasattr(self.image, 'path') and self.image.name != 'default.jpg':
-                    img = Image.open(self.image.path)
-                    if img.height>300 or img.width>300:
-                        output_size = (300,300)
-                        img.thumbnail(output_size)
-                        img.save(self.image.path)
-                        logger.info(f"Resized image for user {self.user.username}")
+            with self.image.open() as img_file:
+                img = Image.open(img_file)
+                if img.height>300 or img.width>300:
+                    output_size = (300, 300)
+                    img.thumbnail(output_size, Image.Resampling.LANCZOS)
+
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        bg = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode == 'P': img = img.convert('RGBA')
+                        if img.mode == 'RGBA': bg.paste(img, mask=img.split()[-1])
+                        img = bg
+
+                    img_io = io.BytesIO()
+                    img_format = 'JPEG'
+                    img.save(img_io, format=img_format, quality=85, optimize=True)
+                    img_io.seek(0)
+
+                    self.image.save(self.image.name, ContentFile(img_io.getvalue()),save=False)
+                    logger.info(f"Resized image for user {self.user.username}")
+
         except Exception as e:
             logger.warning(f"Could not resize image for user {self.user.username}: {e}")
-            pass
-
-    # def save(self, *args, **kwargs):
-    #     is_new_image = not self.pk or not Profile.objects.filter(pk=self.pk).exists()
-    #
-    #     super().save(*args, **kwargs)
-    #
-    #     if self.image and self.image.name != 'default.jpg':
-    #         try:
-    #             logger.info(f"Processing image for user {self.user.username}: {self.image.name}")
-    #             try:
-    #                 img = Image.open(self.image.open())
-    #             except Exception as e:
-    #                 logger.error(f"Error opening image: {e}")
-    #                 return
-    #
-    #             if img.height>300 or img.width>300:
-    #                 output_size = (300, 300)
-    #                 img.thumbnail(output_size, Image.Resampling.LANCZOS)
-    #                 logger.info(f"Resized image to {img.size}")
-    #
-    #             img_io = io.BytesIO()
-    #             img_format = img.format if img.format else 'JPEG'
-    #
-    #             if img_format == 'JPEG':
-    #                 if img.mode in ('RGBA', 'LA', 'P'):
-    #                     bg = Image.new('RGB', img.size, (255, 255, 255))
-    #                     if img.mode == 'P': img = img.convert('RGBA')
-    #                     bg.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-    #                     img = bg
-    #
-    #             img.save(img_io, format=img_format, quality=85, optimize=True)
-    #             img_io.seek(0)
-    #
-    #             filename = os.path.basename(self.image.name)
-    #             ppath = 'profile_pics/'+filename
-    #
-    #             if 'profile_pics/profile_pics/' in self.image.name:
-    #                 logger.info(f"Fixing duplicated path: {self.image.name}")
-    #                 parts = self.image.name.split('profile_pics/')
-    #                 filename = parts[-1]  # Get the last part
-    #                 ppath = 'profile_pics/' + filename
-    #
-    #             logger.info(f"Saving image to {ppath}")
-    #             self.image.save(ppath, ContentFile(img_io.getvalue()), save=False)
-    #
-    #             super().save(update_fields=['image'])
-    #             logger.info(f"Saved image successfully: {self.image.url}")
-    #
-    #         except Exception as e:
-    #             logger.error(f"Error processing image: {e}", exc_info=True)
