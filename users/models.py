@@ -56,9 +56,8 @@ class Profile(models.Model):
         super().save(*args, **kwargs)
         self._resize_image()
 
-    def _resize_image(self):
+    def _resize_image(self): # _ - for internal use funcs
         if not self.image or self.image.name == 'default.jpg': return
-
         try:
             with self.image.open() as img_file:
                 img = Image.open(img_file)
