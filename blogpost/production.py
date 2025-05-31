@@ -38,7 +38,6 @@ print(f"B2_REGION: {'- OK - ' + str(B2_REGION) if B2_REGION else 'x Missing'}")
 
 if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     print("===================================== B2 STG CONFIG =====================================")
-
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
@@ -52,6 +51,18 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_VERIFY = True
     AWS_S3_FILE_OVERWRITE = True
+
+    AWS_S3_USE_SSL = True
+    AWS_S3_SIGNATURE_NAME = 's3v4'
+    AWS_S3_REGION_NAME = B2_REGION
+
+    AWS_IS_GZIPPED = False
+    AWS_S3_GZIP = False
+
+    # env vars to fix boto3 checksum errs
+    import os
+    os.environ['AWS_S3_ADDRESSING_STYLE'] = 'path'
+    os.environ['AWS_S3_SIGNATURE_VERSION'] = 's3v4'
 
     AWS_S3_CUSTOM_DOMAIN = f'{B2_BUCKET_NAME}.s3.{B2_REGION}.backblazeb2.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
