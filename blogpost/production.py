@@ -16,7 +16,66 @@ DATABASES = {
     )
 }
 
+# b2
+B2_ACCESS_KEY_ID = os.environ.get('B2_ACCESS_KEY_ID')
+B2_SECRET_ACCESS_KEY = os.environ.get('B2_SECRET_ACCESS_KEY')
+B2_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
+B2_REGION = os.environ.get('B2_REGION', 'eu-central-003')
+
+print(f"B2 Configuration Debug:")
+print(f"B2_ACCESS_KEY_ID: {'Set' if B2_ACCESS_KEY_ID else 'Not Set'}")
+print(f"B2_SECRET_ACCESS_KEY: {'Set' if B2_SECRET_ACCESS_KEY else 'Not Set'}")
+print(f"B2_BUCKET_NAME: {B2_BUCKET_NAME}")
+print(f"B2_REGION: {B2_REGION}")
+
+if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
+    print("===================================== B2 STG CONFIG =====================================")
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = B2_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = B2_BUCKET_NAME
+    AWS_S3_ENDPOINT_URL = f'https://s3.{B2_REGION}.backblazeb2.com'
+    AWS_S3_REGION_NAME = B2_REGION
+
+    AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False # NO QUERY PARAMS FOR URLS
+    AWS_S3_VERIFY = True
+    AWS_S3_FILE_OVERWRITE = True
+
+    AWS_S3_CUSTOM_DOMAIN = f'{B2_BUCKET_NAME}.s3.{B2_REGION}.backblazeb2.com'
+
+    CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
+    CKEDITOR_5_UPLOAD_PATH = "uploads/"
+
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+    print(f"B2 Storage configured successfully!")
+    print(f"Endpoint: {AWS_S3_ENDPOINT_URL}")
+    print(f"Media URL: {MEDIA_URL}")
+    print(f"Default Storage: {DEFAULT_FILE_STORAGE}")
+else:
+    print("B2 credentials not found, using local storage")
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 # ENABLE_DEBUG_LOGGING = os.environ.get('ENABLE_DEBUG_LOGGING', 'False') == 'True'
+
+if 'postgresql' in DATABASES['default']['ENGINE']: #ssl config for postg
+    DATABASES['default']['OPTIONS'] = { 'sslmode': 'require',}
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+
+#security
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LOGGING = {
     'version': 1,
@@ -69,58 +128,3 @@ LOGGING = {
 #         },
 #     },
 # }
-
-if 'postgresql' in DATABASES['default']['ENGINE']: #ssl config for postg
-    DATABASES['default']['OPTIONS'] = { 'sslmode': 'require',}
-    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
-
-#security
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-# b2
-B2_ACCESS_KEY_ID = os.environ.get('B2_ACCESS_KEY_ID')
-B2_SECRET_ACCESS_KEY = os.environ.get('B2_SECRET_ACCESS_KEY')
-B2_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
-B2_REGION = os.environ.get('B2_REGION', 'eu-central-003')
-
-print(f"B2 Configuration Debug:")
-print(f"B2_ACCESS_KEY_ID: {'Set' if B2_ACCESS_KEY_ID else 'Not Set'}")
-print(f"B2_SECRET_ACCESS_KEY: {'Set' if B2_SECRET_ACCESS_KEY else 'Not Set'}")
-print(f"B2_BUCKET_NAME: {B2_BUCKET_NAME}")
-print(f"B2_REGION: {B2_REGION}")
-
-if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY = B2_SECRET_ACCESS_KEY
-    AWS_STORAGE_BUCKET_NAME = B2_BUCKET_NAME
-    AWS_S3_ENDPOINT_URL = f'https://s3.{B2_REGION}.backblazeb2.com'
-    AWS_S3_REGION_NAME = B2_REGION
-
-    AWS_S3_ADDRESSING_STYLE = 'path'
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_QUERYSTRING_AUTH = False # NO QUERY PARAMS FOR URLS
-    AWS_S3_VERIFY = True
-    AWS_S3_FILE_OVERWRITE = True
-
-    AWS_S3_CUSTOM_DOMAIN = f'{B2_BUCKET_NAME}.s3.{B2_REGION}.backblazeb2.com'
-
-    CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
-    CKEDITOR_5_UPLOAD_PATH = "uploads/"
-
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-
-    print(f"B2 Storage configured successfully!")
-    print(f"Endpoint: {AWS_S3_ENDPOINT_URL}")
-    print(f"Media URL: {MEDIA_URL}")
-else:
-    print("B2 credentials not found, using local storage")
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
