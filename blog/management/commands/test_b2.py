@@ -5,34 +5,34 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 class Command(BaseCommand):
-    help = 'testing B2 storage connect n config'
+    help = 'Testing S3 storage connection and configuration'
     def handle(self, *args, **options):
-        self.stdout.write("testingggg STORAGE...")
+        self.stdout.write("Testing S3 STORAGE...")
 
         self.stdout.write("\n=== ENV VARIABLES ===")
-        envv = ['B2_ACCESS_KEY_ID', 'B2_SECRET_ACCESS_KEY', 'B2_BUCKET_NAME', 'B2_REGION']
+        envv = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME', 'AWS_S3_REGION_NAME']
         for var in envv:
             val = os.environ.get(var)
             if val:
-                dspv = val[:8] + '...' if var in ['B2_ACCESS_KEY_ID', 'B2_SECRET_ACCESS_KEY'] else val
+                dspv = val[:8] + '...' if 'KEY' in var else val
                 self.stdout.write(f"OK {var}: {dspv}")
             else: self.stdout.write(self.style.ERROR(f"x {var}: Not set"))
 
-        self.stdout.write("\n=== DJ STGS ===")
+        self.stdout.write("\n=== DJANGO SETTINGS ===")
         self.stdout.write(f"DEBUG: {settings.DEBUG}")
         self.stdout.write(f"Storage backend: {default_storage.__class__.__name__}")
 
         if hasattr(settings, 'AWS_STORAGE_BUCKET_NAME'):
             self.stdout.write(f"AWS_STORAGE_BUCKET_NAME: {settings.AWS_STORAGE_BUCKET_NAME}")
-        if hasattr(settings, 'AWS_S3_ENDPOINT_URL'):
-            self.stdout.write(f"AWS_S3_ENDPOINT_URL: {settings.AWS_S3_ENDPOINT_URL}")
+        if hasattr(settings, 'AWS_S3_CUSTOM_DOMAIN'):
+            self.stdout.write(f"AWS_S3_CUSTOM_DOMAIN: {settings.AWS_S3_CUSTOM_DOMAIN}")
         if hasattr(settings, 'MEDIA_URL'):
             self.stdout.write(f"MEDIA_URL: {settings.MEDIA_URL}")
 
-        # FILE UPL TEST
+        # FILE UPLOAD TEST
         self.stdout.write("\n=== TEST FILE UPLOAD ===")
         try:
-            test_content = "test file for B2 storage"
+            test_content = "test file for S3 storage"
             test_file = ContentFile(test_content.encode('utf-8'))
             test_filename = "test_upload.txt"
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
             if default_storage.exists(saved_path):
                 self.stdout.write("OK File exists in storage")
 
-                # READING IT BACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+                # READING IT BACK
                 with default_storage.open(saved_path, 'r') as f:
                     cntt = f.read()
                     if cntt.strip() == test_content:
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     else:
                         self.stdout.write(self.style.ERROR("x File content mismatch"))
 
-                # CLEAN PU
+                # CLEAN UP
                 default_storage.delete(saved_path)
                 self.stdout.write("OK Test file cleaned up")
 
@@ -63,4 +63,4 @@ class Command(BaseCommand):
 
         except Exception as e: self.stdout.write(self.style.ERROR(f"x Upload test failed: {str(e)}"))
 
-        self.stdout.write("\nB2 Storage test completed!")
+        self.stdout.write("\nS3 Storage test completed!")

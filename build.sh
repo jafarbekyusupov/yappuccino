@@ -233,8 +233,8 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "Testing storage configuration..."
-if [ -f "blog/management/commands/test_b2.py" ]; then
-    python manage.py test_b2 || echo "B2 test failed - check env vars"
+if [ -f "blog/management/commands/test_s3.py" ]; then
+    python manage.py test_s3 || echo "S3 test failed - check env vars"
 fi
 
 echo "Build process completed!"
