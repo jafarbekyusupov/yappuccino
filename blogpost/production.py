@@ -16,20 +16,29 @@ DATABASES = {
     )
 }
 
-# b2
+if 'postgresql' in DATABASES['default']['ENGINE']:
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 B2_ACCESS_KEY_ID = os.environ.get('B2_ACCESS_KEY_ID')
 B2_SECRET_ACCESS_KEY = os.environ.get('B2_SECRET_ACCESS_KEY')
 B2_BUCKET_NAME = os.environ.get('B2_BUCKET_NAME')
 B2_REGION = os.environ.get('B2_REGION', 'eu-central-003')
 
-print(f"B2 Configuration Debug:")
-print(f"B2_ACCESS_KEY_ID: {'Set' if B2_ACCESS_KEY_ID else 'Not Set'}")
-print(f"B2_SECRET_ACCESS_KEY: {'Set' if B2_SECRET_ACCESS_KEY else 'Not Set'}")
-print(f"B2_BUCKET_NAME: {B2_BUCKET_NAME}")
-print(f"B2_REGION: {B2_REGION}")
+print(f"=== B2 Configuration Check ===")
+print(f"B2_ACCESS_KEY_ID: {'- OK - Set' if B2_ACCESS_KEY_ID else 'x Missing'}")
+print(f"B2_SECRET_ACCESS_KEY: {'- OK - Set' if B2_SECRET_ACCESS_KEY else 'x Missing'}")
+print(f"B2_BUCKET_NAME: {'- OK - ' + str(B2_BUCKET_NAME) if B2_BUCKET_NAME else 'x Missing'}")
+print(f"B2_REGION: {'- OK - ' + str(B2_REGION) if B2_REGION else 'x Missing'}")
 
 if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
     print("===================================== B2 STG CONFIG =====================================")
+
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     AWS_ACCESS_KEY_ID = B2_ACCESS_KEY_ID
@@ -40,39 +49,33 @@ if B2_ACCESS_KEY_ID and B2_SECRET_ACCESS_KEY and B2_BUCKET_NAME:
 
     AWS_S3_ADDRESSING_STYLE = 'path'
     AWS_DEFAULT_ACL = 'public-read'
-    AWS_QUERYSTRING_AUTH = False # NO QUERY PARAMS FOR URLS
+    AWS_QUERYSTRING_AUTH = False
     AWS_S3_VERIFY = True
     AWS_S3_FILE_OVERWRITE = True
 
     AWS_S3_CUSTOM_DOMAIN = f'{B2_BUCKET_NAME}.s3.{B2_REGION}.backblazeb2.com'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
     CKEDITOR_5_FILE_STORAGE = DEFAULT_FILE_STORAGE
     CKEDITOR_5_UPLOAD_PATH = "uploads/"
 
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    print(f"- OK - DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
+    print(f"- OK - Media URL = {MEDIA_URL}")
+    print(f"- OK - S3 Endpoint = {AWS_S3_ENDPOINT_URL}")
 
-    print(f"B2 Storage configured successfully!")
-    print(f"Endpoint: {AWS_S3_ENDPOINT_URL}")
-    print(f"Media URL: {MEDIA_URL}")
-    print(f"Default Storage: {DEFAULT_FILE_STORAGE}")
 else:
-    print("B2 credentials not found, using local storage")
+    print("x B2 credentials incomplete - Using local storage")
+    missing = []
+    if not B2_ACCESS_KEY_ID: missing.append('B2_ACCESS_KEY_ID')
+    if not B2_SECRET_ACCESS_KEY: missing.append('B2_SECRET_ACCESS_KEY')
+    if not B2_BUCKET_NAME: missing.append('B2_BUCKET_NAME')
+    print(f"x Missing: {missing}")
+
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
-# ENABLE_DEBUG_LOGGING = os.environ.get('ENABLE_DEBUG_LOGGING', 'False') == 'True'
-
-if 'postgresql' in DATABASES['default']['ENGINE']: #ssl config for postg
-    DATABASES['default']['OPTIONS'] = { 'sslmode': 'require',}
-    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
-
-#security
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+    print(f"x Fallback: DEFAULT_FILE_STORAGE = {DEFAULT_FILE_STORAGE}")
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -80,51 +83,49 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers':{
-        'console':{
-            # 'level': 'DEBUG',  # tmp -- INFO → DEBUG
+    'handlers': {
+        'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
-    'loggers':{
-        'users.models':{
+    'loggers': {
+        'users.models': {
             'handlers': ['console'],
-            # 'level': 'DEBUG' if ENABLE_DEBUG_LOGGING else 'INFO',  # tmp -- INFO → DEBUG
             'level': 'INFO',
             'propagate': False,
         },
-        'blog.patch_ckeditor':{
+        'blog.patch_ckeditor': {
             'handlers': ['console'],
-            # 'level': 'DEBUG',  # tmp -- INFO → DEBUG
             'level': 'INFO',
             'propagate': True,
         },
-        'storages':{
+        'storages': {
             'handlers': ['console'],
-            # 'level': 'DEBUG',
             'level': 'INFO',
             'propagate': False,
         },
     },
 }
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers':{
-#         'console':{
-#             'level': 'INFO',
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers':{
-#         'users.models':{
-#             'handlers': ['console'],
-#             'level': 'INFO',
-#         },
-#         'blog.patch_ckeditor':{
-#             'handlers': ['console'],
-#             'level': 'INFO',
-#         },
-#     },
-# }
+
+# lets see wth is going on
+print(f"=== SETTINGS CHECK ===")
+print(f"MODULE DEFAULT_FILE_STORAGE = {locals().get('DEFAULT_FILE_STORAGE', 'NOT SET')}")
+print(f"MEDIA_URL = {locals().get('MEDIA_URL', 'NOT SET')}")
+
+# FORCE THIS STUPD ... TO REINIT STRG
+print("==== FORCING DJANGO to REINIT STORAGE ====")
+try:
+    from django.core.files.storage import default_storage
+    from django.utils.module_loading import import_string
+
+    scp = locals().get('DEFAULT_FILE_STORAGE', 'django.core.files.storage.FileSystemStorage')
+    StorageClass = import_string(scp)
+
+    import django.core.files.storage
+    django.core.files.storage.default_storage = StorageClass()
+
+    print(f"- OK - Forced storage to: {django.core.files.storage.default_storage.__class__.__name__}")
+
+except Exception as e:
+    print(f"x Failed to force storage reinit: {e}")
