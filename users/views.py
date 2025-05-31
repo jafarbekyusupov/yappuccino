@@ -1,3 +1,4 @@
+import os
 import logging
 import traceback
 
@@ -11,6 +12,9 @@ from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
+
+from django.conf import settings
+from django.utils.module_loading import import_string
 
 from .forms import (
     UserRegisterForm,
@@ -284,6 +288,126 @@ def test_storage(request):
 
 	except Exception as e:
 		logger.error(f"Storage test failed: {e}")
+		return JsonResponse({
+			'success': False,
+			'error': str(e),
+			'storage_class': default_storage.__class__.__name__
+		})
+
+
+@csrf_exempt
+def debug_storage(request):
+	try:
+		debug_info = {
+			'django_settings_module': os.environ.get('DJANGO_SETTINGS_MODULE'),
+			'debug_mode': settings.DEBUG,
+		}
+
+		b2_vars = {
+			'B2_ACCESS_KEY_ID': '- OK - Set' if os.environ.get('B2_ACCESS_KEY_ID') else 'X Missing',
+			'B2_SECRET_ACCESS_KEY': '- OK - Set' if os.environ.get('B2_SECRET_ACCESS_KEY') else 'X Missing',
+			'B2_BUCKET_NAME': os.environ.get('B2_BUCKET_NAME', 'X Missing'),
+			'B2_REGION': os.environ.get('B2_REGION', 'X Missing'),
+		}
+
+		django_settings = {
+			'DEFAULT_FILE_STORAGE': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set'),
+			'AWS_ACCESS_KEY_ID': '- OK - Set' if getattr(settings, 'AWS_ACCESS_KEY_ID', None) else 'X Missing',
+			'AWS_SECRET_ACCESS_KEY': '- OK - Set' if getattr(settings, 'AWS_SECRET_ACCESS_KEY', None) else 'X Missing',
+			'AWS_STORAGE_BUCKET_NAME': getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'X Missing'),
+			'AWS_S3_ENDPOINT_URL': getattr(settings, 'AWS_S3_ENDPOINT_URL', 'X Missing'),
+			'MEDIA_URL': getattr(settings, 'MEDIA_URL', 'X Missing'),
+		}
+
+		storage_info = {
+			'default_storage_class': default_storage.__class__.__name__,
+			'default_storage_module': default_storage.__class__.__module__,
+		}
+
+
+		try:
+			storage_class_path = getattr(settings, 'DEFAULT_FILE_STORAGE',
+										 'django.core.files.storage.FileSystemStorage')
+			StorageClass = import_string(storage_class_path)
+			expected_storage = StorageClass()
+			storage_info['expected_storage_class'] = expected_storage.__class__.__name__
+			storage_info['expected_storage_module'] = expected_storage.__class__.__module__
+		except Exception as e:
+			storage_info['expected_storage_error'] = str(e)
+
+		test_results = {}
+		try:
+			test_content = "storage debug test"
+			test_file = ContentFile(test_content.encode('utf-8'))
+			file_path = default_storage.save('debug_test/test.txt', test_file)
+			file_url = default_storage.url(file_path)
+
+			test_results = {
+				'file_saved': True,
+				'file_path': file_path,
+				'file_url': file_url,
+				'file_exists': default_storage.exists(file_path)
+			}
+
+			if default_storage.exists(file_path):
+				default_storage.delete(file_path)
+
+		except Exception as e:
+			test_results = {
+				'file_saved': False,
+				'error': str(e)
+			}
+
+		return JsonResponse({
+			'success': True,
+			'debug_info': debug_info,
+			'b2_environment_vars': b2_vars,
+			'django_settings': django_settings,
+			'storage_info': storage_info,
+			'test_results': test_results,
+		})
+
+	except Exception as e:
+		logger.error(f"Debug storage test failed: {e}")
+		return JsonResponse({
+			'success': False,
+			'error': str(e),
+			'debug_info': {
+				'django_settings_module': os.environ.get('DJANGO_SETTINGS_MODULE'),
+				'error_type': type(e).__name__
+			}
+		})
+
+
+@csrf_exempt
+def test_storage_reload(request):
+	try:
+		from importlib import reload
+		from django.core.files import storage
+		reload(storage)
+		from django.core.files.storage import default_storage
+
+		test_content = "reloaded storage test"
+		test_file = ContentFile(test_content.encode('utf-8'))
+		file_path = default_storage.save('reload_test/test.txt', test_file)
+		file_url = default_storage.url(file_path)
+
+		result = {
+			'success': True,
+			'message': 'Reloaded storage test passed',
+			'file_path': file_path,
+			'file_url': file_url,
+			'storage_class': default_storage.__class__.__name__,
+			'storage_module': default_storage.__class__.__module__,
+			'default_file_storage_setting': getattr(settings, 'DEFAULT_FILE_STORAGE', 'Not Set')
+		}
+
+		if default_storage.exists(file_path):
+			default_storage.delete(file_path)
+
+		return JsonResponse(result)
+
+	except Exception as e:
 		return JsonResponse({
 			'success': False,
 			'error': str(e),
