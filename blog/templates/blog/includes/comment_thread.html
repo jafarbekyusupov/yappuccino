@@ -4,7 +4,7 @@
 <div class="comment-item" id="comment-{{ comment.id }}">
   <div class="comment-header">
     <div class="comment-author-info">
-      <img class="rounded-circle" src="{{ comment.author.profile.image.url }}" width="32" height="32">
+      <img class="rounded-circle" src="{{ comment.author.profile.image.url }}" width="32" height="32" alt="{{ comment.author.username }}">
       <div>
         <a href="{% url 'user-posts' comment.author.username %}" class="comment-author-link">
           {{ comment.author.username }}
@@ -18,19 +18,19 @@
       </div>
     </div>
 
-    {# --- 3 DOT DROPDOWN - REPORT, REPLY -- BUTTONS ---  TODO --  add more functionality #}
+    {# --- 3 DOT - REPORT, REPLY -- BUTTONS ---  TODO --  add more functionality #}
     {% if user.is_authenticated %}
       <div class="comment-options">
-        <button class="options-btn" type="button">
+        <button class="options-btn" type="button" aria-label="comment options">
           <i class="bi bi-three-dots-vertical"></i>
         </button>
         <div class="options-dropdown">
-					<button class="reply-btn" data-comment-id="{{ comment.id }}">
-						<i class="bi bi-reply"></i> Reply
-					</button>
-					<button class="report-btn" data-comment-id="{{ comment.id }}">
-						<i class="bi bi-flag"></i> Report
-					</button>
+          <button class="reply-btn" data-comment-id="{{ comment.id }}">
+            <i class="bi bi-reply"></i> Reply
+          </button>
+          <button class="report-btn" data-comment-id="{{ comment.id }}">
+            <i class="bi bi-flag"></i> Report
+          </button>
         </div>
       </div>
     {% endif %}
@@ -40,12 +40,37 @@
     {{ comment.get_safe_content|safe }}
   </div>
 
-	{# --- VOTING BUTTONS --- #}
+  {# --- VOTING BUTTONS --- #}
   {% with user_vote=comment.user_vote %}
-    {% include "blog/includes/comment_voting_buttons.html" with comment=comment user_vote=user_vote %}
+{#    {% include "blog/includes/comment_voting_buttons.html" with comment=comment user_vote=user_vote %}#}
+    <div class="comment-vote-container">
+      {% if user.is_authenticated %}
+        <button class="comment-vote-btn upvote-btn {% if user_vote == 'up' %}active{% endif %}"
+                data-comment-id="{{ comment.id }}"
+                data-vote-type="up"
+                aria-label="upvote comment">
+          <i class="bi bi-hand-thumbs-up"></i>
+          <span class="upvote-count">{{ comment.upvotes }}</span>
+        </button>
+        <button class="comment-vote-btn downvote-btn {% if user_vote == 'down' %}active{% endif %}"
+                data-comment-id="{{ comment.id }}"
+                data-vote-type="down"
+                aria-label="downvote comment">
+          <i class="bi bi-hand-thumbs-down"></i>
+          <span class="downvote-count">{{ comment.downvotes }}</span>
+        </button>
+      {% else %}
+        <span class="text-muted mr-2">
+          <i class="bi bi-hand-thumbs-up"></i> {{ comment.upvotes }}
+        </span>
+        <span class="text-muted">
+          <i class="bi bi-hand-thumbs-down"></i> {{ comment.downvotes }}
+        </span>
+      {% endif %}
+    </div>
   {% endwith %}
 
-	{# --- REPLY - EDIT - DELETE BUTTONS --- #}
+  {# --- REPLY - EDIT - DELETE BUTTONS - bit smaller now --- #}
   {% if user.is_authenticated %}
     <div class="comment-actions">
       <button class="comment-action-btn reply-btn" data-comment-id="{{ comment.id }}">
@@ -62,49 +87,58 @@
     </div>
   {% endif %}
 
-	{# --- REPLY FORM - hidden by default --- #}
+  {# --- REPLY FORM - hidden by default --- #}
   {% if user.is_authenticated %}
-    <div class="reply-form-container" id="reply-form-{{ comment.id }}">
+    <div class="reply-form-container" id="reply-form-{{ comment.id }}" style="display: none;">
       <form method="POST" action="{% url 'add-comment' comment.post.id %}" class="reply-comment-form" data-comment-id="{{ comment.id }}">
         {% csrf_token %}
         <input type="hidden" name="parent_id" value="{{ comment.id }}">
         <div class="form-group">
+          <label for="reply-content-{{ comment.id }}" class="sr-only">Write your reply</label>
           <textarea name="content" class="form-control" rows="3" placeholder="Write your reply..." required></textarea>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-sm btn-orange">Post Reply</button>
-          <button type="button" class="btn btn-sm btn-secondary cancel-reply" data-comment-id="{{ comment.id }}">Cancel</button>
+          <button type="submit" class="btn btn-orange btn-sm">
+            <i class="bi bi-send"></i> Post Reply
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm cancel-reply" data-comment-id="{{ comment.id }}">Cancel</button>
         </div>
       </form>
     </div>
   {% endif %}
 
-	{# --- EDIT FORM hidden by default --- #}
+  {# --- EDIT FORM hidden by default --- #}
   {% if user == comment.author %}
-    <div class="edit-form-container" id="edit-form-{{ comment.id }}">
+    <div class="edit-form-container" id="edit-form-{{ comment.id }}" style="display: none;">
       <form method="POST" action="{% url 'edit-comment' comment.id %}" class="edit-comment-form" data-comment-id="{{ comment.id }}">
         {% csrf_token %}
         <div class="form-group">
-          <textarea name="content" class="form-control" rows="3" required>{{ comment.content|striptags }}</textarea>
+{#        <textarea name="content" class="form-control" rows="3" required>{{ comment.content|striptags }}</textarea>#}
+          <label for="edit-content-{{ comment.id }}" class="sr-only">edit comment</label>
+          <textarea id="edit-content-{{ comment.id }}" name="content" class="form-control" rows="3" required>{{ comment.content|striptags }}</textarea>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn btn-sm btn-orange">Save Changes</button>
-          <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-comment-id="{{ comment.id }}">Cancel</button>
+          <button type="submit" class="btn btn-orange btn-sm">
+            <i class="bi bi-check-lg"></i> Save Changes
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm cancel-edit" data-comment-id="{{ comment.id }}">Cancel</button>
         </div>
       </form>
     </div>
   {% endif %}
 
-	{# --- DELETE CONFIRMATION hidden by default --- #}
+  {# --- DELETE CONFIRMATION hidden by default --- #}
   {% if user == comment.author %}
     <div class="delete-confirm" id="delete-confirm-{{ comment.id }}" style="display: none;">
-      <p><strong>Are you sure you want to delete this comment?</strong></p>
-      <p class="text-muted">This action cannot be undone.</p>
-      <div class="delete-confirm-actions">
-        <button class="btn btn-sm btn-danger confirm-delete" data-comment-id="{{ comment.id }}">
-          <i class="bi bi-trash"></i> Delete
-        </button>
-        <button class="btn btn-sm btn-secondary cancel-delete" data-comment-id="{{ comment.id }}">Cancel</button>
+      <div class="alert alert-warning">
+        <p><strong>Are you sure you want to delete this comment?</strong></p>
+        <p class="text-muted mb-3">This action cannot be undone.</p>
+        <div class="delete-confirm-actions">
+          <button class="btn btn-danger btn-sm confirm-delete" data-comment-id="{{ comment.id }}">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+          <button class="btn btn-secondary btn-sm cancel-delete" data-comment-id="{{ comment.id }}">Cancel</button>
+        </div>
       </div>
     </div>
   {% endif %}

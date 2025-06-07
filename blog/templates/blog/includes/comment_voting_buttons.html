@@ -21,50 +21,5 @@
       <i class="bi bi-hand-thumbs-down"></i> {{ comment.downvotes }}
     </span>
   {% endif %}
+
 </div>
-<style>
-	.comment-vote-container {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		margin-top: 5px;
-	}
-
-	.comment-vote-btn {
-		background: none;
-		border: none;
-		color: #666;
-		font-size: 14px;
-		padding: 2px 6px;
-		border-radius: 4px;
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		transition: all 0.2s ease;
-	}
-
-	.comment-vote-btn:hover {
-		background-color: #f0f0f0;
-	}
-
-	.comment-vote-btn.upvote-btn.active {
-		color: var(--orange);
-	}
-
-	.comment-vote-btn.downvote-btn.active {
-		color: var(--dark-orange);
-	}
-
-	.comment-vote-btn:focus {
-		outline: none;
-	}
-
-	.comment-vote-btn i {
-		font-size: 14px;
-	}
-
-	.upvote-count, .downvote-count {
-		font-size: 12px;
-		font-weight: 500;
-	}
-</style>

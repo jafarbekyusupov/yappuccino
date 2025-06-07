@@ -30,10 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-key-for-development')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['yappuccino-ef85d40e1d34.herokuapp.com', 'localhost', '127.0.0.1']
@@ -123,12 +120,12 @@ WSGI_APPLICATION = 'blogpost.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='sqlite:///db.sqlite3',
+#         conn_max_age=600
+#     )
+# }
 
 def clean_database_url(url):
     # remove pgbouncer param in url --  if exists
@@ -184,8 +181,20 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # whiteNoise for static files in prod
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ==== S3 SETTINGS ==== #
+# ==== S3 SETTINGS + DB ==== #
 if not DEBUG:
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+
     # credentials
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
@@ -205,11 +214,29 @@ if not DEBUG:
     # Media URL
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db_local.sqlite3',
+        }
+    }
+
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     CKEDITOR_5_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     CKEDITOR_5_UPLOAD_PATH = "uploads/"
+
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    print(" ==== LOCAL | DEV MODE - using SQLITE DB ==== ")
 
 CKEDITOR_RESTRICT_BY_USER = False
 CKEDITOR_BROWSE_SHOW_DIRS = True
