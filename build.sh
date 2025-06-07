@@ -237,4 +237,11 @@ if [ -f "blog/management/commands/test_s3.py" ]; then
     python manage.py test_s3 || echo "S3 test failed - check env vars"
 fi
 
+echo "CREATING SUPERUSER..."
+if [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+    python manage.py create_superuser || echo "superuser creation failed - prob alr exists"
+else
+    echo "no DJANGO_SUPERUSER_PASSWORD set - skipping superuser creation"
+fi
+
 echo "Build process completed!"
