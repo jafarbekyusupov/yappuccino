@@ -83,6 +83,24 @@
           </a>
         </h2>
 
+        {% if post.has_summary %}
+        <div class="ai-summary-section">
+          <div class="ai-summary-header">
+            <i class="bi bi-robot"></i>
+            <span class="ai-summary-label">AI Summary</span>
+            <small class="summary-meta">
+              Generated {{ post.summary_generated_at|timesince }} ago
+              {% if post.summary_model_version %}
+                • {{ post.summary_model_version }}
+              {% endif %}
+            </small>
+          </div>
+          <div class="ai-summary-content">
+            {{ post.summary }}
+          </div>
+        </div>
+        {% endif %}
+
         <div class="article-content">
           {% if display_mode == 'feed' %}
             {% with truncated=post.original_post.get_safe_content|truncate_words:40 %}
@@ -200,6 +218,90 @@
 </article>
 
 <style>
+
+.ai-summary-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  border: 1px solid #d1ecf1;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 15px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-summary-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #007bff 0%, #0056b3 100%);
+}
+
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.ai-summary-header i {
+  color: #007bff;
+  font-size: 16px;
+}
+
+.ai-summary-label {
+  font-weight: 600;
+  color: #0056b3;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-meta {
+  color: #6c757d;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.ai-summary-content {
+  color: #495057;
+  font-size: 14px;
+  line-height: 1.5;
+  font-style: italic;
+  padding-left: 24px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .ai-summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .summary-meta {
+    margin-left: 0;
+  }
+  
+  .ai-summary-content {
+    padding-left: 0;
+  }
+}
+
+/* Dark mode support (if you implement it) */
+@media (prefers-color-scheme: dark) {
+  .ai-summary-section {
+    background: linear-gradient(135deg, #1a1d29 0%, #2d3748 100%);
+    border-color: #4a5568;
+  }
+  
+  .ai-summary-content {
+    color: #e2e8f0;
+  }
+}
+
 .original-post-label, .repost-label {
   margin-bottom: 5px;
 }

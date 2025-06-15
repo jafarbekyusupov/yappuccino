@@ -23,6 +23,7 @@ from .views import (
 from . import views
 from .ckeditor_views import ckeditor_upload
 from users.views import CustomPasswordChangeView
+from .api_views import PostsToSummarizeView, SaveSummaryView, SummaryStatsView
 
 urlpatterns = [
     # --- CORE --- #
@@ -61,4 +62,9 @@ urlpatterns = [
 
     # --- POST/COMMENT EDITOR --- #
     path('ckeditor5/custom-upload/', ckeditor_upload, name='ckeditor_custom_upload'),
+    # --- AI AGENT SUMMARY ENDPOINTS --- #
+    path('api/posts-to-summarize/', PostsToSummarizeView.as_view(), name='api-posts-to-summarize'),
+    path('api/save-summary/', SaveSummaryView.as_view(), name='api-save-summary'),
+    path('api/summary-stats/', SummaryStatsView.as_view(), name='api-summary-stats'),
+    path('admin/summary-dashboard/', views.summary_dashboard, name='summary-dashboard'),
 ]

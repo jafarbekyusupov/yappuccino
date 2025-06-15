@@ -61,6 +61,11 @@ class Post(models.Model):
 	tags = models.ManyToManyField('Tag', blank=True, related_name='posts')
 	view_count = models.PositiveIntegerField(default=0)
 
+	summary = models.TextField(blank=True, null=True, help_text="AI-generated summary")
+	summary_generated_at = models.DateTimeField(blank=True, null=True)
+	needs_summary_update = models.BooleanField(default=True)
+	summary_model_version = models.CharField(max_length=50, blank=True, null=True)
+
 	# UPD -- REPOST mechanics
 	original_post = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='reposts')
 	is_repost = models.BooleanField(default=False)
@@ -68,33 +73,36 @@ class Post(models.Model):
 	def __str__(self):
 		return self.title
 
-	def get_absolute_url(self):
-		return reverse('post-detail', kwargs={'pk': self.pk})
+	def get_absolute_url(self): return reverse('post-detail', kwargs={'pk': self.pk})
 
 	@property
-	def upvotes(self):
-		return self.votes.filter(vote_type=Vote.UPVOTE).count()
+	def upvotes(self): return self.votes.filter(vote_type=Vote.UPVOTE).count()
 
 	@property
-	def downvotes(self):  # fixed typo -- donwvotes → downvotes
-		return self.votes.filter(vote_type=Vote.DOWNVOTE).count()
+	def downvotes(self): return self.votes.filter(vote_type=Vote.DOWNVOTE).count()
 
 	@property
-	def score(self):
-		return self.upvotes - self.downvotes
+	def score(self): return self.upvotes - self.downvotes
 
 	@property
-	def comments_count(self):
+	def comments_count(self): 
 		return self.comments.count()
 
 	@property
-	def reposts_count(self):
+	def reposts_count(self): 
 		return self.reposts.count()
 
+	@property
+	def word_count(self):
+		import re
+		clean_txt = re.sub(r'<[^>]+>', '', self.content)
+		return len(clean_txt.split())
+
+	@property
+	def has_summary(self):
+		return bool(self.summary and self.summary.strip())
+
 	def get_safe_content(self):
-		"""
-		return safely sanitized html content
-		"""
 		try:
 			return bleach.clean(
 				self.content,
@@ -117,7 +125,13 @@ class Post(models.Model):
 			raise ValidationError('Title must have more variety of characters.')
 
 	def save(self, *args, **kwargs):
-		self.clean()
+		if self.pk:
+			try:
+				old_post = Post.objects.get(pk=self.pk)
+				if old_post.content != self.content:
+					self.needs_summary_update = True
+			except Post.DoesNotExist: pass
+		else: self.needs_summary_update = True # new post → always needs summary update
 		super().save(*args, **kwargs)
 
 class Vote(models.Model):
