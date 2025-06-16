@@ -24,7 +24,6 @@ from . import views
 from .ckeditor_views import ckeditor_upload
 from users.views import CustomPasswordChangeView
 from .api_views import PostsToSummarizeView, SaveSummaryView, SummaryStatsView
-
 urlpatterns = [
     # --- CORE --- #
     path('', PostListView.as_view(), name='blog-home'),

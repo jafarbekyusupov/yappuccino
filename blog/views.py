@@ -911,7 +911,6 @@ def summary_dashboard(request): #ADMIN PANEL -- dashboard for monitoring AI summ
     pendPostCnt = Post.objects.filter(needs_summary_update=True,is_repost=False).count()
     completion_rate = round((summarized_posts / total_posts*100), 1) if total_posts>0 else 0
     recent_summaries = Post.objects.filter(is_repost=False,summary__isnull=False).exclude(summary='').order_by('-summary_generated_at')[:10]
-    
     context = {
         'total_posts': total_posts,
         'summarized_posts': summarized_posts,
@@ -919,5 +918,4 @@ def summary_dashboard(request): #ADMIN PANEL -- dashboard for monitoring AI summ
         'completion_rate': completion_rate,
         'recent_summaries': recent_summaries,
     }
-    
     return render(request, 'blog/summary_dashboard.html', context)

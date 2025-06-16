@@ -114,7 +114,7 @@ async function refreshStats(){
 
 async function triggerSummarization(){ alert('manual trigger not implemented yet :\)');} // trigger n8n manually -- TODO
 
-async function loadRecentActivity() {
+async function loadRecentActivity(){
     try {
         const posts2Smryz = await fetch('/api/posts-to-summarize/?limit=10');
         const data = await posts2Smryz.json();

@@ -97,7 +97,6 @@ class Command(BaseCommand):
             post = Post.objects.get(id=post_id)
             post.needs_summary_update = True
             post.save()
-            
             self.stdout.write(f"-- OK -- marked post '{post.title}' for summarization")
             self.stdout.write("-- RUN -- run n8n workflow to process this post")
             

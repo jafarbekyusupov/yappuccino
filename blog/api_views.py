@@ -24,9 +24,7 @@ class PostsToSummarizeView(SummaryAPIView): # get posts that need summry
     def get(self, request):
         try:
             psts = Post.objects.filter(needs_summary_update=True, is_repost=False).order_by('-date_posted') # no summry for reposts
-            
-            # pagination
-            lim = int(request.GET.get('limit', 5))
+            lim = int(request.GET.get('limit',5)) # pagination
             psts = psts[:lim]            
             psData = []
             for pp in psts:
@@ -43,7 +41,6 @@ class PostsToSummarizeView(SummaryAPIView): # get posts that need summry
                     'needs_summary': pp.needs_summary_update,
                     'current_summary': pp.summary or ''
                 })
-            
             return JsonResponse({'success': True,'count': len(psData),'posts': psData})
             
         except Exception as e:
