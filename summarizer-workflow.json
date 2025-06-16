@@ -1,0 +1,283 @@
+{
+  "name": "yapp summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -620,
+        100
+      ],
+      "id": "1f4395f1-2959-410a-98e7-a2a88c307b55",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/api/posts-to-summarize/",
+        "options": {}
+      },
+      "name": "Fetch Posts to Summarize",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -400,
+        100
+      ],
+      "id": "42f0f73a-d91a-4d32-8a7b-c379291e1ce0",
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "and": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "greaterThan",
+              "value2": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Check if Posts Exist",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -180,
+        100
+      ],
+      "id": "43a9c054-36c8-457e-8e1e-1701171bf7c6",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "posts",
+        "options": {}
+      },
+      "name": "Split Posts",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        0,
+        0
+      ],
+      "id": "8648a52b-db4f-4dcd-bc49-90810af41a26",
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "functionCode": "// Create a focused summarization prompt\nconst post = $input.item.json;\nconst content = post.content;\nconst title = post.title;\nconst wordCount = post.word_count;\n\n// Determine summary length based on content length\nlet summaryLength;\nif (wordCount < 200) {\n  summaryLength = \"1-2 sentences\";\n} else if (wordCount < 500) {\n  summaryLength = \"2-3 sentences\";\n} else {\n  summaryLength = \"3-4 sentences\";\n}\n\n// Create the prompt\nconst prompt = `Please provide a concise summary of this blog article in ${summaryLength}. Focus on the main points and key takeaways.\n\nTitle: ${title}\n\nContent: ${content}\n\nSummary:`;\n\nreturn {\n  json: {\n    post_id: post.id,\n    post_title: title,\n    original_content: content,\n    word_count: wordCount,\n    prompt: prompt,\n    expected_length: summaryLength\n  }\n};"
+      },
+      "name": "Prepare Summarization Prompt",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        200,
+        0
+      ],
+      "id": "8bb28869-22ac-4c3e-80f9-a0da903d2b7c",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/generate",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2:latest\",\n  \"prompt\": \"Summarize this blog post in 3-4 sentences: {{ $json.original_content }}\",\n  \"stream\": false,\n  \"options\": {\n    \"num_predict\": 150,\n    \"temperature\": 0.3\n  }\n}",
+        "options": {
+          "timeout": 6000000
+        }
+      },
+      "name": "Generate Summary with Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        420,
+        0
+      ],
+      "id": "fc54cfa1-44a6-403d-9052-68c4638922af",
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and clean the summary from Ollama response\nconst ollamaResponse = $input.item.json.response;\nconst postData = $input.item.json;\n\n// Clean up the summary\nlet summary = ollamaResponse.trim();\n\n// Remove common prefixes that Ollama might add\nsummary = summary.replace(/^(Summary:|This article|The article|In summary:?|To summarize:?)\\s*/i, '');\n\n// Ensure it ends with proper punctuation\nif (summary && !summary.match(/[.!?]$/)) {\n  summary += '.';\n}\n\n// Log for debugging\nconsole.log('Original response:', ollamaResponse);\nconsole.log('Cleaned summary:', summary);\n\nreturn {\n  json: {\n    post_id: $('Prepare Summarization Prompt').item.json.post_id,\n    post_title: $('Prepare Summarization Prompt').item.json.post_title,\n    summary: summary,\n    word_count: $('Prepare Summarization Prompt').item.json.word_count,\n    model_version: 'llama3.2',\n    generated_at: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Process Ollama Response",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        640,
+        0
+      ],
+      "id": "f0ed29dc-ecf8-4430-a90b-0d95ca862344",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/save-summary/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post_id\": {{ $json.post_id }},\n  \"summary\": {{ JSON.stringify($json.summary) }},\n  \"model_version\": {{ JSON.stringify($json.model_version) }}\n}",
+        "options": {}
+      },
+      "name": "Save Summary to Django",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        860,
+        0
+      ],
+      "id": "d2d14ec8-624f-469d-9dac-49456fec2b2a",
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "functionCode": "const response = $input.item.json;\nconst postTitle = $('Process Ollama Response').item.json.post_title;\nconst summary = $('Process Ollama Response').item.json.summary;\n\nconsole.log(`✅ Successfully summarized: \"${postTitle}\"`);\nconsole.log(`📝 Summary: ${summary.substring(0, 100)}...`);\n\nreturn {\n  json: {\n    success: true,\n    post_title: postTitle,\n    summary_preview: summary.substring(0, 100) + '...',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Log Success",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        1080,
+        0
+      ],
+      "id": "af78e7f1-8472-4309-b7c5-8311cc40ecb9",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "functionCode": "console.log('ℹ️ No posts need summarization at this time');\n\nreturn {\n  json: {\n    message: 'No posts need summarization',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "No Posts to Process",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        0,
+        200
+      ],
+      "id": "3a78dfc5-dbf0-422e-9300-404304d4acec",
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Posts to Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Posts to Summarize": {
+      "main": [
+        [
+          {
+            "node": "Check if Posts Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Posts Exist": {
+      "main": [
+        [
+          {
+            "node": "Split Posts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Posts to Process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Posts": {
+      "main": [
+        [
+          {
+            "node": "Prepare Summarization Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Summarization Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary with Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary with Ollama": {
+      "main": [
+        [
+          {
+            "node": "Process Ollama Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Ollama Response": {
+      "main": [
+        [
+          {
+            "node": "Save Summary to Django",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Summary to Django": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "ve7vnTwCorhjCyWX"
+  },
+  "versionId": "5f6decbb-368a-4c7f-bdd9-b0a4069c3c9b",
+  "meta": {
+    "instanceId": "5c38c813086d830068ff064629ca2b44cdeace9dcc18470d8f36134f5684b9e2"
+  },
+  "id": "ve7vnTwCorhjCyWX",
+  "tags": []
+}

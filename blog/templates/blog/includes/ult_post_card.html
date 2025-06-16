@@ -86,7 +86,7 @@
         {# -- AI SUMMARY -- #}
         {% if post.has_summary %}
         <div class="ai-summary-container" id="summary-{{ post.id }}">
-          <div class="ai-summary-header" onclick="toggleSummary({{ post.id }})">
+          <div class="ai-summary-header" onclick="toggleSummary('{{ post.id }}')">
             <div class="summary-header-left">
               <i class="bi bi-robot summary-icon"></i>
               <span class="ai-summary-label">AI Summary</span>
@@ -98,10 +98,10 @@
               </small>
             </div>
             <div class="summary-controls">
-              <button class="summary-toggle-btn" onclick="event.stopPropagation(); toggleSummary({{ post.id }})" title="Expand/Collapse Summary">
+              <button class="summary-toggle-btn" onclick="event.stopPropagation(); toggleSummary('{{ post.id }}')" title="Expand/Collapse Summary">
                 <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-{{ post.id }}"></i>
               </button>
-              <button class="summary-close-btn" onclick="event.stopPropagation(); closeSummary({{ post.id }})" title="Hide Summary">
+              <button class="summary-close-btn" onclick="event.stopPropagation(); closeSummary('{{ post.id }}')" title="Hide Summary">
                 <i class="bi bi-x"></i>
               </button>
             </div>
@@ -110,7 +110,7 @@
             {{ post.summary }}
           </div>
           
-          <div class="ai-summary-minimized" id="summary-minimized-{{ post.id }}" style="display: none;" onclick="showSummary({{ post.id }})">
+          <div class="ai-summary-minimized" id="summary-minimized-{{ post.id }}" style="display: none;" onclick="showSummary('{{ post.id }}')">
             <i class="bi bi-robot"></i>
             <span>AI Summary Available</span>
           </div>
@@ -184,7 +184,7 @@
       {# -- AI SUMMARY -- #}
       {% if post.has_summary %}
       <div class="ai-summary-container" id="summary-{{ post.id }}">
-        <div class="ai-summary-header" onclick="toggleSummary({{ post.id }})">
+        <div class="ai-summary-header" onclick="toggleSummary('{{ post.id }}')">
           <div class="summary-header-left">
             <i class="bi bi-robot summary-icon"></i>
             <span class="ai-summary-label">AI Summary</span>
@@ -196,10 +196,10 @@
             </small>
           </div>
           <div class="summary-controls">
-            <button class="summary-toggle-btn" onclick="event.stopPropagation(); toggleSummary({{ post.id }})" title="Expand/Collapse Summary">
+            <button class="summary-toggle-btn" onclick="event.stopPropagation(); toggleSummary('{{ post.id }}')" title="Expand/Collapse Summary">
               <i class="bi bi-chevron-down toggle-icon" id="toggle-icon-{{ post.id }}"></i>
             </button>
-            <button class="summary-close-btn" onclick="event.stopPropagation(); closeSummary({{ post.id }})" title="Hide Summary">
+            <button class="summary-close-btn" onclick="event.stopPropagation(); closeSummary('{{ post.id }}')" title="Hide Summary">
               <i class="bi bi-x"></i>
             </button>
           </div>
@@ -207,7 +207,7 @@
         <div class="ai-summary-content collapsed" id="summary-content-{{ post.id }}">
           {{ post.summary }}
         </div>
-        <div class="ai-summary-minimized" id="summary-minimized-{{ post.id }}" style="display: none;" onclick="showSummary({{ post.id }})">
+        <div class="ai-summary-minimized" id="summary-minimized-{{ post.id }}" style="display: none;" onclick="showSummary('{{ post.id }}')">
           <i class="bi bi-robot"></i>
           <span>AI Summary Available</span>
         </div>

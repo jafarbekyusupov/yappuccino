@@ -785,10 +785,7 @@ def edit_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 
     if request.user != comment.author:
-        return JsonResponse({
-            'success': False,
-            'message': 'Permission denied'
-        }, status=403)
+        return JsonResponse({'success': False,'message': 'Permission denied'},status=403)
 
     raw_content = request.POST.get('content', '').strip()
 
@@ -907,30 +904,18 @@ def vote_comment(request, pk):
 
 
 @staff_member_required
-def summary_dashboard(request):
-    """Dashboard for monitoring AI summarization"""
+def summary_dashboard(request): #ADMIN PANEL -- dashboard for monitoring AI summarization
     # stats
     total_posts = Post.objects.filter(is_repost=False).count()
-    summarized_posts = Post.objects.filter(
-        is_repost=False,
-        summary__isnull=False
-    ).exclude(summary='').count()
-    pending_posts = Post.objects.filter(
-        needs_summary_update=True,
-        is_repost=False
-    ).count()
-    
-    completion_rate = round((summarized_posts / total_posts * 100), 1) if total_posts > 0 else 0
-    
-    recent_summaries = Post.objects.filter(
-        is_repost=False,
-        summary__isnull=False
-    ).exclude(summary='').order_by('-summary_generated_at')[:10]
+    summarized_posts = Post.objects.filter(is_repost=False, summary__isnull=False).exclude(summary='').count()
+    pendPostCnt = Post.objects.filter(needs_summary_update=True,is_repost=False).count()
+    completion_rate = round((summarized_posts / total_posts*100), 1) if total_posts>0 else 0
+    recent_summaries = Post.objects.filter(is_repost=False,summary__isnull=False).exclude(summary='').order_by('-summary_generated_at')[:10]
     
     context = {
         'total_posts': total_posts,
         'summarized_posts': summarized_posts,
-        'pending_posts': pending_posts,
+        'pending_posts': pendPostCnt,
         'completion_rate': completion_rate,
         'recent_summaries': recent_summaries,
     }

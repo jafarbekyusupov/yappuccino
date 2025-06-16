@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Summary Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2><i class="bi bi-robot"></i> AI Summary Dashboard</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-file-text fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ total_posts }}</h4>
+                            <p class="card-text">Total Posts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ summarized_posts }}</h4>
+                            <p class="card-text">Summarized</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ pending_posts }}</h4>
+                            <p class="card-text">Pending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-percent fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ completion_rate }}%</h4>
+                            <p class="card-text">Complete</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- btns -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" onclick="triggerSummarization()">
+                <i class="bi bi-play-circle"></i> Trigger Summarization
+            </button>
+            <button class="btn btn-secondary" onclick="refreshStats()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh Stats
+            </button>
+            <a href="/api/summary-stats/" class="btn btn-info" target="_blank">
+                <i class="bi bi-graph-up"></i> View API Stats
+            </a>
+        </div>
+    </div>
+    
+    <!-- recent activity -->
+    <div class="row">
+        <div class="col-12">
+            <h4>Recent Summarization Activity</h4>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Post</th>
+                            <th>Summary Preview</th>
+                            <th>Model</th>
+                            <th>Generated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTable">
+                        <!-- acttable -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function refreshStats(){
+    try{
+        const smryStats = await fetch('/api/summary-stats/');
+        const data = await smryStats.json();
+        if(data.success){ location.reload();}
+    } catch(error){ console.error('Error refreshing stats:', error);}
+}
+
+async function triggerSummarization(){ alert('manual trigger not implemented yet :\)');} // trigger n8n manually -- TODO
+
+async function loadRecentActivity() {
+    try {
+        const posts2Smryz = await fetch('/api/posts-to-summarize/?limit=10');
+        const data = await posts2Smryz.json();
+        const tbody = document.getElementById('activityTable');
+        tbody.innerHTML = '';
+        data.posts.forEach(post => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <a href="/post/${post.id}/" target="_blank">
+                        ${post.title}
+                    </a>
+                </td>
+                <td>
+                    ${post.current_summary ? 
+                        post.current_summary.substring(0, 100) + '...' : 
+                        '<em>No summary yet</em>'
+                    }
+                </td>
+                <td>
+                    <span class="badge badge-info">llama3.2</span>
+                </td>
+                <td>
+                    ${post.needs_summary ? 
+                        '<span class="badge badge-warning">Pending</span>' : 
+                        '<span class="badge badge-success">Done</span>'
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewPost(${post.id})">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch(error){ console.error('err loading activity:', error);}
+}
+
+function viewPost(postId){ window.open(`/post/${postId}/`, '_blank');}
+
+document.addEventListener('DOMContentLoaded', loadRecentActivity);
+</script>
+</body>
+</html>

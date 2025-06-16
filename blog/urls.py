@@ -62,6 +62,7 @@ urlpatterns = [
 
     # --- POST/COMMENT EDITOR --- #
     path('ckeditor5/custom-upload/', ckeditor_upload, name='ckeditor_custom_upload'),
+    
     # --- AI AGENT SUMMARY ENDPOINTS --- #
     path('api/posts-to-summarize/', PostsToSummarizeView.as_view(), name='api-posts-to-summarize'),
     path('api/save-summary/', SaveSummaryView.as_view(), name='api-save-summary'),

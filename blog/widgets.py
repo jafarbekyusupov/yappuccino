@@ -26,10 +26,9 @@ class AdvancedTagWidget(forms.CheckboxSelectMultiple):
 	def _render_template(self, context):
 		widget_html = f'''
         <div class="advanced-tag-selector" data-field-name="{context['widget']['name']}">
-            <!-- Tag Input Container -->
             <div class="tag-input-container" id="tagContainer-{context['widget']['name']}">
                 <div class="selected-tags-container" id="selectedTags-{context['widget']['name']}">
-                    <!-- Selected tags will appear here -->
+                    
                 </div>
 
                 <div class="input-group">
@@ -46,27 +45,23 @@ class AdvancedTagWidget(forms.CheckboxSelectMultiple):
                 </div>
             </div>
 
-            <!-- Popular Tags Section -->
             <div class="popular-tags-section mt-3">
                 <h6 class="popular-tags-title">
                     <i class="bi bi-fire"></i> Popular Tags
                 </h6>
                 <div class="popular-tags-grid" id="popularTags-{context['widget']['name']}">
-                    <!-- Popular tags will be populated here -->
+                    <!-- pop tags -->
                 </div>
             </div>
 
-            <!-- Tag Suggestions Dropdown -->
             <div class="tag-suggestions" id="tagSuggestions-{context['widget']['name']}">
-                <!-- Suggestions will appear here -->
+                <!-- suggestions -->
             </div>
 
-            <!-- Hidden inputs for form submission -->
             <div class="hidden-tag-inputs" id="hiddenInputs-{context['widget']['name']}">
-                <!-- Hidden inputs will be added here -->
+                <!-- hidden inputs -->
             </div>
 
-            <!-- Validation Message -->
             <div class="invalid-feedback" id="tagsError-{context['widget']['name']}">
                 Please select at least one tag.
             </div>
