@@ -23,8 +23,12 @@ services:
         sync: false
       - key: B2_REGION
         sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
 
 databases:
-  - name: yappuccino
+  - name: yappuccino_db
     databaseName: yappuccino_db
     user: yappuccino_user

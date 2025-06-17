@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %} 
+{% block title %}{{ title }} | yappuccino admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">yappuccino admin</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div style="background: #f8f9fa; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+    <a href="{% url 'admin:index' %}" style="margin-right: 15px; color: #007bff; text-decoration: none;">
+        🏠 Dashboard
+    </a>
+    <a href="{% url 'summary-dashboard' %}" style="margin-right: 15px; color: #007bff; text-decoration: none;">
+        🤖 AI Summaries
+        {% if pending_summaries %}
+            <span style="background: orange; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8em;">{{ pending_summaries }}</span>
+        {% endif %}
+    </a>
+    <a href="{% url 'admin:blog_post_changelist' %}" style="margin-right: 15px; color: #007bff; text-decoration: none;">
+        📝 Posts
+    </a>
+    <a href="{% url 'admin:auth_user_changelist' %}" style="margin-right: 15px; color: #007bff; text-decoration: none;">
+        👥 Users
+    </a>
+    <a href="{% url 'blog-home' %}" style="color: #6c757d; text-decoration: none;">
+        ← Back to Site
+    </a>
+</div>
+{% endblock %}

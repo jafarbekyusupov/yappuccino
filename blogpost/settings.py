@@ -164,11 +164,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -180,6 +177,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # whiteNoise for static files in prod
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ollama config --- production
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST', '127.0.0.1')
+OLLAMA_PORT = os.environ.get('OLLAMA_PORT', '11434')
+OLLAMA_BASE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}"
+
+# for n8n to know where django is
+DJANGO_HOST = os.environ.get('DJANGO_HOST', '127.0.0.1') 
+DJANGO_PORT = os.environ.get('DJANGO_PORT', '8000')
+DJANGO_BASE_URL = f"http://{DJANGO_HOST}:{DJANGO_PORT}" if DEBUG else os.environ.get('DJANGO_DOMAIN', 'https://yappuccino.onrender.com')
 
 # ==== S3 SETTINGS + DB ==== #
 if not DEBUG:

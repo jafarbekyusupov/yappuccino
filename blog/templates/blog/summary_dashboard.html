@@ -1,0 +1,488 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Summary Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <!-- <link rel="stylesheet" href="{% static 'blog/main.css' %}"> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-robot"></i> AI Summary Dashboard</h2>
+        <div class="d-flex flex-column">
+            <a href="/admin/" class="btn btn-secondary mb-2 ms-auto">
+                <i class="bi bi-gear"></i> Admin Page
+            </a>
+            <a href="{% url 'blog-home' %}" class="btn custom-btn ms-auto">
+                ← Back to Homepage
+            </a>
+        </div>
+    </div>
+    {% block nav-global %}
+    <div style="background: #f8f9fa; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+        <a href="{% url 'admin:index' %}" class="btn btn-primary mr-15" style="text-decoration: none;">
+            <i class="bi bi-house"></i> Admin Dashboard
+        </a>
+        <a href="{% url 'admin:blog_post_changelist' %}" class="btn btn-success mr-15" style="text-decoration: none;">
+            <i class="bi bi-pencil-square"></i> Posts
+        </a>
+        <a href="{% url 'admin:auth_user_changelist' %}" class="btn btn-info mr-15" style="text-decoration: none;">
+            <i class="bi bi-people-fill"></i> Users
+        </a>
+        <a href="{% url 'admin:blog_comment_changelist' %}" class="btn btn-warning mr-15" style="text-decoration: none;">
+            <i class="bi bi-chat-left-dots-fill"></i> Comments
+        </a>
+        <a href="{% url 'tag-list' %}" class="btn btn-danger mr-15" style="text-decoration: none; ">
+            <i class="bi bi-tags-fill"></i> Tags
+        </a>
+        <a href="{% url 'admin:blog_vote_changelist' %}" class="btn btn-dark mr-15" style="text-decoration: none;">
+            <i class="bi bi-arrow-down-up"></i> Votes
+        </a>
+
+    </div>
+    {% endblock %}
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-file-text fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ total_posts }}</h4>
+                            <p class="card-text">Total Posts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ summarized_posts }}</h4>
+                            <p class="card-text">Summarized</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ pending_posts }}</h4>
+                            <p class="card-text">Pending</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-percent fs-1 me-3"></i>
+                        <div>
+                            <h4 class="card-title">{{ completion_rate }}%</h4>
+                            <p class="card-text">Complete</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- btns -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group me-2" role="group">
+                    <button class="btn btn-primary" onclick="triggerSummarization()" id="triggerBtn">
+                        <i class="bi bi-play-circle"></i> Trigger Summarization
+                    </button>
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="forceUpdateAll()">
+                            <i class="bi bi-arrow-clockwise"></i> Force Update All Posts
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-muted" href="#">
+                            <small>Use "Force Update" to re-summarize existing summaries</small>
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <div class="btn-group me-2" role="group">
+                    <button class="btn btn-secondary" onclick="refreshStats()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Stats
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="testConnection()">
+                        <i class="bi bi-wifi"></i> Test API
+                    </button>
+                </div>
+            
+                <div class="btn-group" role="group">
+                    <a href="/api/summary-stats/" class="btn btn-info" target="_blank">
+                        <i class="bi bi-graph-up"></i> API Stats
+                    </a>
+                    <a href="/admin/" class="btn btn-outline-secondary">
+                        <i class="bi bi-gear"></i> Admin Panel
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> 
+                    Trigger runs immediately for posts without summaries
+                    N8N also runs automatically every 5 minutes!
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- summarization status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title text-primary">
+                                <i class="bi bi-robot"></i> AI Summarization Status
+                            </h6>
+                            <p class="card-text mb-0">
+                                <span id="systemStatus" class="badge badge-success">System Online</span>
+                                <span class="mx-2">•</span>
+                                <small class="text-muted">Last N8N run: auto-detection in progress...</small>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-info btn-sm" onclick="checkSystemHealth()">
+                                    <i class="bi bi-heart-pulse"></i> Health Check
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- status alerts -->
+    <div id="alertContainer"></div>
+    
+    <!-- recent activity -->
+    <div class="row">
+        <div class="col-12">
+            <h4>Posts Needing Summarization</h4>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Post</th>
+                            <th>Author</th>
+                            <th>Word Count</th>
+                            <th>Summary Status</th>
+                            <th>Date Posted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTable">
+                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- recent summaries -->
+    {% if recent_summaries %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>Recently Summarized Posts</h4>
+            <div class="list-group">
+                {% for post in recent_summaries %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">
+                            <a href="{% url 'post-detail' post.id %}" target="_blank">{{ post.title }}</a>
+                        </h6>
+                        <small>{{ post.summary_generated_at|timesince }} ago</small>
+                    </div>
+                    <p class="mb-1">{{ post.summary|truncatechars:200 }}</p>
+                    <small>Model: {{ post.summary_model_version|default:"llama3.2" }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+
+async function checkSystemHealth(){
+    try{
+        showAlert('checking sys health...', 'info');
+        const apiResp = await fetch('/api/summary-stats/');
+        const apiData = await apiResp.json();
+        if(!apiData.success){ throw new Error('django api health check failed');}
+        
+        const posts2Smryz = await fetch('/api/posts-to-summarize/?limit=1');
+        const postsData = await posts2Smryz.json();
+        if(!postsData.success){ throw new Error('posts api health check failed');}
+        
+        $('#systemStatus').removeClass('badge-warning badge-danger').addClass('badge-success').text('System Healthy');
+        showAlert(`system health check PASSED → found ${postsData.count} posts needing summarization.`, 'success');
+        
+    } catch(error){
+        console.error('health check failed:', error);
+        $('#systemStatus').removeClass('badge-success badge-warning').addClass('badge-danger').text('system issues');
+        showAlert('system health check failed: ' + error.message, 'danger');
+    }
+}
+
+// get csrf token
+function getCookie(name){
+    let ckVal = null;
+    if(document.cookie && document.cookie !== ''){
+        const cookies = document.cookie.split(';');
+        for(let i=0; i<cookies.length; i++){
+            const cookie = cookies[i].trim();
+            if(cookie.substring(0,name.length+1) === (name+'=')){ ckVal = decodeURIComponent(cookie.substring(name.length+1));break;}
+        }
+    }
+    return ckVal;
+}
+
+// show alert messages
+function showAlert(message, type = 'info'){
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    $('#alertContainer').html(alertHtml);
+
+    setTimeout(() =>{ $('.alert').alert('close');},5000);
+}
+
+async function refreshStats(){
+    try{
+        const smryStats = await fetch('/api/summary-stats/');
+        const data = await smryStats.json();
+        if(data.success){
+            showAlert('stats refreshed succcessfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else{ showAlert('error refreshing stats: ' + data.error, 'danger');}
+    } catch(error){ console.error('error refreshing stats:', error); showAlert('error refreshing stats', 'danger');}
+}
+
+async function triggerSummarization(){
+    const btn = $('#triggerBtn');
+    const origTxt = btn.html();
+    try{
+        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> Triggering...');
+        showAlert('Triggering AI summarization...', 'info');
+        const triggerSmrztn = await fetch('/api/trigger-summarization/',{
+            method: 'POST',
+            headers:{'Content-Type': 'application/json','X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({ force_update: false}) // set to true to resmryz all posts
+        });
+        
+        const data = await triggerSmrztn.json();
+        if(data.success){
+            let msg = data.message;
+            if(data.webhook_triggered){ msg += ' - N8N workflow triggered immediately!'; showAlert(msg, 'success'); setTimeout(() =>{loadRecentActivity(); refreshStats();},3000);} 
+            else{ msg += ' - WEll... N8N will process in couple minutes'; showAlert(msg, 'success'); setTimeout(() => loadRecentActivity(), 1000);}
+            if(data.webhook_error){ showAlert(`Note: ${data.webhook_error} | posts marked for processing anyway!`, 'warning');}
+            
+        } else{ showAlert('Failed to trigger summarization: ' +(data.error || 'unknown error'), 'danger');}
+        
+    } catch(error){
+        console.error('Error triggering summarization:', error);
+        showAlert('Error triggering summarization. Check console for details.', 'danger');
+    } finally{ btn.prop('disabled', false).html(origTxt);}
+}
+
+async function triggerSinglePost(postId){ // trigger specific posts
+    try{
+        showAlert(`triggering summarization for post ${postId}...`, 'info');
+        const triggerSmrztn = await fetch('/api/trigger-summarization/',{
+            method: 'POST',
+            headers:{'Content-Type': 'application/json','X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({post_ids: [postId]})
+        });
+        const data = await triggerSmrztn.json();
+        if(data.success){
+            showAlert(`successfully triggered summarization for post ${postId}`, 'success');
+            setTimeout(() => loadRecentActivity(), 1000);
+        } else{ showAlert('failed to trigger summarization: ' +(data.error || 'Unknown error'), 'danger');}
+        
+    } catch(error){ console.error('Error:', error); showAlert('Error triggering summarization', 'danger');}
+}
+
+async function forceUpdateAll(){ //dofenschmitz ahh func
+    if(!confirm('this will re-summarize ALL POSTS, even those that already GOT SUMMARIES. YOU SURE YOU WANNA DO THIS, BRO?')){ return;}
+    try{
+        showAlert('force updating ALL posts for sumamriaztion...', 'warning');
+        const triggerSmrztn = await fetch('/api/trigger-summarization/',{
+            method: 'POST',
+            headers:{ 'Content-Type': 'application/json','X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({ force_update: true})
+        });
+        const data = await triggerSmrztn.json();
+        if(data.success){
+            showAlert(data.message + ' - this may take A WHILE to process /-_-/', 'success');
+            setTimeout(() =>{loadRecentActivity(); refreshStats();},2000);
+        } else{ showAlert('failed to force update: ' +(data.error || 'unknown error'), 'danger');}
+    } catch(error){ console.error('error:', error); showAlert('error force updating posts', 'danger');}
+}
+
+async function testConnection(){
+    try{
+        showAlert('testing api connection...', 'info');
+        const posts2Smryz = await fetch('/api/posts-to-summarize/?limit=1');
+        const data = await posts2Smryz.json();
+        if(data.success){ showAlert(`API connection successful → found ${data.count} posts needing summarization.`, 'success');} 
+        else{ showAlert('api connection failed: ' +(data.error || 'unnkown error'), 'danger');}
+    } catch(error){ console.error('api test failed:', error); showAlert('API CONNECTION TEST FAILED!!! → open console for details', 'danger');}
+}
+
+async function loadRecentActivity(){
+    try{
+        const response = await fetch('/api/posts-to-summarize/?limit=10');
+        const data = await response.json();
+        const tbody = $('#activityTable');
+        
+        if(!data.success){ tbody.html('<tr><td colspan="6" class="text-center text-danger">error loading data: ' + (data.error || 'unknown error') + '</td></tr>'); return;}
+        if(data.posts.length === 0){ tbody.html('<tr><td colspan="6" class="text-center text-muted">no posts need summarization</td></tr>'); return;}
+        
+        let rows = '';
+        data.posts.forEach(post =>{
+            const status = post.needs_summary ? 
+                '<span class="badge badge-warning">Pending</span>' : 
+                '<span class="badge badge-success">Done</span>';
+                
+            rows += `
+                <tr>
+                    <td>
+                        <a href="/post/${post.id}/" target="_blank">${post.title}</a>
+                    </td>
+                    <td>${post.author}</td>
+                    <td><span class="badge badge-secondary">${post.word_count} words</span></td>
+                    <td>${status}</td>
+                    <td><small>${new Date(post.date_posted).toLocaleDateString()}</small></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewPost(${post.id})" title="View Post">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-success btn-sm" onclick="triggerSinglePost(${post.id})" title="Trigger Summary">
+                                <i class="bi bi-robot"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.html(rows);
+        
+    } catch(error){ console.error('error loading activity:', error); $('#activityTable').html('<tr><td colspan="6" class="text-center text-danger">error loading data → open console for details</td></tr>');}
+}
+
+function viewPost(postId){ window.open(`/post/${postId}/`, '_blank');}
+$(document).ready(function(){
+    loadRecentActivity();
+    setTimeout(checkSystemHealth, 2000); 
+    setInterval(loadRecentActivity, 30000);
+});
+</script>
+
+<style>
+    body{ background-color: #f3f3f355;}
+    .fs-1{ font-size: 3rem !important; }
+    .me-3{ margin-right: 1rem !important; }
+    .card{
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .table th{
+        border-top: none;
+        font-weight: 600;
+    }
+    .badge{ font-size: 0.8em;}
+
+    .custom-btn{
+        background: #ec7a1c;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        color: #f0f8ff;
+        font-size: var(--fs-btn);
+        font-weight: 600;
+        line-height: normal;
+        transition: all 0.3s;
+        padding: 10px 20px;
+    }
+
+    .custom-btn:hover{
+        background: #90462c;
+        color: #f0f8ff;
+    }
+
+    .btn-toolbar .btn-group:not(:last-child) {
+        margin-right: 0.5rem;
+    }
+
+    .card.border-left-primary {
+        border-left: 4px solid #007bff;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.35em 0.65em;
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+        .btn-toolbar {
+            flex-direction: column;
+        }
+        
+        .btn-group {
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    }
+</style>
+</body>
+</html>
