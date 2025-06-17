@@ -1,27 +1,35 @@
-# Yappuccino 🗣️☕
+# [Yappuccino 🗣️☕ + 🤖 AI Post Summarizer Agent](https://yappuccino.onrender.com/)
 *A platform for Certified Yappers*
 
 <div>  
    <img src="https://img.shields.io/badge/Django-5.2.1-white?logo=django&logoColor=white&labelColor=092E20&style=for-the-badge" alt="Django">  
   <img src="https://img.shields.io/badge/Python-3.8+-white?logo=python&logoColor=white&labelColor=3776AB&style=for-the-badge" alt="Python">  
   <img src="https://img.shields.io/badge/Bootstrap-5-white?logo=bootstrap&logoColor=white&labelColor=7952B3&style=for-the-badge" alt="Bootstrap">  
-  <img src="https://img.shields.io/badge/CKEditor-5-white?logo=ckeditor&logoColor=white&labelColor=0287D0&style=for-the-badge" alt="CKEditor">  
   <img src="https://img.shields.io/badge/PostgreSQL-white?logo=postgresql&logoColor=white&labelColor=4169E1&style=for-the-badge" alt="PostgreSQL">  
   <img src="https://img.shields.io/badge/AWS_S3-white?logo=amazons3&logoColor=white&labelColor=FF9900&style=for-the-badge" alt="AWS S3">
+  <img src="https://img.shields.io/badge/n8n-white?logo=n8n&logoColor=white&labelColor=EA4B71&style=for-the-badge" alt="n8n">
+  <img src="https://img.shields.io/badge/DeepSeek-white?logo=lightning&logoColor=white&labelColor=1E40AF&style=for-the-badge" alt="DeepSeek">
+  <img src="https://img.shields.io/badge/Groq-white?logo=lightning&logoColor=white&labelColor=F55036&style=for-the-badge" alt="Groq">
 </div>
 
 ## 🔥 [Live Demo](https://yappuccino.onrender.com/)
 [![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://yappuccino.onrender.com/)
 > [!IMPORTANT]  
 > 🔸 **Cold Start Delay**: This demo runs on a free-tier cloud service. If the link hasn't been clicked recently, the server may enter *sleep mode*.  
-> 🔸 **First load** could take from **10-50 seconds**. After first load, following one will be fast
+> 🔸 **First load** could take from **10-50 seconds**. After first load, following ones will be fast
 
 ## 🌟 Overview
 
-Yappuccino is a feature-rich social blogging platform that combines traditional blogging with modern social media features. Users can create posts, engage through comments, vote on content, and share posts through a repost system.
+Yappuccino is a social blogging platform where you can share posts, comment, vote, and repost. **Plus, it uses n8n AI agent to automatically summarize everything, so you get the gist instantly.**
 
 
 ## 🚀 Key Features
+
+### 🤖 **AI Integration & Automation**
+- **Built AI workflow** using n8n for automated summaries
+- **Integrated multiple AI providers** - Groq & DeepSeek (also on local version, used Ollama models)
+- **Real-time webhooks trigger** instant processing
+- **Added Admin Panel - AI Summary Dashboard -** for viewing and monitoring processes with live stats provided
 
 ### 📝 Content Management
 - **Rich Text Editor**: CKEditor 5 integration with image upload
@@ -65,31 +73,6 @@ Yappuccino is a feature-rich social blogging platform that combines traditional 
 - **Editor**: CKEditor 5 with custom upload handling
 - **Content Sanitization**: Bleach for XSS protection
 - **Image Processing**: Pillow for profile picture optimization
-
-## 📁 Project Structure
-
-```
-yappuccino/
-├── blog/                          # Main blog application
-│   ├── migrations/                # Database migrations
-│   ├── static/blog/               # Static files (CSS, JS, images)
-│   │   ├── css/                   # Stylesheets
-│   │   └── js/                    # JavaScript files
-│   ├── templates/blog/            # HTML templates
-│   │   └── includes/              # Reusable template components
-│   ├── templatetags/              # Custom template tags
-│   ├── models.py                  # Database models
-│   ├── views.py                   # View logic
-│   ├── forms.py                   # Form definitions
-│   └── urls.py                    # URL routing
-├── users/                         # User management application
-│   ├── templates/users/           # User-related templates
-│   ├── models.py                  # User profile models
-│   ├── views.py                   # User views
-│   └── forms.py                   # User forms
-├── media/                         # User-uploaded files
-└── requirements.txt               # Python dependencies
-```
 
 ## 🚀 Installation & Setup
 
@@ -201,3 +184,93 @@ The application includes comprehensive mobile support:
 - [ ] Set up media file handling
 - [ ] Configure email backend
 - [ ] Set environment variables for secrets
+
+## 📁 Project Structure
+
+```
+yappuccino/
+├── blog/                              # MAIN blog application
+│   ├── admin.py                       # admin panel config
+│   ├── api_views.py                   # api endpoints for n8n ai agent integration
+│   ├── apps.py                        # app config
+│   ├── ckeditor_views.py              # CKEditor implementation to override conflicting views
+│   ├── ckeditor_upload_permissions.py # upload permissions
+│   ├── context_processors.py          # custom context processors
+│   ├── forms.py                       # form definitions
+│   ├── management/                    # custom management commands
+│   │   └── commands/
+│   │       ├── create_superuser.py   # SUPERUSER creation
+│   │       ├── test_s3.py            # s3 storage testing
+│   │       └── test_summarization.py # ai summarization testing
+│   │
+│   ├── migrations/                # database migrations -- mostly generate by django
+│   ├── models.py                  # database models
+│   ├── patch_ckeditor.py          # CKEditor customization
+│   ├── static/blog/               # static files
+│   │   ├── components.css         # component styles
+│   │   ├── main.css               # main stylesheet
+│   │   ├── navbar_styles.css      # navigation bar styling
+│   │   └── js/                    # javascript dir
+│   │       ├── comment_voting.js  # comment voting functionality
+│   │       ├── main.js            # core JS
+│   │       ├── social_features.js # social interaction features
+│   │       └── tag_widget.js      # tag selection widget
+│   │
+│   ├── templates/blog/            # HTML templates
+│   │   ├── includes/              # reusable components
+│   │   │   ├── comment_section.html
+│   │   │   ├── filter_ctrls.html     # post filtering
+│   │   │   ├── footer.html          
+│   │   │   ├── pagination.html
+│   │   │   ├── sidebar.html   
+│   │   │   └── ult_post_card.html    # post display component
+│   │   ├── about.html             # about page
+│   │   ├── base.html              # base template -- which other pages extend from
+│   │   ├── home.html              # homepage
+│   │   ├── post_detail.html       # post view
+│   │   ├── post_form.html         # post creation/editing
+│   │   ├── summary_dashboard.html # ADMIN PANEL -- ai summary dashboard
+│   │   ├── tag_list.html          # tag management
+│   │   └── user_activity.html     # user activity view
+│   ├── templatetags/              # custom template tags
+│   │   └── blog_extras.py         # template helpers
+│   ├── urls.py                    # URL routing
+│   ├── views.py                   # view logic
+│   └── widgets.py                 # custom form widgets
+│
+├── users/                         # USER MANAGEMENT APP
+│   ├── admin.py                   # user admin config
+│   ├── apps.py                    # app config
+│   ├── forms.py                   # user-related forms
+│   ├── migrations/                # user model migrations
+│   ├── models.py                  # user profile models
+│   ├── signals.py                 # user signal handlers
+│   ├── templates/users/           # user-related templates
+│   │   ├── login.html             # login page
+│   │   ├── logout.html            # logout page
+│   │   ├── profile.html           # user profile
+│   │   ├── register.html          # registration page
+│   │   └── settings.html          # user settings
+│   ├── urls.py                    # user URL patterns
+│   └── views.py                   # user view logic
+│
+├── blogpost/                      # PROJECT CONFIG DIRECTORY
+│   ├── __init__.py                # package init
+│   ├── asgi.py                    # ASGI configuration
+│   ├── production.py              # production settings
+│   ├── settings.py                # development settings
+│   ├── urls.py                    # main URL routing
+│   └── wsgi.py                    # WSGI configuration
+│
+├── media/                         # user-uploaded files (only for dev|local)
+│
+├── .gitignore                     
+├── build.sh                       # deployment build script
+├── dump_data.py                   # database backup utils
+├── manage.py                      # django management script
+├── Procfile                       # Heroku/Render deployment
+├── README.md                      # TIHS FILE -- project documentation
+├── render.yaml                    # render.com config
+├── requirements.txt               # python dependencies
+└── runtime.txt                    # python runtime speciifcation
+```
