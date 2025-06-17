@@ -23,7 +23,7 @@ from .views import (
 from . import views
 from .ckeditor_views import ckeditor_upload
 from users.views import CustomPasswordChangeView
-from .api_views import PostsToSummarizeView, SaveSummaryView, SummaryStatsView
+from .api_views import PostsToSummarizeView, SaveSummaryView, SummaryStatsView, TriggerSummarizationView
 urlpatterns = [
     # --- CORE --- #
     path('', PostListView.as_view(), name='blog-home'),
@@ -66,5 +66,6 @@ urlpatterns = [
     path('api/posts-to-summarize/', PostsToSummarizeView.as_view(), name='api-posts-to-summarize'),
     path('api/save-summary/', SaveSummaryView.as_view(), name='api-save-summary'),
     path('api/summary-stats/', SummaryStatsView.as_view(), name='api-summary-stats'),
-    path('admin/summary-dashboard/', views.summary_dashboard, name='summary-dashboard'),
+    path('summary-dashboard/', views.summary_dashboard, name='summary-dashboard'),
+    path('api/trigger-summarization/', TriggerSummarizationView.as_view(), name='api-trigger-summarization'),
 ]

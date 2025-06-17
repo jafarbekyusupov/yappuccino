@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 from .models import Post, Tag, Vote, Comment
-
 
 class CommentInline(admin.TabularInline):
     model = Comment
@@ -17,8 +18,8 @@ class VoteInline(admin.TabularInline):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'date_posted', 'display_tags', 'view_count', 'score', 'comments_count')
-    list_filter = ('date_posted', 'author', 'tags', 'is_repost')
+    list_display = ('title', 'author', 'date_posted', 'display_tags', 'view_count', 'score', 'comments_count', 'summary_status')
+    list_filter = ('date_posted', 'author', 'tags', 'is_repost', 'needs_summary_update')
     search_fields = ('title', 'content')
     filter_horizontal = ('tags',)
     readonly_fields = ('view_count',)
@@ -33,6 +34,12 @@ class PostAdmin(admin.ModelAdmin):
     def comments_count(self, obj):
         return obj.comments.count()
 
+    def summary_status(self, obj):
+        if obj.summary: return format_html('<span style="color: green;">✓ Summarized</span>')
+        elif obj.needs_summary_update: return format_html('<span style="color: orange;">Pending</span>')
+        else: return format_html('<span style="color: gray;">No summary</span>')
+    
+    summary_status.short_description = 'AI Summary'
     display_tags.short_description = 'Tags'
     score.short_description = 'Score'
     comments_count.short_description = 'Comments'
@@ -71,6 +78,13 @@ class VoteAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'post__title')
     readonly_fields = ('created_at',)
 
+
+def get_admin_urls():
+    from django.urls import path
+    from . import views
+    return [
+        path('summary-dashboard/', views.summary_dashboard, name='summary_dashboard_admin'),
+    ]
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Tag, TagAdmin)

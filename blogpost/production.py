@@ -31,6 +31,14 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'localhost')
+OLLAMA_PORT = os.environ.get('OLLAMA_PORT', '11434')
+OLLAMA_BASE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}"
+
+N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL')
+
+DJANGO_BASE_URL = os.environ.get('DJANGO_DOMAIN', 'https://yappuccino.onrender.com')
+
 print(f"=== S3 Configuration Check ===")
 print(f"AWS_ACCESS_KEY_ID: {'- OK - Set' if AWS_ACCESS_KEY_ID else 'x Missing'}")
 print(f"AWS_SECRET_ACCESS_KEY: {'- OK - Set' if AWS_SECRET_ACCESS_KEY else 'x Missing'}")

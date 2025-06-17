@@ -8,18 +8,14 @@ decouple==0.0.7
 Django==5.2.1
 django-ckeditor==6.7.2
 django-ckeditor-5==0.2.18
-django-cors-headers==4.7.0
 django-crispy-forms==2.4
 django-js-asset==3.1.2
-djangorestframework==3.16.0
-djangorestframework_simplejwt==5.5.0
 idna==3.10
 pillow==11.2.1
 PyJWT==2.9.0
 python-decouple==3.8
 pytz==2025.2
 requests==2.32.3
-rest-framework-simplejwt==0.0.2
 sqlparse==0.5.3
 tzdata==2025.2
 urllib3==2.4.0
@@ -32,3 +28,4 @@ django-storages==1.14.2
 b2sdk==1.23.0
 boto3==1.38.25
 tinycss2==1.4.0
+# sentry-sdk[django]==1.45.0  # for error tracking

@@ -23,6 +23,15 @@ services:
         sync: false
       - key: B2_REGION
         sync: false
+      # - key: OLLAMA_HOST
+      #   value: "localhost"
+      # - key: OLLAMA_PORT  
+      #   value: "11434"
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      # ---- migth switch ----
+      - key: GROQ_API_KEY
+        sync: false
 
 databases:
   - name: yappuccino

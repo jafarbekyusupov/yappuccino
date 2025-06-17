@@ -218,6 +218,12 @@
                     <i class="bi bi-gear"></i> Settings
                   </a>
                   {% if user.is_authenticated and user.is_staff %}
+                  <a class="dropdown-item" href="{% url 'summary-dashboard' %}">
+                    <i class="bi bi-robot"></i> AI Summaries
+                    {% if pending_summaries %}
+                      <span class="badge badge-warning">{{ pending_summaries }}</span>
+                    {% endif %}
+                  </a>
                   <a class="dropdown-item" href="{% url 'tag-list' %}">
                       <i class="bi bi-tags"></i> Manage Tags
                   </a>

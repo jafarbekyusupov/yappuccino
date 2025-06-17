@@ -1,6 +1,9 @@
+
 from django.http import JsonResponse
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils import timezone
@@ -9,6 +12,7 @@ from .models import Post
 import json
 import logging
 from django.utils.html import strip_tags
+import requests
 import re
 
 logger = logging.getLogger(__name__)
@@ -97,3 +101,56 @@ class SummaryStatsView(SummaryAPIView):
             logger.error(f"Error getting summary stats: {e}")
             return JsonResponse({'success': False,'error': str(e)},status=500)
 
+@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(staff_member_required, name='dispatch')
+class TriggerSummarizationView(View): #manually trigger summarization for posts
+    def post(self, request):
+        try:
+            data = json.loads(request.body) if request.body else {}
+            post_ids = data.get('post_ids', [])
+            force_update = data.get('force_update', False)
+            
+            if post_ids:
+                posts = Post.objects.filter(id__in=post_ids, is_repost=False)
+                updCnt = posts.count()
+                posts.update(needs_summary_update=True)
+                msg = f"marked {updCnt} specific posts for summarization"
+                
+            else:
+                if force_update:
+                    posts = Post.objects.filter(is_repost=False)
+                    updCnt = posts.update(needs_summary_update=True)
+                    msg = f"Force updated {updCnt} posts for summarization"
+                else: # only posts w/o smry
+                    posts = Post.objects.filter(is_repost=False,summary__isnull=True) | Post.objects.filter(is_repost=False,summary="")
+                    updCnt = posts.update(needs_summary_update=True)
+                    msg = f"marked {updCnt} posts w/o summaries for processing"
+            
+            logger.info(f"manual trigger: {msg} by user {request.user.username}")
+            
+            respData = {
+                'success': True,
+                'message': msg,
+                'posts_marked': updCnt,
+                'note': 'N8N will process these posts in the next 5 minutes'
+            }
+            
+            n8nWhURL = getattr(settings, 'N8N_WEBHOOK_URL', None)
+            if n8nWhURL:
+                try:
+                    whResp = requests.post(n8nWhURL,json={'trigger': 'manual', 'user': request.user.username},timeout=10)
+                    if whResp.status_code == 200:
+                        respData['webhook_triggered'] = True
+                        respData['note'] = 'N8N workflow triggered immediately!!!!!!'
+                    else: respData['webhook_error'] = f"webhook returned {whResp.status_code}"
+                except requests.exceptions.RequestException as e:
+                    logger.warning(f"Failed to trigger N8N webhook: {e}")
+                    respData['webhook_error'] = str(e)
+            return JsonResponse(respData)
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False,'error': 'invalid json data'},status=400)
+            
+        except Exception as e:
+            logger.error(f"Error in manual trigger: {e}")
+            return JsonResponse({'success': False,'error': str(e)},status=500)

@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 set -o errexit
 
 export DJANGO_SETTINGS_MODULE=blogpost.production
@@ -30,6 +29,18 @@ if hasattr(settings, 'AWS_STORAGE_BUCKET_NAME'):
     print(f"\n OK AWS_STORAGE_BUCKET_NAME: {settings.AWS_STORAGE_BUCKET_NAME}")
 if hasattr(settings, 'AWS_S3_ENDPOINT_URL'):
     print(f"OK AWS_S3_ENDPOINT_URL: {settings.AWS_S3_ENDPOINT_URL}")
+if hasattr(settings, 'MEDIA_URL'):
+    print(f"MEDIA_URL: {settings.MEDIA_URL}")
+
+# check ai api keys
+ai_keys = ['DEEPSEEK_API_KEY', 'GROQ_API_KEY', 'OPENAI_API_KEY']
+print("\n=== ai api keys ===")
+for key in ai_keys:
+    value = os.environ.get(key)
+    if value:
+        print(f"OK {key}: {value[:8]}...")
+    else:
+        print(f"x {key}: Not set")
 EOF
 
 echo "verif settings n env"
@@ -109,6 +120,10 @@ class Migration(migrations.Migration):
                 ('date_posted', models.DateTimeField(default=django.utils.timezone.now)),
                 ('view_count', models.PositiveIntegerField(default=0)),
                 ('is_repost', models.BooleanField(default=False)),
+                ('summary', models.TextField(blank=True, null=True, help_text="AI-generated summary")),
+                ('summary_generated_at', models.DateTimeField(blank=True, null=True)),
+                ('needs_summary_update', models.BooleanField(default=True)),
+                ('summary_model_version', models.CharField(max_length=50, blank=True, null=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -244,4 +259,14 @@ else
     echo "no DJANGO_SUPERUSER_PASSWORD set - skipping superuser creation"
 fi
 
-echo "Build process completed!"
+echo "=== testing ai api connectivity ==="
+# test if any ai api keys are available
+if [ -n "$DEEPSEEK_API_KEY" ]; then
+    echo "-- OK -- deepseek api key detected"
+elif [ -n "$GROQ_API_KEY" ]; then
+    echo "-- OK -- groq api key detected"
+else
+    echo "-- FAIL -- no ai api keys detected → summaries wont work"
+fi
+
+echo "Build process completed with AI API integration!"
