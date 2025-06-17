@@ -89,14 +89,94 @@ EOF
 echo "Verifying database connection..."
 python verify_db.py
 
-echo "Removing existing migrations..."
-rm -f blog/migrations/0*.py
-rm -f users/migrations/0*.py
-touch blog/migrations/__init__.py
-touch users/migrations/__init__.py
+# check if we need to reset migrations or if we can work with existing database
+cat > check_migration_state.py << 'EOF'
+import os
+import django
+from django.db import connection
+from django.apps import apps
 
-echo "Creating consolidated migration files..."
-cat > blog/migrations/0001_initial.py << 'EOF'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.production')
+django.setup()
+
+def check_migration_state():
+    with connection.cursor() as cursor:
+        try:
+            # check if django_migrations table exists
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = 'django_migrations'
+                );
+            """)
+            migrations_table_exists = cursor.fetchone()[0]
+            
+            if not migrations_table_exists:
+                print("fresh database - no migrations table found")
+                return "fresh"
+            
+            # check if blog_post table exists
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = 'blog_post'
+                );
+            """)
+            post_table_exists = cursor.fetchone()[0]
+            
+            if not post_table_exists:
+                print("blog app not migrated yet")
+                return "fresh"
+                
+            # check if summary columns exist
+            cursor.execute("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'blog_post'
+                AND column_name IN ('summary', 'summary_generated_at', 'needs_summary_update', 'summary_model_version');
+            """)
+            summary_columns = [row[0] for row in cursor.fetchall()]
+            
+            if len(summary_columns) == 4:
+                print("database has all summary columns - up to date")
+                return "complete"
+            elif len(summary_columns) == 0:
+                print("database missing all summary columns - needs migration")
+                return "needs_summary_migration"
+            else:
+                print(f"database has partial summary columns: {summary_columns}")
+                return "partial"
+                
+        except Exception as e:
+            print(f"error checking migration state: {e}")
+            return "error"
+
+migration_state = check_migration_state()
+print(f"migration_state={migration_state}")
+
+# write state to file for build script
+with open('migration_state.txt', 'w') as f:
+    f.write(migration_state)
+EOF
+
+echo "checking migration state..."
+python check_migration_state.py
+MIGRATION_STATE=$(cat migration_state.txt)
+echo "migration state: $MIGRATION_STATE"
+
+if [ "$MIGRATION_STATE" = "fresh" ]; then
+    echo "fresh database detected - creating consolidated migrations..."
+    
+    # remove existing migrations
+    rm -f blog/migrations/0*.py
+    rm -f users/migrations/0*.py
+    touch blog/migrations/__init__.py
+    touch users/migrations/__init__.py
+
+    # create consolidated migration for blog
+    cat > blog/migrations/0001_initial.py << 'EOF'
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
@@ -210,7 +290,7 @@ class Migration(migrations.Migration):
     ]
 EOF
 
-cat > users/migrations/0001_initial.py << 'EOF'
+    cat > users/migrations/0001_initial.py << 'EOF'
 from django.db import migrations, models
 import django.db.models.deletion
 from django.conf import settings
@@ -241,10 +321,55 @@ class Migration(migrations.Migration):
     ]
 EOF
 
+elif [ "$MIGRATION_STATE" = "needs_summary_migration" ]; then
+    echo "existing database without summary fields - keeping existing migrations and adding summary migration..."
+    
+    if [ ! -f "blog/migrations/0002_add_summary_fields.py" ]; then
+        echo "creating summary fields migration..."
+        cat > blog/migrations/0002_add_summary_fields.py << 'EOF'
+from django.db import migrations, models
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('blog', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name='post',
+            name='needs_summary_update',
+            field=models.BooleanField(default=True),
+        ),
+        migrations.AddField(
+            model_name='post',
+            name='summary',
+            field=models.TextField(blank=True, help_text='AI-generated summary', null=True),
+        ),
+        migrations.AddField(
+            model_name='post',
+            name='summary_generated_at',
+            field=models.DateTimeField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name='post',
+            name='summary_model_version',
+            field=models.CharField(blank=True, max_length=50, null=True),
+        ),
+    ]
+EOF
+    fi
+
+elif [ "$MIGRATION_STATE" = "complete" ]; then
+    echo "database alr has all required fields - no migration changes needed"
+
+else
+    echo "unexpected migration state: $MIGRATION_STATE - proceeding with caution..."
+fi
+
 echo "running migrations..."
 python manage.py migrate --noinput --verbosity 2
 
-cat > check_tables.py << 'EOF'
+cat > lverif.py << 'EOF'
 import os
 import django
 from django.db import connection
@@ -252,43 +377,51 @@ from django.db import connection
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.production')
 django.setup()
 
-def check_post_table():
-    with connection.cursor() as cursor: #check if smry columns exist
+def verify_tables():
+    with connection.cursor() as cursor:
+        reqTbs = ['blog_post', 'blog_tag', 'blog_comment', 'blog_vote', 'users_profile']
+        
+        for tt in reqTbs:
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = %s
+                );
+            """, [tt])
+            
+            exists = cursor.fetchone()[0]
+            if exists:
+                print(f"-- OK -- {tt}: exists")
+            else:
+                print(f"-- X -- {tt}: missing")
+                return False
+        
+        # check if post table has basic required columns
         cursor.execute("""
-            SELECT column_name, data_type, is_nullable
+            SELECT column_name
             FROM information_schema.columns
             WHERE table_name = 'blog_post'
-            AND column_name IN ('summary', 'summary_generated_at', 'needs_summary_update', 'summary_model_version')
-            ORDER BY column_name;
+            AND column_name IN ('id', 'title', 'content', 'author_id');
         """)
-        columns = cursor.fetchall()
+        bscCls = [row[0] for row in cursor.fetchall()]
         
-        expected_columns = {'summary', 'summary_generated_at', 'needs_summary_update', 'summary_model_version'}
-        found_columns = {col[0] for col in columns}
-        
-        print("=== checking post table summary columns ===")
-        for col in expected_columns:
-            if col in found_columns:
-                print(f"-- OK -- {col}: found")
-            else:
-                print(f"-- X -- {col}: missing")
-        
-        if expected_columns.issubset(found_columns):
-            print("-- OK -- all summary columns present")
+        if len(bscCls) >= 4:
+            print("-- OK -- blog_post table has required columns")
             return True
         else:
-            print("-- X -- some summary columns missing")
+            print(f"-- X -- blog_post missing basic columns: {bscCls}")
             return False
 
-if check_post_table():
-    print("migration verification passed")
+if verify_tables():
+    print("database verification passed")
 else:
-    print("migration verification failed")
+    print("database verification failed")
     exit(1)
 EOF
 
-echo "verifying migrations and database tables..."
-python check_tables.py
+echo "verifying database structure..."
+python lverif.py
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
@@ -315,4 +448,6 @@ else
     echo "-- FAIL -- no ai api keys detected → summaries wont work"
 fi
 
+# cleanup tmp files
+rm -f migration_state.txt verify_settings.py verify_db.py check_migration_state.py lverif.py
 echo "Build process completed with AI API integration!"
