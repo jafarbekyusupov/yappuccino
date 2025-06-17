@@ -112,6 +112,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='Tag',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=50, unique=True)),
+                ('slug', models.SlugField(blank=True, unique=True, max_length=50)),
+            ],
+        ),
+
+        migrations.CreateModel(
             name='Post',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -120,20 +129,12 @@ class Migration(migrations.Migration):
                 ('date_posted', models.DateTimeField(default=django.utils.timezone.now)),
                 ('view_count', models.PositiveIntegerField(default=0)),
                 ('is_repost', models.BooleanField(default=False)),
+                # ------------------------------ SMRY FIELDS ------------------------------ #
                 ('summary', models.TextField(blank=True, null=True, help_text="AI-generated summary")),
                 ('summary_generated_at', models.DateTimeField(blank=True, null=True)),
                 ('needs_summary_update', models.BooleanField(default=True)),
                 ('summary_model_version', models.CharField(max_length=50, blank=True, null=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-
-        migrations.CreateModel(
-            name='Tag',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('slug', models.SlugField(blank=True, unique=True)),
             ],
         ),
 
@@ -240,9 +241,54 @@ class Migration(migrations.Migration):
     ]
 EOF
 
+echo "running migrations..."
 python manage.py migrate --noinput --verbosity 2
-echo "Verifying migrations and database tables..."
-python verify_db.py
+
+cat > check_tables.py << 'EOF'
+import os
+import django
+from django.db import connection
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blogpost.production')
+django.setup()
+
+def check_post_table():
+    with connection.cursor() as cursor: #check if smry columns exist
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_name = 'blog_post'
+            AND column_name IN ('summary', 'summary_generated_at', 'needs_summary_update', 'summary_model_version')
+            ORDER BY column_name;
+        """)
+        columns = cursor.fetchall()
+        
+        expected_columns = {'summary', 'summary_generated_at', 'needs_summary_update', 'summary_model_version'}
+        found_columns = {col[0] for col in columns}
+        
+        print("=== checking post table summary columns ===")
+        for col in expected_columns:
+            if col in found_columns:
+                print(f"-- OK -- {col}: found")
+            else:
+                print(f"-- X -- {col}: missing")
+        
+        if expected_columns.issubset(found_columns):
+            print("-- OK -- all summary columns present")
+            return True
+        else:
+            print("-- X -- some summary columns missing")
+            return False
+
+if check_post_table():
+    print("migration verification passed")
+else:
+    print("migration verification failed")
+    exit(1)
+EOF
+
+echo "verifying migrations and database tables..."
+python check_tables.py
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
