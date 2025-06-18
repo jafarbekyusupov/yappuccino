@@ -19,7 +19,7 @@
     {# -- POST HEADER w METADATA -- #}
     <div class="article-metadata d-flex justify-content-between">
       <div class="post-author-info">
-        <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+        <a class="mr-2" href="{% url 'user-activity' post.author.username %}">{{ post.author }}</a>
         <small class="text-muted">{{ post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
       </div>
 
@@ -57,7 +57,7 @@
       <div class="repost-container">
         <div class="article-metadata d-flex justify-content-between">
           <div>
-            <a class="mr-2" href="{% url 'user-posts' post.original_post.author.username %}">{{ post.original_post.author }}</a>
+            <a class="mr-2" href="{% url 'user-activity' post.original_post.author.username %}">{{ post.original_post.author }}</a>
             <small class="text-muted">{{ post.original_post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
           </div>
           {% if display_mode != 'feed' or show_stats %}
