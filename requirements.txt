@@ -30,3 +30,7 @@ boto3==1.38.25
 tinycss2==1.4.0
 psycopg2-binary==2.9.10
 # sentry-sdk[django]==1.45.0  # for error tracking
+# ========= dev https server support - for ssl in dev mode =========
+django-extensions==3.2.3
+Werkzeug==3.0.1
+pyOpenSSL==24.0.0

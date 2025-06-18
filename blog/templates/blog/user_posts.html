@@ -5,7 +5,14 @@
   <div class="content-section mb-4">
     <div class="media">
       {% with username=view.kwargs.username %}
-        <img class="rounded-circle account-img mr-3" src="{{ posts.0.author.profile.image.url }}">
+        <div class="profile-image-container">
+          <img class="rounded-circle account-img profile-image" src="{{ profile_user.profile.image.url }}" id="profileImage">
+          {# -- ==== IMG MODAL ==== -- #}
+          <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="fullSizeImage">
+          </div>
+        </div>
         <div class="media-body">
           <h2 class="account-heading">{{ username }}</h2>
           <p class="text-muted">Posts by {{ username }} ({{ page_obj.paginator.count }})</p>

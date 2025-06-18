@@ -120,6 +120,40 @@ Yappuccino is a social blogging platform where you can share posts, comment, vot
    - Main site: http://127.0.0.1:8000/
    - Admin panel: http://127.0.0.1:8000/admin/
 
+## 🔧 Troubleshooting
+
+### HTTPS Error on Development Server
+
+**Problem**: Getting SSL/HTTPS errors when running `python manage.py runserver`
+
+**Symptoms**:
+```
+code 400, message Bad request syntax ('\x16\x03\x01\x06À\x01\x00\x06¼\x03\x03%')
+You're accessing the development server over HTTPS, but it only supports HTTP.
+```
+
+**Solutions**:
+1. **Switch to HTTP** manually:
+```
+http://127.0.0.1:8000  ✅
+https://127.0.0.1:8000 ❌
+```
+
+2. **Clear browser cache/HSTS for localhost:**
+- Chrome: Go to **chrome://net-internals/#hsts** → **Delete localhost**
+- Or use incognito/private mode
+
+3. **HTTPS in development:**
+- Packages already included in requirements.txt, install if you didnt
+```bash
+pip install -r requirements.txt
+```
+- If you DID install requirement.txt, then just run the following command:
+```bash
+python manage.py runserver_plus --cert-file cert.pem
+```
+
+
 ## 💡 Usage Examples
 
 ### Creating a Post

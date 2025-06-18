@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-key-for-development')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['yappuccino-ef85d40e1d34.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['yappuccino.onrender.com', 'localhost', '127.0.0.1']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -42,6 +42,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     # 'rest_framework',
     # 'rest_framework_simplejwt',
+    'django_extensions',
     'django_ckeditor_5',
     'users.apps.UsersConfig',
     'blog.apps.BlogConfig',
@@ -346,12 +347,14 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'stream': 'ext://sys.stdout', # to fix unicode encoding issues on wind
         },
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
     },
     'loggers': {
