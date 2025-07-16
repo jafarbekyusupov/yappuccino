@@ -22,6 +22,9 @@
 
 Yappuccino is a social blogging platform where you can share posts, comment, vote, and repost. **Plus, it uses n8n AI agent to automatically summarize everything, so you get the gist instantly.**
 
+> [!NOTE]
+> #### [Detailed Project Overview & Analysis](https://deepwiki.com/jafarbekyusupov/yappuccino)
+> Explore the complete project overview, including UML Diagrams and in-depth explanations, provided by **Cognition** [here.](https://deepwiki.com/jafarbekyusupov/yappuccino)
 
 ## 🚀 Key Features
 
