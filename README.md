@@ -322,8 +322,8 @@ yappuccino/
 
 <div align="center">
 
-#### AI Docs TGBot @ [`jafarbekyusupov`](https://github.com/jafarbekyusupov)
+#### Yappuccino @ [`jafarbekyusupov`](https://github.com/jafarbekyusupov)
 
-[⭐ Star this Repo](https://github.com/jafarbekyusupov/yappuccino) • [🐛 Report Bug](https://github.com/jafarbekyusupov/yappuccino/issues) • [💡 Request/Suggest **Feature**](https://github.com/jafarbekyusupov/yappuccino/issues)
+[⭐ Star this Repo](https://github.com/jafarbekyusupov/yappuccino) • [🐛 Report Bug](https://github.com/jafarbekyusupov/yappuccino/issues) • [💡 Request | Suggest **Feature**](https://github.com/jafarbekyusupov/yappuccino/issues)
 
 </div>
