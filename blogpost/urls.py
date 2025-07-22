@@ -17,8 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+
+# views imports
+from blog import views as blog_views
 from django.contrib.auth import views as auth_views
 from users import views as user_views
+
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -46,6 +50,9 @@ urlpatterns = [
 
   # USER URLs
   path('user/', include('users.urls')),
+
+  # for keepalive
+  path('health/', blog_views.health_check, name='health'),
 
   # BLOG URLs
   path('', include('blog.urls')),
