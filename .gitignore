@@ -186,3 +186,7 @@ cython_debug/
 Thumbs.db
 
 test_ollama.py
+/media/profile_pics
+cert.crt
+*.key
+*.sqlite3
