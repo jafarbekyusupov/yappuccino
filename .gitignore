@@ -187,6 +187,10 @@ Thumbs.db
 
 test_ollama.py
 /media/profile_pics
-cert.crt
+stop
+*.crt
 *.key
+cert.crt
+cert.key
+stop
 *.sqlite3

@@ -38,6 +38,10 @@ import bleach
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 
+# for keepalive
+from django.http import JsonResponse
+from datetime import datetime
+
 def home(request):
 	context = {
 		'posts': Post.objects.all(),
@@ -45,6 +49,27 @@ def home(request):
 	}
 	return render(request, 'blog/home.html', context)
 
+def health_check(request):
+    try: # as a "check" -- simple req to get user cnt from db
+        ucnt = User.objects.count()
+        
+        # from .models import Post
+        # pcnt = Post.objects.count()
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'service': 'django-blog',
+            'database': 'connected',
+            'users': ucnt,
+            # 'posts': pcnt,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'service': 'django-blog', 
+            'error': str(e)
+        },status=500)
 
 @login_required
 def settings(request):
