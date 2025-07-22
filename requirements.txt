@@ -34,3 +34,4 @@ psycopg2-binary==2.9.10
 django-extensions==3.2.3
 Werkzeug==3.0.1
 pyOpenSSL==24.0.0
+requests==2.32.3
