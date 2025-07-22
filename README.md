@@ -22,6 +22,9 @@
 
 Yappuccino is a social blogging platform where you can share posts, comment, vote, and repost. **Plus, it uses n8n AI agent to automatically summarize everything, so you get the gist instantly.**
 
+> [!NOTE]
+> #### [Detailed Project Overview & Analysis](https://deepwiki.com/jafarbekyusupov/yappuccino)
+> Explore the complete project overview, including UML Diagrams and in-depth explanations, provided by **Cognition** [here.](https://deepwiki.com/jafarbekyusupov/yappuccino)
 
 ## 🚀 Key Features
 
@@ -84,41 +87,47 @@ Yappuccino is a social blogging platform where you can share posts, comment, vot
 ### Quick Start
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/jafarbekyusupov/yappuccino.git
-   cd yappuccino
-   ```
+```bash
+git clone https://github.com/jafarbekyusupov/yappuccino.git
+cd yappuccino
+```
 
 2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+> [!TIP]
+> **On Windows:**
+> ```
+> python -m venv venv
+> venv\Scripts\activate
+> ```
 
 3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
 4. **Set up the database**
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
 5. **Create a superuser**
-   ```bash
-   python manage.py createsuperuser
-   ```
+```bash
+python manage.py createsuperuser
+```
 
 6. **Run the development server**
-   ```bash
-   python manage.py runserver
-   ```
+```bash
+python manage.py runserver
+```
 
 7. **Access the application**
-   - Main site: http://127.0.0.1:8000/
-   - Admin panel: http://127.0.0.1:8000/admin/
+ - Main site: http://127.0.0.1:8000/
+ - Admin panel: http://127.0.0.1:8000/admin/
 
 ## 🔧 Troubleshooting
 
@@ -308,3 +317,13 @@ yappuccino/
 ├── requirements.txt               # python dependencies
 └── runtime.txt                    # python runtime speciifcation
 ```
+
+---
+
+<div align="center">
+
+#### [Yappuccino](https://github.com/jafarbekyusupov/yappuccino) @ [`jafarbekyusupov`](https://github.com/jafarbekyusupov)
+
+[⭐ Star this **Repo**](https://github.com/jafarbekyusupov/yappuccino) • [🐛 Report **Bug**](https://github.com/jafarbekyusupov/yappuccino/issues) • [💡 Request | Suggest **Feature**](https://github.com/jafarbekyusupov/yappuccino/issues)
+
+</div>

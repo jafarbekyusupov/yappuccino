@@ -190,5 +190,7 @@ test_ollama.py
 stop
 *.crt
 *.key
+cert.crt
 cert.key
 stop
+*.sqlite3
