@@ -240,6 +240,7 @@ yappuccino/
 │   ├── ckeditor_upload_permissions.py # upload permissions
 │   ├── context_processors.py          # custom context processors
 │   ├── forms.py                       # form definitions
+│   ├── keepalive.py                   # built-in auto-ping sender to solve problem of server sleep
 │   ├── management/                    # custom management commands
 │   │   └── commands/
 │   │       ├── create_superuser.py   # SUPERUSER creation
