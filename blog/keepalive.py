@@ -14,7 +14,16 @@ class KeepAlive:
         self.running = False
         self.thread = None
         
-    def _should_beOn(self): return(not settings.DEBUG and ('onrender.com' in self.app_url or os.environ.get('RENDER'))) # prod mode onyl
+    def _should_beOn(self): 
+        isProd = (
+            not settings.DEBUG or 
+            os.environ.get('DJANGO_SETTINGS_MODULE') == 'blogpost.production' or
+            os.environ.get('RENDER') or
+            'onrender.com' in self.app_url
+        )
+        
+        print(f"keepalive check - prod: {isProd}")
+        return isProd
     
     def start(self):
         if not self.enabled:
