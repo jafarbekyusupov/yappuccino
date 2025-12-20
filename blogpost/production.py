@@ -17,7 +17,8 @@ DATABASES = {
 }
 
 if 'postgresql' in DATABASES['default']['ENGINE']:
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    # DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    DATABASES['default']['OPTIONS'] = {}
     DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
