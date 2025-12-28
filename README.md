@@ -1,4 +1,4 @@
-# [Yappuccino 🗣️☕ + 🤖 AI Post Summarizer Agent](https://yappuccino.onrender.com/)
+# [☕ Yappuccino ](https://yappuccino.jafarbekyusupov.com/)
 *A platform for Certified Yappers*
 
 <div>  
@@ -12,15 +12,12 @@
   <img src="https://img.shields.io/badge/Groq-white?logo=lightning&logoColor=white&labelColor=F55036&style=for-the-badge" alt="Groq">
 </div>
 
-## 🔥 [Live Demo](https://yappuccino.onrender.com/)
-[![Try It Now](https://img.shields.io/badge/TRY_IT_HERE-FF6B6B?style=for-the-badge&logo=firefox&logoColor=white)](https://yappuccino.onrender.com/)
-> [!IMPORTANT]  
-> 🔸 **Cold Start Delay**: This demo runs on a free-tier cloud service. If the link hasn't been clicked recently, the server may enter *sleep mode*.  
-> 🔸 **First load** could take from **10-50 seconds**. After first load, following ones will be fast
+## 🔥 [Live Demo](https://yappuccino.jafarbekyusupov.com/)
+<a href="https://www.digitalocean.com/?refcode=b75e7d1f645d&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge"><img src="https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg" alt="DigitalOcean Referral Badge" /></a>
 
 ## 🌟 Overview
 
-Yappuccino is a social blogging platform where you can share posts, comment, vote, and repost. **Plus, it uses n8n AI agent to automatically summarize everything, so you get the gist instantly.**
+Yappuccino is a social blogging platform where you can share posts, comment, vote, and repost. **Platform integrates n8n AI agent to automatically summarize posts.**
 
 > [!NOTE]
 > #### [Detailed Project Overview & Analysis](https://deepwiki.com/jafarbekyusupov/yappuccino)
@@ -29,10 +26,10 @@ Yappuccino is a social blogging platform where you can share posts, comment, vot
 ## 🚀 Key Features
 
 ### 🤖 **AI Integration & Automation**
-- **Built AI workflow** using n8n for automated summaries
-- **Integrated multiple AI providers** - Groq & DeepSeek (also on local version, used Ollama models)
+- **[n8n AI workflow](https://github.com/jafarbekyusupov/yappuccino/blob/master/media/README-MEDIA/n8n-summarizer-workflow.png)** - for automated summaries
+- **Multiple LLM API Providers** - Groq & DeepSeek
 - **Real-time webhooks trigger** instant processing
-- **Added Admin Panel - AI Summary Dashboard -** for viewing and monitoring processes with live stats provided
+- **Added Admin Panel - [AI Summary Dashboard](https://github.com/jafarbekyusupov/yappuccino/blob/master/media/README-MEDIA/ai-summary-dashboard.png) -** for viewing and monitoring processes with live stats provided
 
 ### 📝 Content Management
 - **Rich Text Editor**: CKEditor 5 integration with image upload
@@ -72,17 +69,12 @@ Yappuccino is a social blogging platform where you can share posts, comment, vot
 - **Icons**: Bootstrap Icons
 - **Fonts**: Google Fonts (Roboto Condensed, Underdog)
 
-### Rich Text & Media
-- **Editor**: CKEditor 5 with custom upload handling
-- **Content Sanitization**: Bleach for XSS protection
-- **Image Processing**: Pillow for profile picture optimization
-
 ## 🚀 Installation & Setup
 
 ### Prerequisites
 - Python 3.8+
 - pip (Python package installer)
-- Virtual environment (recommended)
+- Virtual environment **(recommended)**
 
 ### Quick Start
 
@@ -97,7 +89,7 @@ cd yappuccino
 python -m venv venv
 source venv/bin/activate
 ```
-> [!TIP]
+> [!NOTE]
 > **On Windows:**
 > ```
 > python -m venv venv
@@ -131,7 +123,8 @@ python manage.py runserver
 
 ## 🔧 Troubleshooting
 
-### HTTPS Error on Development Server
+### HTTPS Error on Development Server 
+<!-- TODO -- create sep file for err fixes -->
 
 **Problem**: Getting SSL/HTTPS errors when running `python manage.py runserver`
 
@@ -162,26 +155,6 @@ pip install -r requirements.txt
 python manage.py runserver_plus --cert-file cert.pem
 ```
 
-
-## 💡 Usage Examples
-
-### Creating a Post
-1. Register/Login to your account
-2. Click "New Post" in the navigation
-3. Add title, content (with rich text formatting), and tags
-4. Publish or save as draft
-
-### Engaging with Content
-- **Vote**: Click upvote/downvote buttons on posts
-- **Comment**: Add comments with nested replies
-- **Repost**: Share interesting content with your followers
-- **Tag Navigation**: Click tags to view related content
-
-### User Management
-- **Profile**: Customize your profile picture and information
-- **Settings**: Manage privacy, notifications, and appearance
-- **Activity**: View your posts, comments, and voting history
-
 ## 🎨 Customization
 
 ### Styling
@@ -202,12 +175,12 @@ python manage.py runserver_plus --cert-file cert.pem
 - `POST /comment/<id>/vote/` - Vote on comments
 - `GET /tag-suggestions/` - Tag autocomplete
 
-## 🧪 Testing
-
+<!-- ## 🧪 Testing
 Run the test suite:
 ```bash
 python manage.py test
-```
+``` -->
+<!-- TODO -- add unit e2e tests -->
 
 ## 📱 Mobile Support
 
@@ -225,99 +198,7 @@ The application includes comprehensive mobile support:
 - [ ] Set up production database (PostgreSQL recommended)
 - [ ] Configure static file serving
 - [ ] Set up media file handling
-- [ ] Configure email backend
-- [ ] Set environment variables for secrets
-
-## 📁 Project Structure
-
-```
-yappuccino/
-├── blog/                              # MAIN blog application
-│   ├── admin.py                       # admin panel config
-│   ├── api_views.py                   # api endpoints for n8n ai agent integration
-│   ├── apps.py                        # app config
-│   ├── ckeditor_views.py              # CKEditor implementation to override conflicting views
-│   ├── ckeditor_upload_permissions.py # upload permissions
-│   ├── context_processors.py          # custom context processors
-│   ├── forms.py                       # form definitions
-│   ├── keepalive.py                   # built-in auto-ping sender to solve problem of server sleep
-│   ├── management/                    # custom management commands
-│   │   └── commands/
-│   │       ├── create_superuser.py   # SUPERUSER creation
-│   │       ├── test_s3.py            # s3 storage testing
-│   │       └── test_summarization.py # ai summarization testing
-│   │
-│   ├── migrations/                # database migrations -- mostly generate by django
-│   ├── models.py                  # database models
-│   ├── patch_ckeditor.py          # CKEditor customization
-│   ├── static/blog/               # static files
-│   │   ├── components.css         # component styles
-│   │   ├── main.css               # main stylesheet
-│   │   ├── navbar_styles.css      # navigation bar styling
-│   │   └── js/                    # javascript dir
-│   │       ├── comment_voting.js  # comment voting functionality
-│   │       ├── main.js            # core JS
-│   │       ├── social_features.js # social interaction features
-│   │       └── tag_widget.js      # tag selection widget
-│   │
-│   ├── templates/blog/            # HTML templates
-│   │   ├── includes/              # reusable components
-│   │   │   ├── comment_section.html
-│   │   │   ├── filter_ctrls.html     # post filtering
-│   │   │   ├── footer.html          
-│   │   │   ├── pagination.html
-│   │   │   ├── sidebar.html   
-│   │   │   └── ult_post_card.html    # post display component
-│   │   ├── about.html             # about page
-│   │   ├── base.html              # base template -- which other pages extend from
-│   │   ├── home.html              # homepage
-│   │   ├── post_detail.html       # post view
-│   │   ├── post_form.html         # post creation/editing
-│   │   ├── summary_dashboard.html # ADMIN PANEL -- ai summary dashboard
-│   │   ├── tag_list.html          # tag management
-│   │   └── user_activity.html     # user activity view
-│   ├── templatetags/              # custom template tags
-│   │   └── blog_extras.py         # template helpers
-│   ├── urls.py                    # URL routing
-│   ├── views.py                   # view logic
-│   └── widgets.py                 # custom form widgets
-│
-├── users/                         # USER MANAGEMENT APP
-│   ├── admin.py                   # user admin config
-│   ├── apps.py                    # app config
-│   ├── forms.py                   # user-related forms
-│   ├── migrations/                # user model migrations
-│   ├── models.py                  # user profile models
-│   ├── signals.py                 # user signal handlers
-│   ├── templates/users/           # user-related templates
-│   │   ├── login.html             # login page
-│   │   ├── logout.html            # logout page
-│   │   ├── profile.html           # user profile
-│   │   ├── register.html          # registration page
-│   │   └── settings.html          # user settings
-│   ├── urls.py                    # user URL patterns
-│   └── views.py                   # user view logic
-│
-├── blogpost/                      # PROJECT CONFIG DIRECTORY
-│   ├── __init__.py                # package init
-│   ├── asgi.py                    # ASGI configuration
-│   ├── production.py              # production settings
-│   ├── settings.py                # development settings
-│   ├── urls.py                    # main URL routing
-│   └── wsgi.py                    # WSGI configuration
-│
-├── media/                         # user-uploaded files (only for dev|local)
-│
-├── .gitignore                     
-├── build.sh                       # deployment build script
-├── dump_data.py                   # database backup utils
-├── manage.py                      # django management script
-├── Procfile                       # Heroku/Render deployment
-├── README.md                      # TIHS FILE -- project documentation
-├── render.yaml                    # render.com config
-├── requirements.txt               # python dependencies
-└── runtime.txt                    # python runtime speciifcation
-```
+- [ ] Set environment variables
 
 ---
 
