@@ -14,8 +14,8 @@
         </div>
       </form>
 
-        {# -- CATEGORIES -- #}
-      <h3>Categories</h3>
+      {# -- CATEGORIES -- #}
+      <h3>Tags</h3>
       <div class="list-group mb-4" id="sidebar-categories">
         {% for tag in tags %}
           <a href="{% url 'blog-home' %}?tag={{ tag.slug|default:tag.name|urlencode }}" class="list-group-item d-flex justify-content-between align-items-center">
@@ -66,9 +66,9 @@
 
 	#sidebar-nav a{
 		text-decoration: none !important;
-		{#transition: all 0.2s ease;#}
+		/* {#transition: all 0.2s ease;#}
 		{#display: block;#}
-		{#width: 100%;#}
+		{#width: 100%;#} */
 		color: var(--orange);
 	}
 
@@ -123,7 +123,6 @@
     overflow-y: auto;
   }
 
-  /* WHEN SIDEBAR REACHES FOOTER - class applied via js */
   .sticky-sidebar.is-at-bottom{
     position: absolute;
     top: auto;
@@ -170,15 +169,13 @@
     var $window = $(window);
     var navHeight = $('.navbar').outerHeight();
     var sdb_wth = $sidebarColumn.width();
-
     var sdbScrollHndlr = null;
 
-    function updSdBarDims(){ // update sidebar dimensions
+    function updateSideBarDimensions(){
       sdb_wth = $sidebarColumn.width();
       navHeight = $('.navbar').outerHeight();
     }
 
-    // sidebar pos
     function stickySidebar(){
       var scrollTop = $window.scrollTop();
       var contBttm = $contentColumn.offset().top + $contentColumn.height();
@@ -186,9 +183,7 @@
       var sidebarHeight = $sidebar.height();
       var windowHeight = $window.height();
 
-      // STARTING POINT
       if(scrollTop <= $sidebar.offset().top-navHeight){
-        // normal posit
         $sidebar.removeClass('is-sticky is-at-bottom');
         $sidebar.css({
           'width': '',
@@ -196,46 +191,49 @@
           'max-height': ''
         });
       }
-      // 2nd pos -- STICKY at the middle / not at footer
       else if(scrollTop+navHeight+sidebarHeight < ftrTop){
         $sidebar.addClass('is-sticky').removeClass('is-at-bottom');
         $sidebar.css({
           'width': sdb_wth + 'px',
           'top': navHeight + 'px',
-          'max-height': (windowHeight - navHeight - 20) + 'px' // 20px buffer -- adj
+          'max-height': (windowHeight - navHeight - 20) + 'px'
         });
       }
-      // REACHED FOOTER
       else{
         $sidebar.removeClass('is-sticky').addClass('is-at-bottom');
         $sidebar.css({
           'width': sdb_wth + 'px',
           'top': 'auto',
-          'bottom': '30px', // space above footer
+          'bottom': '30px',
           'max-height': ''
         });
       }
     }
 
     function initSidebar(){
-      if(sdbScrollHndlr){ $window.off('scroll', sdbScrollHndlr);}
-
+      if(sdbScrollHndlr){ 
+        $window.off('scroll', sdbScrollHndlr);
+      }
       updSdBarDims();
       stickySidebar();
-
       sdbScrollHndlr = function(){ stickySidebar();};
       $window.on('scroll', sdbScrollHndlr);
     }
 
     initSidebar();
-
     var rszTmr;
-    $window.on('resize', function(){ clearTimeout(rszTmr); rszTmr = setTimeout(function(){ updSdBarDims(); stickySidebar();}, 250);});
-
-    // TAB CHANGES -- for activity page
+    $window.on('resize', function(){ 
+      clearTimeout(rszTmr); 
+      rszTmr = setTimeout(function(){ 
+        updSdBarDims(); 
+        stickySidebar();
+      }, 250);
+    });
     $('#activityTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e){
-      // UPD -- waiting for tab to render first - byutipul
-      setTimeout(function(){ updSdBarDims(); stickySidebar();}, 150);
+      setTimeout(function(){ 
+        updSdBarDims(); 
+        stickySidebar();
+      }, 150);
     });
   });
 </script>

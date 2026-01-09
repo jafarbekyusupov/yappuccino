@@ -31,7 +31,7 @@
 
           {% for post in posts %}
             {% if not post.is_repost %}
-              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True %}
+              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True user_vote=post.user_vote %}
             {% endif %}
           {% empty %}
             <div class="content-section">
@@ -46,10 +46,12 @@
         <div class="activity-container">
           {% for comment in comments %}
             <div class="media comment-item mb-3 content-section">
-              <img class="rounded-circle comment-img mr-3" src="{{ comment.author.profile.image.url }}" width="40" height="40">
+              <a href="{% url 'user-activity' comment.author.username %}">
+                <img class="post-author-avatar comment-img mr-3" src="{{ comment.author.profile.image.url }}" width="40" height="40">
+              </a>
               <div class="media-body">
                 <div class="comment-metadata">
-                  <a href="{% url 'user-posts' comment.author.username %}" class="comment-author">{{ comment.author }}</a>
+                  <a href="{% url 'user-activity' comment.author.username %}" class="comment-author">{{ comment.author }}</a>
                   <small class="text-muted ml-2">{{ comment.date_posted|date:"F d, Y" }}</small>
                   <small class="text-muted ml-2">on <a href="{% url 'post-detail' comment.post.id %}">{{ comment.post.title }}</a></small>
                 </div>
@@ -71,7 +73,7 @@
         <div class="activity-container">
           {% for post in posts %}
             {% if post.is_repost %}
-              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True %}
+              {% include "blog/includes/ult_post_card.html" with post=post display_mode="profile" show_actions=True show_stats=True user_vote=post.user_vote original_user_vote=post.original_user_vote %}
             {% endif %}
           {% empty %}
             <div class="content-section">
@@ -81,19 +83,42 @@
         </div>
       </div>
 
-      <!-- UPVOTES TAB -->
+      {# --- UPVOTES TAB --- #}
       <div class="tab-pane fade" id="upvoted" role="tabpanel" aria-labelledby="upvoted-tab">
         <div class="activity-container">
           {% for vote in upvoted_posts %}
-            <article class="media content-section">
-              <img class="rounded-circle article-img" src="{{ vote.post.author.profile.image.url }}">
+            <article class="media content-section post-card">
               <div class="media-body">
-                <div class="article-metadata">
-                  <a class="mr-2" href="{% url 'user-posts' vote.post.author.username %}">{{ vote.post.author }}</a>
-                  <small class="text-muted">{{ vote.post.date_posted|date:"F d, Y" }}</small>
+                {# -- compact post header w metadata -- #}
+                <div class="post-header">
+                  <div class="post-header-main">
+                    <a href="{% url 'user-activity' vote.post.author.username %}">
+                      <img class="post-author-avatar" src="{{ vote.post.author.profile.image.url }}" alt="{{ vote.post.author }}">
+                    </a>
+                    <div class="post-header-info">
+                      <div class="post-author-line">
+                        <a class="post-author-name" href="{% url 'user-activity' vote.post.author.username %}">{{ vote.post.author }}</a>
+                      </div>
+                      <div class="post-meta-line">
+                        <span class="post-date">{{ vote.post.date_posted|date:"F d, Y" }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
                 <h2><a class="article-title" href="{% url 'post-detail' vote.post.id %}">{{ vote.post.title }}</a></h2>
-                <div class="article-content">{{ vote.post.get_safe_content|safe }}</div>
+                <div class="article-content">
+                  {% with truncated=vote.post.get_safe_content|truncate_words:40 %}
+                    {{ truncated.0|safe }}
+                    {% if truncated.1 %}
+                      <div class="text-center mt-2">
+                        <a href="{% url 'post-detail' vote.post.id %}" class="btn btn-sm btn-outline-secondary show-more-btn">
+                          <i class="bi bi-arrows-expand"></i> Show More
+                        </a>
+                      </div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
               </div>
             </article>
           {% empty %}
@@ -106,22 +131,286 @@
     </div>
   </div>
 	{% include "blog/includes/user_profile_styles.html" %}
+
+  <style>
+    /* ensure post cards match main feed */
+    .post-card {
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    .media-body {
+      max-width: 100%;
+      overflow-x: hidden;
+      word-wrap: break-word;
+      box-sizing: border-box;
+    }
+
+    .article-content,
+    .article-title {
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    /* compact post header */
+    .post-header {
+      margin-bottom: 15px;
+    }
+
+    .post-header-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .post-author-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2.5px solid var(--orange);
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(236, 122, 28, 0.2);
+    }
+
+    .post-author-avatar:hover {
+      transform: scale(1.08);
+      box-shadow: 0 3px 10px rgba(236, 122, 28, 0.35);
+      border-color: var(--dark-orange);
+    }
+
+    .post-header-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .post-author-line {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .post-author-name {
+      font-weight: 700;
+      color: #333;
+      text-decoration: none;
+      font-size: 1.25rem;
+      transition: color 0.2s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .post-author-name:hover {
+      color: rgba(236, 122, 28, 0.8);
+      text-decoration: none;
+    }
+
+    .post-meta-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .post-date {
+      color: #6c757d;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* comment styles */
+    .comment-item {
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .comment-item:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .comment-img {
+      border: 2px solid var(--orange);
+      object-fit: cover;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: #333;
+      font-size: 1rem;
+      text-decoration: none;
+    }
+
+    .comment-author:hover {
+      color: var(--orange);
+      text-decoration: none;
+    }
+
+    .comment-metadata {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .comment-metadata small {
+      font-size: 0.85rem;
+    }
+
+    .comment-content {
+      color: #333;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* responsive text sizing */
+    @media (max-width: 768px) {
+      .post-author-name {
+        font-size: 1.1rem;
+      }
+
+      .post-date {
+        font-size: 0.85rem;
+      }
+
+      .article-title {
+        font-size: 1.3rem;
+      }
+
+      .comment-author {
+        font-size: 0.95rem;
+      }
+
+      .comment-metadata small {
+        font-size: 0.8rem;
+      }
+
+      .comment-content {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .post-author-avatar {
+        width: 48px;
+        height: 48px;
+      }
+
+      .post-author-name {
+        font-size: 1rem;
+      }
+
+      .post-date {
+        font-size: 0.8rem;
+      }
+
+      .article-title {
+        font-size: 1.2rem;
+      }
+
+      .comment-img {
+        width: 35px !important;
+        height: 35px !important;
+      }
+
+      .comment-author {
+        font-size: 0.9rem;
+      }
+
+      .comment-metadata {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+      }
+
+      .comment-metadata small {
+        font-size: 0.75rem;
+        margin-left: 0 !important;
+      }
+
+      .comment-content {
+        font-size: 0.85rem;
+      }
+
+      .post-card {
+        padding: 10px !important;
+      }
+
+      .post-header-main {
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .post-author-avatar {
+        width: 44px;
+        height: 44px;
+      }
+
+      .post-author-name {
+        font-size: 0.95rem;
+      }
+
+      .post-date {
+        font-size: 0.75rem;
+      }
+
+      .article-title {
+        font-size: 1.1rem;
+      }
+
+      .comment-img {
+        width: 32px !important;
+        height: 32px !important;
+      }
+
+      .post-card {
+        padding: 8px !important;
+      }
+
+      .post-header-main {
+        gap: 8px;
+      }
+    }
+
+    /* activity tabs responsive */
+    @media (max-width: 576px) {
+      .activity-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .activity-tabs .nav-link {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+
   <script>
     document.addEventListener('DOMContentLoaded', function(){
       var modal = document.getElementById('imageModal');
       var img = document.getElementById('profileImage');
       var modalImg = document.getElementById('fullSizeImage');
 
-      img.onclick = function(){
-        modal.style.display = "block";
-        modalImg.src = this.src;
+      if(img && modal && modalImg){
+        img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+        }
+
+        var span = document.getElementsByClassName("close")[0];
+        if(span){
+          span.onclick = function(){ modal.style.display = "none";}
+        }
+
+        modal.onclick = function(event){ if(event.target == modal){ modal.style.display = "none";}}
       }
-
-      var span = document.getElementsByClassName("close")[0];
-
-      span.onclick = function(){ modal.style.display = "none";}
-
-      modal.onclick = function(event){ if(event.target == modal){ modal.style.display = "none";}}
     });
 
     // filter saved across tabs
@@ -129,7 +418,7 @@
       // store curr tab session storage
       $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){ sessionStorage.setItem('activeTab', $(e.target).attr('href'));});
 
-      // then restore active tab on paegload
+      // then restore active tab on pageload
       var activeTab = sessionStorage.getItem('activeTab');
       if(activeTab){ $('#activityTabs a[href="' + activeTab + '"]').tab('show');}
     });

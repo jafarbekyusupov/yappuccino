@@ -3,33 +3,41 @@
 {% load blog_extras %}
 {% block content %}
   <article class="media content-section post-card">
-    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}" alt="{{ object.author }}">
     <div class="media-body">
-      {# --- post header w metadata --- #}
-      <div class="article-metadata d-flex justify-content-between">
-        <div class="post-author-info">
-          <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
-          <small class="text-muted">{{ object.date_posted|date:"F d, Y \a\t g:i A" }}</small>
-        </div>
-        <div class="post-stats d-flex">
-          <span class="badge badge-secondary mr-2">
-            <i class="bi bi-eye"></i> {{ object.view_count }}
-          </span>
-          <span class="badge badge-secondary mr-2">
-            <i class="bi bi-chat"></i> {{ object.comments_count }}
-          </span>
-          {% if object.reposts_count > 0 %}
-            <span class="badge badge-info">
-              <i class="bi bi-arrow-repeat"></i> {{ object.reposts_count }}
-            </span>
-          {% endif %}
+      {# -- COMPACT POST HEADER w METADATA -- #}
+      <div class="post-header">
+        <div class="post-header-main">
+          <img class="post-author-avatar" src="{{ object.author.profile.image.url }}" alt="{{ object.author }}">
+          <div class="post-header-info">
+            <div class="post-author-line">
+              <a class="post-author-name" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+            </div>
+            <div class="post-meta-line">
+              <span class="post-date">{{ object.date_posted|date:"F d, Y \a\t g:i A" }}</span>
+              
+              {# -- STATS (horizontal) -- #}
+              <div class="post-stats">
+                <span class="stat-item">
+                  <i class="bi bi-eye"></i> {{ object.view_count }}
+                </span>
+                <span class="stat-item">
+                  <i class="bi bi-chat"></i> {{ object.comments_count }}
+                </span>
+                {% if object.reposts_count > 0 %}
+                  <span class="stat-item stat-repost">
+                    <i class="bi bi-arrow-repeat"></i> {{ object.reposts_count }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {# --- POST TITlE --- #}
+      {# --- POST TITLE --- #}
       <h2 class="article-title">{{ object.title }}</h2>
 
-      {# --- POST CONTENT -- UPD: using get_safe_content w/ safe filter --- #}
+      {# --- POST CONTENT -- upd: using get_safe_content w/ safe filter --- #}
       <div class="article-content">
         {{ object.get_safe_content|safe }}
       </div>
@@ -68,3 +76,212 @@
   {# --- COMMENTS --- #}
   {% include "blog/includes/comment_section.html" %}
 {% endblock content %}
+
+{% block additional_css %}
+<style>
+/* ==================== */
+/* COMPACT POST HEADER  */
+/* ==================== */
+.post-header {
+  margin-bottom: 15px;
+}
+
+.post-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.post-author-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid var(--orange);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(236, 122, 28, 0.25);
+}
+
+.post-author-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(236, 122, 28, 0.4);
+  border-color: var(--dark-orange);
+}
+
+.post-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.post-author-line {
+  display: flex;
+  align-items: center;
+}
+
+.post-author-name {
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  font-size: 19px;
+  transition: color 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.post-author-name:hover {
+  color: rgba(236, 122, 28, 0.8);
+  text-decoration: none;
+}
+
+.post-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.post-date {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #495057;
+  border-radius: 14px;
+  font-size: 12px;
+  color: #f8f9fa;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.stat-item:hover {
+  background: #343a40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.stat-item i {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.stat-repost {
+  background: rgba(236, 122, 28, 0.20);
+  color: white;
+}
+
+.stat-repost:hover {
+  background: rgba(236, 122, 28, 0.35);
+}
+
+/* responsive adjustments */
+@media (max-width: 576px) {
+  .post-author-avatar {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .post-author-name {
+    font-size: 17px;
+  }
+  
+  .post-date {
+    font-size: 13px;
+  }
+  
+  .stat-item {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  
+  .post-header-main {
+    gap: 12px;
+  }
+  
+  .post-meta-line {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .post-meta-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .post-date {
+    font-size: 11px;
+  }
+  
+  .post-author-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .post-author-name {
+    font-size: 16px;
+  }
+}
+
+/* ensure card fits screen */
+.post-card {
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.media-body {
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.article-content,
+.article-title {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* responsive post card padding */
+@media (max-width: 576px) {
+  .post-card {
+    padding: 10px !important;
+  }
+  
+  .post-header-main {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .post-card {
+    padding: 8px !important;
+  }
+  
+  .post-header-main {
+    gap: 8px;
+  }
+}
+</style>
+{% endblock additional_css %}

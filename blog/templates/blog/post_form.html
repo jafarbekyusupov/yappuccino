@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title %}{% if object %}Edit YapPost{% else %}Create YapPost{% endif %}{% endblock %}
+{% block title %}{% if object %}Edit YapPost{% else %}Create YapPost{% endblock %}
 
 {% block extrahead %}
 {{ form.media.css }}
@@ -19,12 +19,12 @@
                 <h3>{% if object %}Edit YapPost{% else %}Create YapPost{% endif %}</h3>
             </legend>
 
-						{# -- TITLE -- #}
-            <div class="form-group">{# style="font-size: large; font-weight: 550;" #}
+            {# -- TITLE -- #}
+            <div class="form-group">
                {{ form.title|as_crispy_field }}
             </div>
 
-						{# -- CONTENT -- #}
+            {# -- CONTENT -- #}
             <div class="form-group">
                 <label for="{{ form.content.id_for_label }}">{{ form.content.label }}{% if form.content.field.required %}*{% endif %}</label>
                {{ form.content }}
@@ -46,13 +46,13 @@
                     Choose existing tags or type to create new ones. Press Enter or comma to add custom tags.
                 </p>
 
-								{# -- TAG INPUT CONTAINER -- #}
+                {# -- TAG INPUT CONTAINER -- #}
                 <div class="tag-selector-container">
                     <div class="selected-tags-display" id="selectedTagsDisplay">
                         <!-- selected tags will be here -->
                     </div>
 
-                    <!-- TAG INPUT -->
+                    <!-- tag input -->
                     <div class="input-group mb-3">
                         <input type="text"
                                class="form-control"
@@ -77,7 +77,7 @@
                         <div class="popular-tags-container" id="popularTagsContainer"></div>
                     </div>
 
-                    <!-- hidden inputs for FORM SUBMISSION -->
+                    <!-- hidden inputs for form submission -->
                     <div id="hiddenTagInputs"></div>
                     
                     <div class="invalid-feedback" id="tagError" style="display: none;">
@@ -108,12 +108,21 @@
         --gray: #44443b;
     }
 
+    /* ensure form fits screen */
+    .content-section {
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+
     .tag-selector-container{
         border: 2px solid #e0e0e0;
         border-radius: 8px;
         padding: 15px;
         background-color: #fafafa;
         position: relative;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .tag-selector-container:focus-within{
@@ -341,6 +350,48 @@
         .selected-tags-display{
             justify-content: center;
         }
+
+        .tag-selector-container{
+            padding: 12px;
+        }
+
+        .selected-tag{
+            font-size: 13px;
+            padding: 5px 10px;
+        }
+    }
+
+    @media (max-width: 576px){
+        .tag-selector-container{
+            padding: 10px;
+        }
+
+        .selected-tag{
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .popular-tag{
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .btn-lg{
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+    }
+
+    @media (max-width: 400px){
+        .form-group .btn-lg{
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .ml-2{
+            margin-left: 0 !important;
+        }
     }
 </style>
 
@@ -461,7 +512,7 @@ $(document).ready(function(){
             if(tag.isNew){ container.append(`<input type="hidden" name="new_tags" value="${tag.name}">`);}
             else{ container.append(`<input type="hidden" name="tags" value="${tag.id}">`);}
         });
-        console.log('Hidden inputs created:', container.html());
+        console.log('hidden inputs created:', container.html());
     }
 
     function updatePopularTags(){
@@ -587,10 +638,10 @@ $(document).ready(function(){
     $(document).on('click', function(e){ if(!$(e.target).closest('.tag-selector-container').length){ $('#suggestionsDropdown').hide();}});
 
     $('#postForm').on('submit', function(e){
-        console.log('Form submission started');
+        console.log('form submission started');
 
         if(!validateTags()){
-            console.log('Tag validation failed');
+            console.log('tag validation failed');
             e.preventDefault();
             $('#tagSearchInput').focus();
 
@@ -599,7 +650,7 @@ $(document).ready(function(){
         }
 
         const formData = new FormData(this);
-        console.log('Form data being submitted:');
+        console.log('form data being submitted:');
         for(let [key, value] of formData.entries()){ console.log(key + ': ' + value);}
 
         const title = $('#id_title').val().trim();
@@ -620,7 +671,7 @@ $(document).ready(function(){
             return false;
         }
 
-        console.log('All validations passed, submitting form...');
+        console.log('all validations passed, submitting form...');
 
         const $submitBtn = $(this).find('button[type="submit"]');
         const originalText = $submitBtn.html();
