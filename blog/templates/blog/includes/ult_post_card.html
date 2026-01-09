@@ -13,32 +13,39 @@
 {% load blog_extras %}
 
 <article class="media content-section post-card">
-  {# -- AUTHOR IMG -- #}
-  <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}" alt="{{ post.author }}">
   <div class="media-body">
-    {# -- POST HEADER w METADATA -- #}
-    <div class="article-metadata d-flex justify-content-between">
-      <div class="post-author-info">
-        <a class="mr-2" href="{% url 'user-activity' post.author.username %}">{{ post.author }}</a>
-        <small class="text-muted">{{ post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
-      </div>
-
-      {# -- STATS -- views - comments - reposts(if any) -- #}
-      {% if display_mode != 'feed' or show_stats %}
-      <div class="post-stats d-flex">
-        <span class="badge badge-secondary mr-2">
-          <i class="bi bi-eye"></i> {{ post.view_count }}
-        </span>
-        <span class="badge badge-secondary mr-2">
-          <i class="bi bi-chat"></i> {{ post.comments_count }}
-        </span>
-        {% if post.reposts_count > 0 %}
-          <span class="badge badge-info">
-            <i class="bi bi-arrow-repeat"></i> {{ post.reposts_count }}
+    {# -- COMPACT POST HEADER w METADATA -- #}
+    <div class="post-header">
+      <div class="post-header-main">
+        <a href="{% url 'user-activity' post.author.username %}">
+          <img class="post-author-avatar" src="{{ post.author.profile.image.url }}" alt="{{ post.author }}">
+        </a>
+        <div class="post-header-info">
+          <div class="post-author-line">
+            <a class="post-author-name" href="{% url 'user-activity' post.author.username %}">{{ post.author }}</a>
+          </div>
+          <div class="post-meta-line">
+            <span class="post-date mt-0">{{ post.date_posted|date:"F d, Y \a\t g:i A" }}</span>
+          </div>
+        </div>
+        
+        {# -- STATS COLUMN (vertical on right) -- #}
+        {% if display_mode != 'feed' or show_stats %}
+        <div class="post-stats-column">
+          <span class="stat-item">
+            <i class="bi bi-eye"></i> {{ post.view_count }}
           </span>
+          <span class="stat-item">
+            <i class="bi bi-chat"></i> {{ post.comments_count }}
+          </span>
+          {% if post.reposts_count > 0 %}
+            <span class="stat-item stat-repost">
+              <i class="bi bi-arrow-repeat"></i> {{ post.reposts_count }}
+            </span>
+          {% endif %}
+        </div>
         {% endif %}
       </div>
-      {% endif %}
     </div>
 
     {# ========================== #}
@@ -53,23 +60,37 @@
           </span>
         </div>
       </a>
+      
       {# -- ORIGINAL POST CONTENT -- #}
       <div class="repost-container">
-        <div class="article-metadata d-flex justify-content-between">
-          <div>
-            <a class="mr-2" href="{% url 'user-activity' post.original_post.author.username %}">{{ post.original_post.author }}</a>
-            <small class="text-muted">{{ post.original_post.date_posted|date:"F d, Y \a\t g:i A" }}</small>
+        <div class="post-header-main repost-header-compact">
+          <a href="{% url 'user-activity' post.original_post.author.username %}">
+            <img class="post-author-avatar" src="{{ post.original_post.author.profile.image.url }}" alt="{{ post.original_post.author }}">
+          </a>
+          <div class="post-header-info">
+            <div class="post-author-line">
+              <a class="post-author-name" href="{% url 'user-activity' post.original_post.author.username %}">{{ post.original_post.author }}</a>
+            </div>
+            <div class="post-meta-line">
+              <span class="post-date">{{ post.original_post.date_posted|date:"F d, Y \a\t g:i A" }}</span>
+              
+              {% if display_mode != 'feed' or show_stats %}
+              <div class="post-stats">
+                <span class="stat-item">
+                  <i class="bi bi-eye"></i> {{ post.original_post.view_count }}
+                </span>
+                <span class="stat-item">
+                  <i class="bi bi-chat"></i> {{ post.original_post.comments_count }}
+                </span>
+                {% if post.original_post.reposts_count > 0 %}
+                  <span class="stat-item stat-repost">
+                    <i class="bi bi-arrow-repeat"></i> {{ post.original_post.reposts_count }}
+                  </span>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
           </div>
-          {% if display_mode != 'feed' or show_stats %}
-          <div class="post-stats d-flex">
-            <span class="badge badge-secondary mr-2">
-              <i class="bi bi-eye"></i> {{ post.original_post.view_count }}
-            </span>
-            <span class="badge badge-secondary mr-2">
-              <i class="bi bi-chat"></i> {{ post.original_post.comments_count }}
-            </span>
-          </div>
-          {% endif %}
         </div>
 
         <h2>
@@ -266,6 +287,212 @@
 </article>
 
 <style>
+.post-card {
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.media-body {
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.article-content,
+.article-title {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 576px) {
+  .post-card {
+    padding: 10px !important;
+  }
+  
+  .post-header-main {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .post-card {
+    padding: 8px !important;
+  }
+  
+  .post-header-main {
+    gap: 8px;
+  }
+}
+/* ==================== */
+/* COMPACT POST HEADER  */
+/* ==================== */
+.post-header {
+  margin-bottom: 15px;
+}
+
+.post-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.repost-header-compact {
+  margin-bottom: 8px;
+}
+
+.post-author-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2.5px solid var(--orange);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(236, 122, 28, 0.2);
+}
+
+.post-author-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgba(236, 122, 28, 0.35);
+  border-color: var(--dark-orange);
+}
+
+.post-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.post-author-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.post-author-name {
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  font-size: 1.25rem;
+  transition: color 0.2s ease;
+  margin-bottom: -2%;
+  letter-spacing: -0.01em;
+}
+
+.post-author-name:hover {
+  color: rgba(236, 122, 28, 0.8);
+  text-decoration: none;
+}
+
+.post-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.post-date {
+  color: #6c757d;
+  font-size: .9rem;
+  font-weight: 500;
+}
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #495057;
+  border-radius: 14px;
+  font-size: 12px;
+  color: #f8f9fa;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.stat-item:hover {
+  background: #343a40;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.stat-item i {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.stat-repost {
+  background: rgba(236, 122, 28, 0.20);
+  color: white;
+}
+
+.stat-repost:hover {
+  background: rgba(236, 122, 28, 0.35);
+}
+
+/* responsive adjustments */
+@media (max-width: 576px) {
+  .post-author-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .post-author-name {
+    font-size: 16px;
+  }
+  
+  .post-date {
+    font-size: 12px;
+  }
+  
+  .stat-item {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  
+  .post-header-main {
+    gap: 12px;
+  }
+  
+  .post-meta-line {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .post-meta-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .post-date {
+    font-size: 11px;
+  }
+  
+  .post-author-avatar {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ==================== */
+/* AI SUMMARY STYLES    */
+/* ==================== */
 .ai-summary-container {
   background: linear-gradient(135deg, #fff8f0 0%, #ffeedd 100%);
   border: 2px solid var(--orange);
@@ -496,6 +723,27 @@
   .summary-meta {
     color: #d4a574;
   }
+  
+  .post-date {
+    color: #adb5bd;
+  }
+  
+  .stat-item {
+    background: #343a40;
+    color: #f8f9fa;
+  }
+  
+  .stat-item:hover {
+    background: #495057;
+  }
+  
+  .stat-repost {
+    background: rgba(236, 122, 28, 0.9);
+  }
+  
+  .stat-repost:hover {
+    background: rgba(147, 73, 12);
+  }
 }
 
 .ai-summary-container.closing {
@@ -552,17 +800,14 @@
 </style>
 
 <script>
-// === AI SUMMARY TOGGLE FUNC === //
 function toggleSummary(postId){ 
     const cont = document.getElementById(`summary-content-${postId}`);
     const icon = document.getElementById(`toggle-icon-${postId}`);
     if(cont.classList.contains('collapsed')){
-        // expand
         cont.classList.remove('collapsed');
         cont.classList.add('expanding');
         icon.classList.add('rotated');
         
-        // remove xpnd class after animation
         setTimeout(() =>{cont.classList.remove('expanding');},400);
     } else{ cont.classList.add('collapsed'); icon.classList.remove('rotated');} // collapse
 }
@@ -585,29 +830,24 @@ function showSummary(postId){
     const cont = document.getElementById(`summary-content-${postId}`);
     const icon = document.getElementById(`toggle-icon-${postId}`);
     
-    // min state hide
     minzd.style.display = 'none';
     minzd.classList.remove('showing');
     
-    // show container
     container.style.display = 'block';
     container.classList.remove('closing');
     container.classList.add('showing');
     
-    // auto content expand
     cont.classList.remove('collapsed');
     icon.classList.add('rotated');
     
     setTimeout(() =>{ container.classList.remove('showing');},400);
 }
 
-// init all summaries as collapsed on pg load
 document.addEventListener('DOMContentLoaded', function(){
     const smryCont = document.querySelectorAll('.ai-summary-content');
     smryCont.forEach(cont =>{ cont.classList.add('collapsed');});
 });
 
-// ESC btn to toggle dropdown
 document.addEventListener('keydown', function(e){
     if(e.key === 'Escape'){ // close all xpndd summaries
         const xpndSmry = document.querySelectorAll('.ai-summary-content:not(.collapsed)');
