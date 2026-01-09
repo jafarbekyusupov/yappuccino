@@ -128,7 +128,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+*.env
 .venv
 .venv311
 .venv313
@@ -186,6 +186,7 @@ cython_debug/
 Thumbs.db
 
 test_ollama.py
+force_load.py
 /media/profile_pics
 stop
 *.crt
@@ -194,3 +195,5 @@ cert.crt
 cert.key
 stop
 *.sqlite3
+*.sql
+*.json
